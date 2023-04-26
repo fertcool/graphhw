@@ -1,11 +1,11 @@
-#pragma once
+п»ї#pragma once
 #define INF 9999999
 #include "Header.h"
 #include <iomanip>
 #include <fstream>
 
-//*-------------- ф-ии класса графа ------------------*//
-//возвращает вес ребра по его вершинам
+//*-------------- С„-РёРё РєР»Р°СЃСЃР° РіСЂР°С„Р° ------------------*//
+//РІРѕР·РІСЂР°С‰Р°РµС‚ РІРµСЃ СЂРµР±СЂР° РїРѕ РµРіРѕ РІРµСЂС€РёРЅР°Рј
 int Graph::weight(int Ver1, int Ver2) 
 {
 	if (!matrix)
@@ -13,7 +13,7 @@ int Graph::weight(int Ver1, int Ver2)
 	return (*matrix)[Ver1-1][Ver2-1];
 };
 
-//существует ли ребро по данным вершинам
+//СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂРµР±СЂРѕ РїРѕ РґР°РЅРЅС‹Рј РІРµСЂС€РёРЅР°Рј
 bool Graph::is_edge(int Ver1, int Ver2)
 {
 	if (weight(Ver1, Ver2))
@@ -21,13 +21,13 @@ bool Graph::is_edge(int Ver1, int Ver2)
 	return false;
 };
 
-//граф ориентированный или нет
+//РіСЂР°С„ РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№ РёР»Рё РЅРµС‚
 bool Graph::is_directed() 
 {
 	if (!matrix)
 		adjacency_matrix(false);
 	int msize = matrix->size();
-	for (int i = 0; i < msize - 1; i++)//цикл по элементам выше главной диаганали
+	for (int i = 0; i < msize - 1; i++)//С†РёРєР» РїРѕ СЌР»РµРјРµРЅС‚Р°Рј РІС‹С€Рµ РіР»Р°РІРЅРѕР№ РґРёР°РіР°РЅР°Р»Рё
 	{
 		for (int j = i + 1; j < msize; j++)
 		{
@@ -39,20 +39,20 @@ bool Graph::is_directed()
 
 };
 
-//возвращает матрицу смежности
+//РІРѕР·РІСЂР°С‰Р°РµС‚ РјР°С‚СЂРёС†Сѓ СЃРјРµР¶РЅРѕСЃС‚Рё
 vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 {
-	if (matrix && copy)//возврат копии матрицы
+	if (matrix && copy)//РІРѕР·РІСЂР°С‚ РєРѕРїРёРё РјР°С‚СЂРёС†С‹
 	{
-		vector<vector<int>>* matr_c;//копия матрицы
+		vector<vector<int>>* matr_c;//РєРѕРїРёСЏ РјР°С‚СЂРёС†С‹
 		int h_matr = matrix->size();
 		matr_c = new vector<vector<int>>;
 		(*matr_c).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
+		for (int i = 0; i < h_matr; i++)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
 		{
 			(*matr_c)[i].resize(h_matr);
 		}
-		for (int i = 0; i < h_matr; i++)//копирование матрицы
+		for (int i = 0; i < h_matr; i++)//РєРѕРїРёСЂРѕРІР°РЅРёРµ РјР°С‚СЂРёС†С‹
 		{
 			for (int j = 0; j < h_matr; j++)
 			{
@@ -61,14 +61,14 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 		}
 		return matr_c;
 	}
-	else if (matrix && !copy)//если нужно было только создать матрицу смежности без копии
+	else if (matrix && !copy)//РµСЃР»Рё РЅСѓР¶РЅРѕ Р±С‹Р»Рѕ С‚РѕР»СЊРєРѕ СЃРѕР·РґР°С‚СЊ РјР°С‚СЂРёС†Сѓ СЃРјРµР¶РЅРѕСЃС‚Рё Р±РµР· РєРѕРїРёРё
 		return NULL;
-	if (edgelist)//заполнение матрицы из списка ребер
+	if (edgelist)//Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°С‚СЂРёС†С‹ РёР· СЃРїРёСЃРєР° СЂРµР±РµСЂ
 	{
-		//нахождение размера матрицы(максимальная вершина в списке ребер)
+		//РЅР°С…РѕР¶РґРµРЅРёРµ СЂР°Р·РјРµСЂР° РјР°С‚СЂРёС†С‹(РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° РІ СЃРїРёСЃРєРµ СЂРµР±РµСЂ)
 		int h_matr = 0;
 		list<int[3]>* current = edgelist;
-		for (current; current; current = current->next)//нахождение размера матрицы(максимальная вершина в списке ребер)
+		for (current; current; current = current->next)//РЅР°С…РѕР¶РґРµРЅРёРµ СЂР°Р·РјРµСЂР° РјР°С‚СЂРёС†С‹(РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° РІ СЃРїРёСЃРєРµ СЂРµР±РµСЂ)
 		{
 			if (h_matr < current->Ver[0])
 				h_matr = current->Ver[0];
@@ -76,11 +76,11 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 
 		matrix = new vector<vector<int>>;
 		(*matrix).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
+		for (int i = 0; i < h_matr; i++)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
 		{
 			(*matrix)[i].resize(h_matr);
 		}
-		for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
+		for (int i = 0; i < h_matr; i++)//Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°С‚СЂРёС†С‹ 0
 		{
 			for (int j = 0; j < h_matr; j++)
 			{
@@ -89,25 +89,25 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 		}
 
 		current = edgelist;
-		for (current; current; current = current->next)//цикл заполнения матрицы
+		for (current; current; current = current->next)//С†РёРєР» Р·Р°РїРѕР»РЅРµРЅРёСЏ РјР°С‚СЂРёС†С‹
 		{
 			(*matrix)[current->Ver[0]-1][current->Ver[1]-1] = current->Ver[2];
 		}
 		return adjacency_matrix(copy);
 	}
-	if (adjlist)//заполнение матрицы из списка смежности
+	if (adjlist)//Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°С‚СЂРёС†С‹ РёР· СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё
 	{
 
-		int h_matr = adjlist->length();//длина матрицы
+		int h_matr = adjlist->length();//РґР»РёРЅР° РјР°С‚СЂРёС†С‹
 
 		matrix = new vector<vector<int>>;
 		(*matrix).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
+		for (int i = 0; i < h_matr; i++)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
 		{
 			(*matrix)[i].resize(h_matr);
 		}
 
-		for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
+		for (int i = 0; i < h_matr; i++)//Р·Р°РїРѕР»РЅРµРЅРёРµ РјР°С‚СЂРёС†С‹ 0
 		{
 			for (int j = 0; j < h_matr; j++)
 			{
@@ -117,7 +117,7 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 
 		list<list<int>*>* current = adjlist;
 		int i = 0;
-		for (current; current; current = current->next)//цикл заполнения матрицы
+		for (current; current; current = current->next)//С†РёРєР» Р·Р°РїРѕР»РЅРµРЅРёСЏ РјР°С‚СЂРёС†С‹
 		{
 			list<int>* subcurrent = current->Ver;
 			for (subcurrent; subcurrent; subcurrent = subcurrent->next)
@@ -131,89 +131,89 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 	return NULL;
 };
 
-//возвращает список смежности
+//РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё
 list<list<int>*>* Graph::adjacency_list(bool copy)
 {
-	if (adjlist && copy)//возврат копии списка смежности
+	if (adjlist && copy)//РІРѕР·РІСЂР°С‚ РєРѕРїРёРё СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё
 	{
-		list<list<int>*>* list_adj_c = new list<list<int>*>; //копия списка
+		list<list<int>*>* list_adj_c = new list<list<int>*>; //РєРѕРїРёСЏ СЃРїРёСЃРєР°
 		list_adj_c->Ver = new list<int>;
-		list<list<int>*>* current_c = list_adj_c; //текущая вершина в копии списка
-		list<list<int>*>* current = adjlist; //текущая вершина в обычном списке
+		list<list<int>*>* current_c = list_adj_c; //С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° РІ РєРѕРїРёРё СЃРїРёСЃРєР°
+		list<list<int>*>* current = adjlist; //С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° РІ РѕР±С‹С‡РЅРѕРј СЃРїРёСЃРєРµ
 		int length = adjlist->length();
-		for (int i = 0; i < length ; i++)//цикл по вершинам
+		for (int i = 0; i < length ; i++)//С†РёРєР» РїРѕ РІРµСЂС€РёРЅР°Рј
 		{
 
-			int length_subl = current->Ver->length();//длина подсписка (количество смежных вершин j с текущей вершиной i)
-			list<int>* current_c_subl = current_c->Ver;//текущая вершина j в копии списка смежных вершин с текущей i
-			list<int>* current_subl = current->Ver;//текущая вершина j в обычном списке смежная с текущей i
-			for (int j = 0; j < length_subl; j++)//цикл по смежным вершинам j с текущей i
+			int length_subl = current->Ver->length();//РґР»РёРЅР° РїРѕРґСЃРїРёСЃРєР° (РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ j СЃ С‚РµРєСѓС‰РµР№ РІРµСЂС€РёРЅРѕР№ i)
+			list<int>* current_c_subl = current_c->Ver;//С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° j РІ РєРѕРїРёРё СЃРїРёСЃРєР° СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ СЃ С‚РµРєСѓС‰РµР№ i
+			list<int>* current_subl = current->Ver;//С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° j РІ РѕР±С‹С‡РЅРѕРј СЃРїРёСЃРєРµ СЃРјРµР¶РЅР°СЏ СЃ С‚РµРєСѓС‰РµР№ i
+			for (int j = 0; j < length_subl; j++)//С†РёРєР» РїРѕ СЃРјРµР¶РЅС‹Рј РІРµСЂС€РёРЅР°Рј j СЃ С‚РµРєСѓС‰РµР№ i
 			{
-				current_c_subl->Ver = current_subl->Ver;//копирование
-				if (j != length_subl - 1)//создание следующего элемента в копии списка смежных вершин с текущей i
+				current_c_subl->Ver = current_subl->Ver;//РєРѕРїРёСЂРѕРІР°РЅРёРµ
+				if (j != length_subl - 1)//СЃРѕР·РґР°РЅРёРµ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° РІ РєРѕРїРёРё СЃРїРёСЃРєР° СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ СЃ С‚РµРєСѓС‰РµР№ i
 				{
 					current_c_subl->next = new list<int>;
-					current_c_subl = current_c_subl->next;//итерация
+					current_c_subl = current_c_subl->next;//РёС‚РµСЂР°С†РёСЏ
 					current_subl = current_subl->next;
 				}
 			}
-			if (i != length - 1)//создание следующего элемента в копии списка 
+			if (i != length - 1)//СЃРѕР·РґР°РЅРёРµ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р° РІ РєРѕРїРёРё СЃРїРёСЃРєР° 
 			{
 				current_c->next = new list<list<int>*>;
 				current_c->next->Ver = new list<int>;
-				current_c = current_c->next;//итерация
+				current_c = current_c->next;//РёС‚РµСЂР°С†РёСЏ
 				current = current->next;
 			}
 
  		}
 		return list_adj_c;
 	}
-	else if (adjlist && !copy)//если нужно было только создать список смежности (без копирования)
+	else if (adjlist && !copy)//РµСЃР»Рё РЅСѓР¶РЅРѕ Р±С‹Р»Рѕ С‚РѕР»СЊРєРѕ СЃРѕР·РґР°С‚СЊ СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё (Р±РµР· РєРѕРїРёСЂРѕРІР°РЅРёСЏ)
 		return NULL;
-	if (!matrix)//создание матрицы смежности
+	if (!matrix)//СЃРѕР·РґР°РЅРёРµ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
 		adjacency_matrix(false);
-	int lsize = matrix->size();//размер списка (матрицы)
-	adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
-	adjlist->Ver = new list<int>; //выделение памяти под список вершин
+	int lsize = matrix->size();//СЂР°Р·РјРµСЂ СЃРїРёСЃРєР° (РјР°С‚СЂРёС†С‹)
+	adjlist = new list<list<int>*>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СЃРїРёСЃРѕРє СЃРїРёСЃРєРѕРІ РІРµСЂС€РёРЅ
+	adjlist->Ver = new list<int>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ
 	list<list<int>*>* current = adjlist;
 	for (int i = 0; i < lsize; i++)
 	{
-		list<int>* current_sub = current->Ver;//указатель на текущий список вершин
+		list<int>* current_sub = current->Ver;//СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰РёР№ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ
 		for (int j = 0; j < lsize; j++)
 		{
 			if ((*matrix)[i][j])
 			{
-				current_sub->Ver = j + 1; //добавление вершины в список
-				current_sub->next = new list<int>;//итерация
+				current_sub->Ver = j + 1; //РґРѕР±Р°РІР»РµРЅРёРµ РІРµСЂС€РёРЅС‹ РІ СЃРїРёСЃРѕРє
+				current_sub->next = new list<int>;//РёС‚РµСЂР°С†РёСЏ
 				current_sub = current_sub->next;
 			}
 		}
-		current->Ver->del();//удаляем лишний элемент
-		current->next = new list<list<int>*>;//итерация
+		current->Ver->del();//СѓРґР°Р»СЏРµРј Р»РёС€РЅРёР№ СЌР»РµРјРµРЅС‚
+		current->next = new list<list<int>*>;//РёС‚РµСЂР°С†РёСЏ
 		current->next->Ver = new list<int>;
 		current = current->next;
 	}
-	adjlist->del();//удаляем лишний элемент
+	adjlist->del();//СѓРґР°Р»СЏРµРј Р»РёС€РЅРёР№ СЌР»РµРјРµРЅС‚
 	return adjacency_list(copy);
 };
 
-//возвращает список вершин смежных Ver
+//РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ СЃРјРµР¶РЅС‹С… Ver
 list<int>* Graph::adjacency_list(int Ver)
 {
-	if (!adjlist)//сохдание списка смежности
+	if (!adjlist)//СЃРѕС…РґР°РЅРёРµ СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё
 		adjacency_list(false);
-	list<int>* adjlist_c = new list<int>;//копия списка смежных вершин
-	list<int>* current_c = adjlist_c; // текущая вершина в копии списка
-	list<list<int>*>* current = adjlist;//текущая вершина в основном списке
-	for (int i = 0; i < Ver - 1; i++)//цикл смещения указателя на нужный список смежных вершин
+	list<int>* adjlist_c = new list<int>;//РєРѕРїРёСЏ СЃРїРёСЃРєР° СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ
+	list<int>* current_c = adjlist_c; // С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° РІ РєРѕРїРёРё СЃРїРёСЃРєР°
+	list<list<int>*>* current = adjlist;//С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° РІ РѕСЃРЅРѕРІРЅРѕРј СЃРїРёСЃРєРµ
+	for (int i = 0; i < Ver - 1; i++)//С†РёРєР» СЃРјРµС‰РµРЅРёСЏ СѓРєР°Р·Р°С‚РµР»СЏ РЅР° РЅСѓР¶РЅС‹Р№ СЃРїРёСЃРѕРє СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ
 	{
 		current = current->next;
 	}
-	list<int>* current_sub = current->Ver;//текущая вершина j смежная с Ver
-	for (current_sub;current_sub;current_sub = current_sub->next)//цикл копирования
+	list<int>* current_sub = current->Ver;//С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° j СЃРјРµР¶РЅР°СЏ СЃ Ver
+	for (current_sub;current_sub;current_sub = current_sub->next)//С†РёРєР» РєРѕРїРёСЂРѕРІР°РЅРёСЏ
 	{
-		current_c->Ver = current_sub->Ver;//копирование
-		if (current_sub->next)//выделение памяти для следующего элемента
+		current_c->Ver = current_sub->Ver;//РєРѕРїРёСЂРѕРІР°РЅРёРµ
+		if (current_sub->next)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РґР»СЏ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р°
 		{
 			current_c->next = new list<int>;
 			current_c = current_c->next;
@@ -222,17 +222,17 @@ list<int>* Graph::adjacency_list(int Ver)
 	
 	return adjlist_c;
 }
-//возвращает список вершин входящих в Ver
+//РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ РІС…РѕРґСЏС‰РёС… РІ Ver
 list<int>* Graph::adjacency_list_in(int Ver)
 {
-	if (!matrix)//сохдание списка смежности
+	if (!matrix)//СЃРѕС…РґР°РЅРёРµ СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё
 		adjacency_matrix(false);
-	list<int>* adjlistin_c = new list<int>;//копия списка смежных вершин
-	int init = adjlistin_c->Ver;//изначальный мусор в списке
-	list<int>* current_c = adjlistin_c; // текущая вершина в копии списка
+	list<int>* adjlistin_c = new list<int>;//РєРѕРїРёСЏ СЃРїРёСЃРєР° СЃРјРµР¶РЅС‹С… РІРµСЂС€РёРЅ
+	int init = adjlistin_c->Ver;//РёР·РЅР°С‡Р°Р»СЊРЅС‹Р№ РјСѓСЃРѕСЂ РІ СЃРїРёСЃРєРµ
+	list<int>* current_c = adjlistin_c; // С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР° РІ РєРѕРїРёРё СЃРїРёСЃРєР°
 	
-	int length = matrix->size();//длина списка (количество вершин)
-	for (int i = 0; i<length; i++) //цикл по всем вершинам основного списка
+	int length = matrix->size();//РґР»РёРЅР° СЃРїРёСЃРєР° (РєРѕР»РёС‡РµСЃС‚РІРѕ РІРµСЂС€РёРЅ)
+	for (int i = 0; i<length; i++) //С†РёРєР» РїРѕ РІСЃРµРј РІРµСЂС€РёРЅР°Рј РѕСЃРЅРѕРІРЅРѕРіРѕ СЃРїРёСЃРєР°
 	{
 		if ((*matrix)[i][Ver - 1])
 		{
@@ -246,26 +246,26 @@ list<int>* Graph::adjacency_list_in(int Ver)
 	}
 	if(current_c->Ver!=length)
 		adjlistin_c->del();
-	if (adjlistin_c->Ver == init)//если список вершин пуст
+	if (adjlistin_c->Ver == init)//РµСЃР»Рё СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ РїСѓСЃС‚
 		return NULL;
 	return adjlistin_c;
 }
 
-//возвращает список ребер
+//РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє СЂРµР±РµСЂ
 list<int[3]>* Graph::list_of_edges(bool copy)
 {
-	if (edgelist && copy)//возврат копии списка ребер
+	if (edgelist && copy)//РІРѕР·РІСЂР°С‚ РєРѕРїРёРё СЃРїРёСЃРєР° СЂРµР±РµСЂ
 	{
-		list<int[3]>* edgelist_c = new list<int[3]>;//копия списка ребер
-		list<int[3]>* current_c = edgelist_c;//текущее ребро в копии
-		list<int[3]>* current = edgelist;//текущее ребро в основном списке
-		int length = edgelist->length();//длина списка ребер
-		for (int i = 0; i < length; i++)//цикл копирования
+		list<int[3]>* edgelist_c = new list<int[3]>;//РєРѕРїРёСЏ СЃРїРёСЃРєР° СЂРµР±РµСЂ
+		list<int[3]>* current_c = edgelist_c;//С‚РµРєСѓС‰РµРµ СЂРµР±СЂРѕ РІ РєРѕРїРёРё
+		list<int[3]>* current = edgelist;//С‚РµРєСѓС‰РµРµ СЂРµР±СЂРѕ РІ РѕСЃРЅРѕРІРЅРѕРј СЃРїРёСЃРєРµ
+		int length = edgelist->length();//РґР»РёРЅР° СЃРїРёСЃРєР° СЂРµР±РµСЂ
+		for (int i = 0; i < length; i++)//С†РёРєР» РєРѕРїРёСЂРѕРІР°РЅРёСЏ
 		{
 			current_c[0] = current[0];
-			current_c[1] = current[1];//копирование
+			current_c[1] = current[1];//РєРѕРїРёСЂРѕРІР°РЅРёРµ
 			current_c[2] = current[2];
-			if (i != length - 1)//выделение памяти для следующего элемента
+			if (i != length - 1)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РґР»СЏ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р°
 			{
 				current_c->next = new list<int[3]>;
 				current_c = current_c->next;
@@ -277,20 +277,20 @@ list<int[3]>* Graph::list_of_edges(bool copy)
 	else if (edgelist && !copy)
 		return NULL;
 		
-	if (!matrix)//создание матрицы смежности
+	if (!matrix)//СЃРѕР·РґР°РЅРёРµ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
 		adjacency_matrix(false);
-	int lsize = matrix->size();//размер списка (матрицы)
-	edgelist = new list<int[3]>;//выделенеи памяти для ребра
-	list<int[3]>* current = edgelist; //текущее ребро
+	int lsize = matrix->size();//СЂР°Р·РјРµСЂ СЃРїРёСЃРєР° (РјР°С‚СЂРёС†С‹)
+	edgelist = new list<int[3]>;//РІС‹РґРµР»РµРЅРµРё РїР°РјСЏС‚Рё РґР»СЏ СЂРµР±СЂР°
+	list<int[3]>* current = edgelist; //С‚РµРєСѓС‰РµРµ СЂРµР±СЂРѕ
 	for (int i = 0; i < lsize; i++)
 	{
 		for (int j = 0; j < lsize; j++)
 		{
-			if ((*matrix)[i][j]) //если вершины связаны
+			if ((*matrix)[i][j]) //РµСЃР»Рё РІРµСЂС€РёРЅС‹ СЃРІСЏР·Р°РЅС‹
 			{
-				current->Ver[0] = i + 1;//1 вершина
-				current->Ver[1] = j + 1;//2 вершина
-				current->Ver[2] = (*matrix)[i][j];//вес ребра
+				current->Ver[0] = i + 1;//1 РІРµСЂС€РёРЅР°
+				current->Ver[1] = j + 1;//2 РІРµСЂС€РёРЅР°
+				current->Ver[2] = (*matrix)[i][j];//РІРµСЃ СЂРµР±СЂР°
 				current->next = new list<int[3]>;
 				current = current->next;
 			}
@@ -301,25 +301,25 @@ list<int[3]>* Graph::list_of_edges(bool copy)
 
 };
 
-//возвращает список всех ребер иcходящих из Ver
+//РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… СЂРµР±РµСЂ РёcС…РѕРґСЏС‰РёС… РёР· Ver
 list<int[3]>* Graph::list_of_edges(int Ver)
 {
-	if (!matrix)//создание матрицы смежности
+	if (!matrix)//СЃРѕР·РґР°РЅРёРµ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
 		adjacency_matrix(false);
-	list<int[3]>* list_out = new list<int[3]>;//выделение памяти для списка исходящих ребер
-	list<int[3]>* current_out = list_out;//текущее ребро, исходящее из Ver
-	int lmatr = matrix->size();//размер матрицы смежности
+	list<int[3]>* list_out = new list<int[3]>;//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РґР»СЏ СЃРїРёСЃРєР° РёСЃС…РѕРґСЏС‰РёС… СЂРµР±РµСЂ
+	list<int[3]>* current_out = list_out;//С‚РµРєСѓС‰РµРµ СЂРµР±СЂРѕ, РёСЃС…РѕРґСЏС‰РµРµ РёР· Ver
+	int lmatr = matrix->size();//СЂР°Р·РјРµСЂ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
 	
-	for (int i = 0; i < lmatr; i++)//цикл просмотра смежных с Ver вершин и добавления исходящего ребра в список ребер
+	for (int i = 0; i < lmatr; i++)//С†РёРєР» РїСЂРѕСЃРјРѕС‚СЂР° СЃРјРµР¶РЅС‹С… СЃ Ver РІРµСЂС€РёРЅ Рё РґРѕР±Р°РІР»РµРЅРёСЏ РёСЃС…РѕРґСЏС‰РµРіРѕ СЂРµР±СЂР° РІ СЃРїРёСЃРѕРє СЂРµР±РµСЂ
 	{
 		if ((*matrix)[Ver - 1][i])
 		{
-			current_out->Ver[0] = Ver;//добавление 1 вершины
-			current_out->Ver[1] = i + 1;//добавление исходящей вершины
-			current_out->Ver[2] = (*matrix)[Ver - 1][i];//добавление веса ребра
+			current_out->Ver[0] = Ver;//РґРѕР±Р°РІР»РµРЅРёРµ 1 РІРµСЂС€РёРЅС‹
+			current_out->Ver[1] = i + 1;//РґРѕР±Р°РІР»РµРЅРёРµ РёСЃС…РѕРґСЏС‰РµР№ РІРµСЂС€РёРЅС‹
+			current_out->Ver[2] = (*matrix)[Ver - 1][i];//РґРѕР±Р°РІР»РµРЅРёРµ РІРµСЃР° СЂРµР±СЂР°
 
-			current_out->next = new list<int[3]>;//выделение памяти
-			current_out = current_out->next;//итерация
+			current_out->next = new list<int[3]>;//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
+			current_out = current_out->next;//РёС‚РµСЂР°С†РёСЏ
 		}
 	}
 	list_out->del();
@@ -328,108 +328,108 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 };
 
 
-//конструктор
+//РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 Graph::Graph(string FPath, string FType)
 {
 	adjlist = NULL;
 	edgelist = NULL;
 	matrix = NULL;
-	if (FType == "-l")//ввод списка смежности
+	if (FType == "-l")//РІРІРѕРґ СЃРїРёСЃРєР° СЃРјРµР¶РЅРѕСЃС‚Рё
 	{
-		//реализовано без удаления лишних элементов//
+		//СЂРµР°Р»РёР·РѕРІР°РЅРѕ Р±РµР· СѓРґР°Р»РµРЅРёСЏ Р»РёС€РЅРёС… СЌР»РµРјРµРЅС‚РѕРІ//
 
-		ifstream fin(FPath); //поток по файлу
-		adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
-		adjlist->Ver = new list<int>; //выделение памяти под список вершин
-		list<list<int>*>* current = adjlist;//указатель на текущий список с вершинами
+		ifstream fin(FPath); //РїРѕС‚РѕРє РїРѕ С„Р°Р№Р»Сѓ
+		adjlist = new list<list<int>*>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СЃРїРёСЃРѕРє СЃРїРёСЃРєРѕРІ РІРµСЂС€РёРЅ
+		adjlist->Ver = new list<int>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ
+		list<list<int>*>* current = adjlist;//СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰РёР№ СЃРїРёСЃРѕРє СЃ РІРµСЂС€РёРЅР°РјРё
 		while (!fin.eof())
 		{
-			string str; //текущая строка с вершинами
-			getline(fin, str); //считывание строки с вершинами
-			if (str == "") //выход если конец файла(лишняя паустая строка)
+			string str; //С‚РµРєСѓС‰Р°СЏ СЃС‚СЂРѕРєР° СЃ РІРµСЂС€РёРЅР°РјРё
+			getline(fin, str); //СЃС‡РёС‚С‹РІР°РЅРёРµ СЃС‚СЂРѕРєРё СЃ РІРµСЂС€РёРЅР°РјРё
+			if (str == "") //РІС‹С…РѕРґ РµСЃР»Рё РєРѕРЅРµС† С„Р°Р№Р»Р°(Р»РёС€РЅСЏСЏ РїР°СѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
 			{
 				adjlist->del();
 				break;
 			}
 
-			istringstream strstream(str); //поток по строке
-			list<int>* current_sub = current->Ver; //указатель на текущую считываемую вершину
+			istringstream strstream(str); //РїРѕС‚РѕРє РїРѕ СЃС‚СЂРѕРєРµ
+			list<int>* current_sub = current->Ver; //СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰СѓСЋ СЃС‡РёС‚С‹РІР°РµРјСѓСЋ РІРµСЂС€РёРЅСѓ
 			
-			//перед циклом делаем ввод первого числа 
-			//(так сделано, чтобы дальше реализовать цикл с выделением памяти после чтения числа)
-			int check_space;//проверка на пробел в конце строки
-			strstream >> current_sub->Ver;//считывание числа из строчной вершины
+			//РїРµСЂРµРґ С†РёРєР»РѕРј РґРµР»Р°РµРј РІРІРѕРґ РїРµСЂРІРѕРіРѕ С‡РёСЃР»Р° 
+			//(С‚Р°Рє СЃРґРµР»Р°РЅРѕ, С‡С‚РѕР±С‹ РґР°Р»СЊС€Рµ СЂРµР°Р»РёР·РѕРІР°С‚СЊ С†РёРєР» СЃ РІС‹РґРµР»РµРЅРёРµРј РїР°РјСЏС‚Рё РїРѕСЃР»Рµ С‡С‚РµРЅРёСЏ С‡РёСЃР»Р°)
+			int check_space;//РїСЂРѕРІРµСЂРєР° РЅР° РїСЂРѕР±РµР» РІ РєРѕРЅС†Рµ СЃС‚СЂРѕРєРё
+			strstream >> current_sub->Ver;//СЃС‡РёС‚С‹РІР°РЅРёРµ С‡РёСЃР»Р° РёР· СЃС‚СЂРѕС‡РЅРѕР№ РІРµСЂС€РёРЅС‹
 	
-			while (!strstream.eof()) //цикл считывания 
+			while (!strstream.eof()) //С†РёРєР» СЃС‡РёС‚С‹РІР°РЅРёСЏ 
 			{
-				strstream >> check_space;//считывание числа из строчной вершины
-				if (strstream.eof())//если конец строки, то выходим
+				strstream >> check_space;//СЃС‡РёС‚С‹РІР°РЅРёРµ С‡РёСЃР»Р° РёР· СЃС‚СЂРѕС‡РЅРѕР№ РІРµСЂС€РёРЅС‹
+				if (strstream.eof())//РµСЃР»Рё РєРѕРЅРµС† СЃС‚СЂРѕРєРё, С‚Рѕ РІС‹С…РѕРґРёРј
 					break;
-				current_sub->next = new list<int>;//выделение памяти 
-				current_sub = current_sub->next;//итерация
-				current_sub->Ver = check_space;//считывание числа из строчной вершины
+				current_sub->next = new list<int>;//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё 
+				current_sub = current_sub->next;//РёС‚РµСЂР°С†РёСЏ
+				current_sub->Ver = check_space;//СЃС‡РёС‚С‹РІР°РЅРёРµ С‡РёСЃР»Р° РёР· СЃС‚СЂРѕС‡РЅРѕР№ РІРµСЂС€РёРЅС‹
 			}
-			if (fin.eof())//выход если конец (чтобы лишнюю память не выделять)
+			if (fin.eof())//РІС‹С…РѕРґ РµСЃР»Рё РєРѕРЅРµС† (С‡С‚РѕР±С‹ Р»РёС€РЅСЋСЋ РїР°РјСЏС‚СЊ РЅРµ РІС‹РґРµР»СЏС‚СЊ)
 				break;
-			current->next = new list<list<int>*>;//выделение памяти 
+			current->next = new list<list<int>*>;//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё 
 			current->next->Ver = new list<int>;
-			current = current->next;//итерация
+			current = current->next;//РёС‚РµСЂР°С†РёСЏ
 			
 		}
 		
 
 	}
-	if (FType == "-e")//ввод списка ребер
+	if (FType == "-e")//РІРІРѕРґ СЃРїРёСЃРєР° СЂРµР±РµСЂ
 	{
-		//реализовано без удаления лишних элементов//
+		//СЂРµР°Р»РёР·РѕРІР°РЅРѕ Р±РµР· СѓРґР°Р»РµРЅРёСЏ Р»РёС€РЅРёС… СЌР»РµРјРµРЅС‚РѕРІ//
 
-		ifstream fin(FPath); //поток по файлу
-		edgelist = new list<int[3]>; //выделение памяти под список ребер
+		ifstream fin(FPath); //РїРѕС‚РѕРє РїРѕ С„Р°Р№Р»Сѓ
+		edgelist = new list<int[3]>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё РїРѕРґ СЃРїРёСЃРѕРє СЂРµР±РµСЂ
 
-		list<int[3]>* current = edgelist;//указатель на текущий ребро
+		list<int[3]>* current = edgelist;//СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰РёР№ СЂРµР±СЂРѕ
 		
 		while (!fin.eof())
 		{
-			string str; //строчка текущего ребра
-			getline(fin, str); //считывание ребра
-			if (str == "") //выход если конец файла(лишняя паустая строка)
+			string str; //СЃС‚СЂРѕС‡РєР° С‚РµРєСѓС‰РµРіРѕ СЂРµР±СЂР°
+			getline(fin, str); //СЃС‡РёС‚С‹РІР°РЅРёРµ СЂРµР±СЂР°
+			if (str == "") //РІС‹С…РѕРґ РµСЃР»Рё РєРѕРЅРµС† С„Р°Р№Р»Р°(Р»РёС€РЅСЏСЏ РїР°СѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
 			{
 				edgelist->del();
 				break;
 			}
-			istringstream strstream(str); //поток по строке
+			istringstream strstream(str); //РїРѕС‚РѕРє РїРѕ СЃС‚СЂРѕРєРµ
 
-			string check_space;//проверка на пробел в конце строки
-			//strstream >> current->Ver[0]; //считывание вершины или веса ребра
+			string check_space;//РїСЂРѕРІРµСЂРєР° РЅР° РїСЂРѕР±РµР» РІ РєРѕРЅС†Рµ СЃС‚СЂРѕРєРё
+			//strstream >> current->Ver[0]; //СЃС‡РёС‚С‹РІР°РЅРёРµ РІРµСЂС€РёРЅС‹ РёР»Рё РІРµСЃР° СЂРµР±СЂР°
 
-			for (int i = 0; i < 2; i++) //цикл считывания двух вершин
+			for (int i = 0; i < 2; i++) //С†РёРєР» СЃС‡РёС‚С‹РІР°РЅРёСЏ РґРІСѓС… РІРµСЂС€РёРЅ
 			{
-				strstream >> current->Ver[i]; //считывание вершины или веса ребра
+				strstream >> current->Ver[i]; //СЃС‡РёС‚С‹РІР°РЅРёРµ РІРµСЂС€РёРЅС‹ РёР»Рё РІРµСЃР° СЂРµР±СЂР°
 				
 			}
-			strstream >> check_space;//проверка и считывание веса (если пусто, то 1)
+			strstream >> check_space;//РїСЂРѕРІРµСЂРєР° Рё СЃС‡РёС‚С‹РІР°РЅРёРµ РІРµСЃР° (РµСЃР»Рё РїСѓСЃС‚Рѕ, С‚Рѕ 1)
 			if (check_space == "")
 				current->Ver[2] = 1;
 			else
 				current->Ver[2] = stoi(check_space);
 
-			if (fin.eof())//выход если конец (чтобы лишнюю память не выделять)
+			if (fin.eof())//РІС‹С…РѕРґ РµСЃР»Рё РєРѕРЅРµС† (С‡С‚РѕР±С‹ Р»РёС€РЅСЋСЋ РїР°РјСЏС‚СЊ РЅРµ РІС‹РґРµР»СЏС‚СЊ)
 				break;
-			current->next = new list<int[3]>; //выделение памяти
-			current = current->next;//итерация
+			current->next = new list<int[3]>; //РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
+			current = current->next;//РёС‚РµСЂР°С†РёСЏ
 			
 		}
 	}
-	if (FType == "-m")//ввод матрицы смежности
+	if (FType == "-m")//РІРІРѕРґ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
 	{
-		//нахождение высоты матрицы
-		ifstream in_ch(FPath); //поток по файлу
+		//РЅР°С…РѕР¶РґРµРЅРёРµ РІС‹СЃРѕС‚С‹ РјР°С‚СЂРёС†С‹
+		ifstream in_ch(FPath); //РїРѕС‚РѕРє РїРѕ С„Р°Р№Р»Сѓ
 		int h_matr = 0;
 		string str_ch;
-		string substr_ch;//проверочные переменные
+		string substr_ch;//РїСЂРѕРІРµСЂРѕС‡РЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
 		getline(in_ch, str_ch);
-		istringstream strstream_ch(str_ch); //поток по строке
-		while (!strstream_ch.eof()) //цикл считывания 
+		istringstream strstream_ch(str_ch); //РїРѕС‚РѕРє РїРѕ СЃС‚СЂРѕРєРµ
+		while (!strstream_ch.eof()) //С†РёРєР» СЃС‡РёС‚С‹РІР°РЅРёСЏ 
 		{
 			strstream_ch >> substr_ch;
 			if (!strstream_ch.eof())
@@ -437,11 +437,11 @@ Graph::Graph(string FPath, string FType)
 		}
 		string str;
 		string substr;
-		ifstream fin(FPath); //поток по файлу
+		ifstream fin(FPath); //РїРѕС‚РѕРє РїРѕ С„Р°Р№Р»Сѓ
 
 		matrix = new vector<vector<int>>;
 		(*matrix).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
+		for (int i = 0; i < h_matr; i++)//РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё
 		{
 			(*matrix)[i].resize(h_matr);
 		}
@@ -458,9 +458,9 @@ Graph::Graph(string FPath, string FType)
 }
 
 
-//*-------------- ф-ии парсинга ------------------*//
+//*-------------- С„-РёРё РїР°СЂСЃРёРЅРіР° ------------------*//
 
-//существование ключа в строке (возвраащает (индекс + 1) или (0))
+//СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РєР»СЋС‡Р° РІ СЃС‚СЂРѕРєРµ (РІРѕР·РІСЂР°Р°С‰Р°РµС‚ (РёРЅРґРµРєСЃ + 1) РёР»Рё (0))
 int exist_key(int argc, char* argv[], string key)
 {
 	for (int i = 1; i < argc; i++)
@@ -470,7 +470,7 @@ int exist_key(int argc, char* argv[], string key)
 	}
 	return 0;
 }
-//есть только 1 ключ файла ввода
+//РµСЃС‚СЊ С‚РѕР»СЊРєРѕ 1 РєР»СЋС‡ С„Р°Р№Р»Р° РІРІРѕРґР°
 bool once_keyfile(int argc, char* argv[])
 {
 	bool ex_e = exist_key(argc, argv, "-e");
@@ -478,60 +478,60 @@ bool once_keyfile(int argc, char* argv[])
 	bool ex_l = exist_key(argc, argv, "-l");
 	if (ex_e && ex_m || ex_e && ex_l || ex_m && ex_l)
 	{
-		cout << "\nВведено несколько ключей файла ввода!!!\n" << endl;
+		cout << "\nР’РІРµРґРµРЅРѕ РЅРµСЃРєРѕР»СЊРєРѕ РєР»СЋС‡РµР№ С„Р°Р№Р»Р° РІРІРѕРґР°!!!\n" << endl;
 		return false;
 	}
 	return true;
 }
-//справка
+//СЃРїСЂР°РІРєР°
 void help(int argc, char* argv[])
 {
 	
-	cout << "Автор работы: Иващенко А.В.\n" << endl;
-	cout << "Группа: M30-211б-21\n" << endl;
-	cout << "Список ключей с параметрами: \n" << endl;
-	cout << "Входные данные для работы программы задаются следующими ключами с параметрами:" << endl;
+	cout << "РђРІС‚РѕСЂ СЂР°Р±РѕС‚С‹: РРІР°С‰РµРЅРєРѕ Рђ.Р’.\n" << endl;
+	cout << "Р“СЂСѓРїРїР°: M30-211Р±-21\n" << endl;
+	cout << "РЎРїРёСЃРѕРє РєР»СЋС‡РµР№ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё: \n" << endl;
+	cout << "Р’С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РґР»СЏ СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјРјС‹ Р·Р°РґР°СЋС‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРјРё РєР»СЋС‡Р°РјРё СЃ РїР°СЂР°РјРµС‚СЂР°РјРё:" << endl;
 	cout << "-e \"edges_list_file_path\"" << endl;
 	cout << "-l \"adjacency_list_file_path\"" << endl;
 	cout << "-m \"adjacency_matrix_file_path\"\n" << endl;
-	cout << "Одновременно может указываться только один из этих ключей!\n" << endl;
-	cout << "Результаты работы выводятся на экран, либо в файл при указании следующего ключа: " << endl;
+	cout << "РћРґРЅРѕРІСЂРµРјРµРЅРЅРѕ РјРѕР¶РµС‚ СѓРєР°Р·С‹РІР°С‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РѕРґРёРЅ РёР· СЌС‚РёС… РєР»СЋС‡РµР№!\n" << endl;
+	cout << "Р РµР·СѓР»СЊС‚Р°С‚С‹ СЂР°Р±РѕС‚С‹ РІС‹РІРѕРґСЏС‚СЃСЏ РЅР° СЌРєСЂР°РЅ, Р»РёР±Рѕ РІ С„Р°Р№Р» РїСЂРё СѓРєР°Р·Р°РЅРёРё СЃР»РµРґСѓСЋС‰РµРіРѕ РєР»СЋС‡Р°: " << endl;
 	cout << "-o \"output_file_path\"\n" << endl;	
 	
-	cout << "Дополнительные ключи для программы: \n" << endl;
-	cout << "№4:" << endl;
-	cout << "Алгоритм для расчёта задаётся следующими ключами: " << endl;
-	cout << "-k – алгоритм Крускала" << endl;	
-	cout << "-p – алгоритм Прима" << endl;
-	cout << "-b – алгоритм Борувки" << endl;
-	cout << "-s – расчёт производится тремя алгоритмами поочерёдно\n" << endl;
-	cout << "№5:" << endl;
-	cout << "Начальная вершина задаётся следующим ключом:" << endl;
-	cout << "-n begin_vertex_number - Данный ключ является обязательным." << endl;
-	cout << "Конечная вершина задаётся следующим ключом:" << endl;
-	cout << "-d end_vertex_number - Данный ключ является обязательным.\n" << endl;
-	cout << "№6:" << endl;
-	cout << "Алгоритм для расчёта задаётся следующими ключами:" << endl;
-	cout << "-d – алгоритм Дейкстры" << endl;
-	cout << "-b – алгоритм Беллмана-Форда-Мура" << endl;
-	cout << "-t – алгоритм Левита\n" << endl;
-	cout << "Начальная вершина задаётся следующим ключом:" << endl;
-	cout << "-n begin_vertex_number - Данный ключ является обязательным\n" << endl;
-	cout << "№8:" << endl;
-	cout << "Входной файл для работы программы задаётся следующим ключом:" << endl;
+	cout << "Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РєР»СЋС‡Рё РґР»СЏ РїСЂРѕРіСЂР°РјРјС‹: \n" << endl;
+	cout << "в„–4:" << endl;
+	cout << "РђР»РіРѕСЂРёС‚Рј РґР»СЏ СЂР°СЃС‡С‘С‚Р° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРјРё РєР»СЋС‡Р°РјРё: " << endl;
+	cout << "-k вЂ“ Р°Р»РіРѕСЂРёС‚Рј РљСЂСѓСЃРєР°Р»Р°" << endl;	
+	cout << "-p вЂ“ Р°Р»РіРѕСЂРёС‚Рј РџСЂРёРјР°" << endl;
+	cout << "-b вЂ“ Р°Р»РіРѕСЂРёС‚Рј Р‘РѕСЂСѓРІРєРё" << endl;
+	cout << "-s вЂ“ СЂР°СЃС‡С‘С‚ РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ С‚СЂРµРјСЏ Р°Р»РіРѕСЂРёС‚РјР°РјРё РїРѕРѕС‡РµСЂС‘РґРЅРѕ\n" << endl;
+	cout << "в„–5:" << endl;
+	cout << "РќР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-n begin_vertex_number - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј." << endl;
+	cout << "РљРѕРЅРµС‡РЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-d end_vertex_number - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј.\n" << endl;
+	cout << "в„–6:" << endl;
+	cout << "РђР»РіРѕСЂРёС‚Рј РґР»СЏ СЂР°СЃС‡С‘С‚Р° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРјРё РєР»СЋС‡Р°РјРё:" << endl;
+	cout << "-d вЂ“ Р°Р»РіРѕСЂРёС‚Рј Р”РµР№РєСЃС‚СЂС‹" << endl;
+	cout << "-b вЂ“ Р°Р»РіРѕСЂРёС‚Рј Р‘РµР»Р»РјР°РЅР°-Р¤РѕСЂРґР°-РњСѓСЂР°" << endl;
+	cout << "-t вЂ“ Р°Р»РіРѕСЂРёС‚Рј Р›РµРІРёС‚Р°\n" << endl;
+	cout << "РќР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-n begin_vertex_number - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј\n" << endl;
+	cout << "в„–8:" << endl;
+	cout << "Р’С…РѕРґРЅРѕР№ С„Р°Р№Р» РґР»СЏ СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјРјС‹ Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
 	cout << "-m \"map_file_path\"\n" << endl;
-	cout << "Начальная вершина задаётся следующим ключом:" << endl;
-	cout << "-n begin_vertex_x begin_vertex_y - Данный ключ является обязательным.\n" << endl;
-	cout << "Конечная вершина задаётся следующим ключом:" << endl;
-	cout << "-d end_vertex_x end_vertex_y - Данный ключ является обязательным.\n" << endl;
-	cout << "№9:" << endl;
-	cout << "Алгоритм для расчёта задаётся следующими ключами:" << endl;
-	cout << "-b – метод ветвей и границ" << endl;
-	cout << "-a – метод муравьиной колонии\n" << endl;
-	cout << "Начальная вершина задаётся следующим ключом:" << endl;
-	cout << "-n begin_vertex_number - Данный ключ является обязательным" << endl;
+	cout << "РќР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-n begin_vertex_x begin_vertex_y - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј.\n" << endl;
+	cout << "РљРѕРЅРµС‡РЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-d end_vertex_x end_vertex_y - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј.\n" << endl;
+	cout << "в„–9:" << endl;
+	cout << "РђР»РіРѕСЂРёС‚Рј РґР»СЏ СЂР°СЃС‡С‘С‚Р° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРјРё РєР»СЋС‡Р°РјРё:" << endl;
+	cout << "-b вЂ“ РјРµС‚РѕРґ РІРµС‚РІРµР№ Рё РіСЂР°РЅРёС†" << endl;
+	cout << "-a вЂ“ РјРµС‚РѕРґ РјСѓСЂР°РІСЊРёРЅРѕР№ РєРѕР»РѕРЅРёРё\n" << endl;
+	cout << "РќР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР° Р·Р°РґР°С‘С‚СЃСЏ СЃР»РµРґСѓСЋС‰РёРј РєР»СЋС‡РѕРј:" << endl;
+	cout << "-n begin_vertex_number - Р”Р°РЅРЅС‹Р№ РєР»СЋС‡ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј" << endl;
 }
-//номер программы
+//РЅРѕРјРµСЂ РїСЂРѕРіСЂР°РјРјС‹
 int num_programm(int argc, char* argv[])
 {
 	for (int i = 1; i < argc; i++)
@@ -541,20 +541,20 @@ int num_programm(int argc, char* argv[])
 	}
 	return 0;
 }
-//создает файл, если он не существует, и возвращает его поток
+//СЃРѕР·РґР°РµС‚ С„Р°Р№Р», РµСЃР»Рё РѕРЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РµРіРѕ РїРѕС‚РѕРє
 ofstream create_file(string filename)
 {
 	ofstream file(filename);
 	return file;
 }
 
-//*-------------- ф-ии для программ ------------------*//
-//для 1 задания
-//печать матрицы
+//*-------------- С„-РёРё РґР»СЏ РїСЂРѕРіСЂР°РјРј ------------------*//
+//РґР»СЏ 1 Р·Р°РґР°РЅРёСЏ
+//РїРµС‡Р°С‚СЊ РјР°С‚СЂРёС†С‹
 void print_matrix(vector<vector<int>>* matrix, ostream& stream_out)
 {
 	int length = matrix->size();
-	for (int i = 0; i < length; i++)//вывод матрицы после кратчайших расстояний
+	for (int i = 0; i < length; i++)//РІС‹РІРѕРґ РјР°С‚СЂРёС†С‹ РїРѕСЃР»Рµ РєСЂР°С‚С‡Р°Р№С€РёС… СЂР°СЃСЃС‚РѕСЏРЅРёР№
 	{
 		for (int j = 0; j < length; j++)
 		{
@@ -566,7 +566,7 @@ void print_matrix(vector<vector<int>>* matrix, ostream& stream_out)
 		stream_out << endl;
 	}
 }
-//печать вектора
+//РїРµС‡Р°С‚СЊ РІРµРєС‚РѕСЂР°
 void print_vector(vector<int>* vec, ostream& stream_out)
 {
 	int length = vec->size();
@@ -580,18 +580,18 @@ void print_vector(vector<int>* vec, ostream& stream_out)
 void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	
-	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрица смежности
-	int length = matrix->size();//размир матрицы
-	int count;//счетчик
-	bool is_directed = GRAPH.is_directed();//флаг ориентированности
-	vector<int>* deg_in = new vector<int>;//вектор степеней входа вершин
+	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//РјР°С‚СЂРёС†Р° СЃРјРµР¶РЅРѕСЃС‚Рё
+	int length = matrix->size();//СЂР°Р·РјРёСЂ РјР°С‚СЂРёС†С‹
+	int count;//СЃС‡РµС‚С‡РёРє
+	bool is_directed = GRAPH.is_directed();//С„Р»Р°Рі РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅРѕСЃС‚Рё
+	vector<int>* deg_in = new vector<int>;//РІРµРєС‚РѕСЂ СЃС‚РµРїРµРЅРµР№ РІС…РѕРґР° РІРµСЂС€РёРЅ
 	deg_in->resize(length);
-	//вывод степеней вершин
-	if (is_directed)//если граф ориентированный
+	//РІС‹РІРѕРґ СЃС‚РµРїРµРЅРµР№ РІРµСЂС€РёРЅ
+	if (is_directed)//РµСЃР»Рё РіСЂР°С„ РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№
 	{
 		
 		stream_out << "deg+ = ";
-		for (int j = 0; j < length; j++)//цикл нахождения степеней входа (кроме последней вершины)
+		for (int j = 0; j < length; j++)//С†РёРєР» РЅР°С…РѕР¶РґРµРЅРёСЏ СЃС‚РµРїРµРЅРµР№ РІС…РѕРґР° (РєСЂРѕРјРµ РїРѕСЃР»РµРґРЅРµР№ РІРµСЂС€РёРЅС‹)
 		{
 			count = 0;
 			for (int i = 0; i < length; i++)
@@ -609,9 +609,9 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		stream_out << "deg- = ";
 	else
 		stream_out << "deg = ";
-	vector<int>* deg_out = new vector<int>;//вектор степеней входа вершин
+	vector<int>* deg_out = new vector<int>;//РІРµРєС‚РѕСЂ СЃС‚РµРїРµРЅРµР№ РІС…РѕРґР° РІРµСЂС€РёРЅ
 	deg_out->resize(length);
-	for (int i = 0; i < length; i++)//цикл нахождения степеней выхода (кроме последней вершины)
+	for (int i = 0; i < length; i++)//С†РёРєР» РЅР°С…РѕР¶РґРµРЅРёСЏ СЃС‚РµРїРµРЅРµР№ РІС‹С…РѕРґР° (РєСЂРѕРјРµ РїРѕСЃР»РµРґРЅРµР№ РІРµСЂС€РёРЅС‹)
 	{
 		count = 0;
 		for (int j = 0; j < length; j++)
@@ -625,16 +625,16 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	print_vector(deg_out, stream_out);
 	
-	//создаем матрицу расстояний
+	//СЃРѕР·РґР°РµРј РјР°С‚СЂРёС†Сѓ СЂР°СЃСЃС‚РѕСЏРЅРёР№
 	Floyd_Warshall(matrix);
 
 	stream_out << endl;
 	print_matrix(matrix, stream_out);
 	
-	//поиск эксцентриситетов
+	//РїРѕРёСЃРє СЌРєСЃС†РµРЅС‚СЂРёСЃРёС‚РµС‚РѕРІ
 	int max;
 	bool inf = false;
-	vector<int>* exc = new vector<int>;//вектор эксцентриситетов
+	vector<int>* exc = new vector<int>;//РІРµРєС‚РѕСЂ СЌРєСЃС†РµРЅС‚СЂРёСЃРёС‚РµС‚РѕРІ
 	exc->resize(length);
 	for (int i = 0; i < length; i++)
 	{
@@ -644,7 +644,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			if ((*matrix)[i][j] > max)
 			{
 				max = (*matrix)[i][j];
-				if (max == INF)//если есть бесконечность то выходим
+				if (max == INF)//РµСЃР»Рё РµСЃС‚СЊ Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЊ С‚Рѕ РІС‹С…РѕРґРёРј
 				{
 					inf = true;
 					break;
@@ -657,14 +657,14 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			break;
 
 	}
-	if (!inf)//выводим эксцентриситеты, если они существуют
+	if (!inf)//РІС‹РІРѕРґРёРј СЌРєСЃС†РµРЅС‚СЂРёСЃРёС‚РµС‚С‹, РµСЃР»Рё РѕРЅРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚
 	{
 		stream_out << "Eccentricity:" << endl;
 		print_vector(exc, stream_out);
 	}
-	if (is_directed)//выход из программы если граф ориентированный
+	if (is_directed)//РІС‹С…РѕРґ РёР· РїСЂРѕРіСЂР°РјРјС‹ РµСЃР»Рё РіСЂР°С„ РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№
 		return;
-	//нахождение диаметра
+	//РЅР°С…РѕР¶РґРµРЅРёРµ РґРёР°РјРµС‚СЂР°
 	max = 0;
 	for (int i = 0; i < length; i++)
 	{
@@ -672,7 +672,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			max = (*exc)[i];
 	}
 	stream_out << "D = " << max<<endl;
-	//нахождение радиуса
+	//РЅР°С…РѕР¶РґРµРЅРёРµ СЂР°РґРёСѓСЃР°
 	int min = INF;
 	for (int i = 0; i < length; i++)
 	{
@@ -680,7 +680,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			min = (*exc)[i];
 	}
 	stream_out << "R = " << min << endl;
-	//нахождение центральных вершин
+	//РЅР°С…РѕР¶РґРµРЅРёРµ С†РµРЅС‚СЂР°Р»СЊРЅС‹С… РІРµСЂС€РёРЅ
 	vector<int>* Z = new vector<int>;
 	stream_out << "Z = ";
 	for (int i = 0; i < length; i++)
@@ -689,7 +689,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			Z->push_back(i + 1);
 	}
 	print_vector(Z, stream_out);
-	//нахождение переферийных вершин
+	//РЅР°С…РѕР¶РґРµРЅРёРµ РїРµСЂРµС„РµСЂРёР№РЅС‹С… РІРµСЂС€РёРЅ
 	vector<int>* P = new vector<int>;
 	stream_out << "P = ";
 	for (int i = 0; i < length; i++)
@@ -699,12 +699,12 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	print_vector(P, stream_out);
 }
-//*-------------- Алгоритмы ------------------*//
-//алгоритм флойда
+//*-------------- РђР»РіРѕСЂРёС‚РјС‹ ------------------*//
+//Р°Р»РіРѕСЂРёС‚Рј С„Р»РѕР№РґР°
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 {
 	int length = matrix->size();
-	for (int i = 0; i < length; i++)//заполнение бесконечностями недостижимых вершин
+	for (int i = 0; i < length; i++)//Р·Р°РїРѕР»РЅРµРЅРёРµ Р±РµСЃРєРѕРЅРµС‡РЅРѕСЃС‚СЏРјРё РЅРµРґРѕСЃС‚РёР¶РёРјС‹С… РІРµСЂС€РёРЅ
 	{
 		for (int j = 0; j < length; j++)
 		{
@@ -712,7 +712,7 @@ vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 				(*matrix)[i][j] = INF;
 		}
 	}
-	for (int k = 0; k < length; k++)//алгоритм флойда
+	for (int k = 0; k < length; k++)//Р°Р»РіРѕСЂРёС‚Рј С„Р»РѕР№РґР°
 	{
 		for (int i = 0; i < length; i++)
 		{

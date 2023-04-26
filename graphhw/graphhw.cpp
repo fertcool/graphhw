@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 	if (exist_key(argc, argv, "-h"))//справка
 	{
 		help(argc, argv);
-		system("pause");
+		system("pause"); 
 		return 0;
 	}
 	if (!once_keyfile(argc, argv))//проверка на 1 ключ ввода в файл

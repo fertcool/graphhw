@@ -129,11 +129,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\OneDrive\Рабочий стол\Новая папка\graphhw.cpp" />
-    <ClCompile Include="..\..\..\..\OneDrive\Рабочий стол\Новая папка\methods.cpp" />
+    <ClCompile Include="graphhw.cpp" />
+    <ClCompile Include="methods.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\OneDrive\Рабочий стол\Новая папка\Header.h" />
+    <ClInclude Include="Header.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="data_adj_l.txt" />
