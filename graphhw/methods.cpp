@@ -72,6 +72,8 @@ vector<vector<int>>* Graph::adjacency_matrix(bool copy)
 		{
 			if (h_matr < current->Ver[0])
 				h_matr = current->Ver[0];
+			if (h_matr < current->Ver[1])
+				h_matr = current->Ver[1];
 		}
 
 		matrix = new vector<vector<int>>;
@@ -202,7 +204,9 @@ list<int>* Graph::adjacency_list(int Ver)
 {
 	if (!adjlist)//сохдание списка смежности
 		adjacency_list(false);
+
 	list<int>* adjlist_c = new list<int>;//копия списка смежных вершин
+	int init = adjlist_c->Ver;//изначальный мусор в списке
 	list<int>* current_c = adjlist_c; // текущая вершина в копии списка
 	list<list<int>*>* current = adjlist;//текущая вершина в основном списке
 	for (int i = 0; i < Ver - 1; i++)//цикл смещения указателя на нужный список смежных вершин
@@ -219,7 +223,8 @@ list<int>* Graph::adjacency_list(int Ver)
 			current_c = current_c->next;
 		}
 	}
-	
+	if (adjlist_c->Ver == init)//если список вершин пуст
+		return NULL;
 	return adjlist_c;
 }
 //возвращает список вершин входящих в Ver
@@ -307,6 +312,7 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 	if (!matrix)//создание матрицы смежности
 		adjacency_matrix(false);
 	list<int[3]>* list_out = new list<int[3]>;//выделение памяти для списка исходящих ребер
+	int init = list_out->Ver[0];//изначальный мусор в списке
 	list<int[3]>* current_out = list_out;//текущее ребро, исходящее из Ver
 	int lmatr = matrix->size();//размер матрицы смежности
 	
@@ -323,6 +329,8 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 		}
 	}
 	list_out->del();
+	if (list_out->Ver[0] == init)//если список вершин пуст
+		return NULL;
 	return list_out;
 
 };
@@ -566,7 +574,8 @@ void print_matrix(vector<vector<int>>* matrix, ostream& stream_out)
 	}
 }
 //печать вектора
-void print_vector(vector<int>* vec, ostream& stream_out)
+template<typename T>
+void print_vector(vector<T>* vec, ostream& stream_out)
 {
 	int length = vec->size();
 	stream_out << "[";
@@ -700,7 +709,25 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	print_vector(P, stream_out);
 }
-
+void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	list<list<int>*>* adjlist = GRAPH.adjacency_list();
+	int length = adjlist->length();
+	for (int i = 1; i <= length; i++)
+	{
+		vector<bool> used(length);
+		vector<int> comp;
+		BFS(GRAPH, &used, i);
+		for (int j = 0; j < length; j++)
+		{
+			if (used[j])
+				comp.push_back(j + 1);
+		}
+		cout << i << " Компонента:" << endl;
+		print_vector(&comp, stream_out);
+	}
+	
+}
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
@@ -728,11 +755,11 @@ vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 
 }
 //поиск в ширину
-void BFS(Graph GRAPH, vector<bool>& used, int Ver)
+void BFS(Graph GRAPH, vector<bool>* used, int Ver)
 {
 	queue<int> q;//очередь вершин
 	q.push(Ver);//вставляем в очередь начальную вершину
-	used[Ver - 1] = true;//маркируем начальную вершину
+	(*used)[Ver - 1] = true;//маркируем начальную вершину
 	while (!q.empty())
 	{
 		int v = q.front();//доставем вершину
@@ -740,10 +767,10 @@ void BFS(Graph GRAPH, vector<bool>& used, int Ver)
 		list<int>* current = GRAPH.adjacency_list(v);//итератор на смежные вершины v
 		for (current; current; current = current->next)//цикл по всем немаркированным смежным вершинам v
 		{
-			if (!used[current->Ver - 1])
+			if (!(*used)[current->Ver - 1])
 			{
 				q.push(current->Ver);//добавляем в очередь
-				used[current->Ver - 1];//маркируем
+				(*used)[current->Ver - 1] = true;//маркируем
 			}
 		}
 

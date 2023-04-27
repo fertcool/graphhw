@@ -33,25 +33,31 @@ int main(int argc, char* argv[])
 
 	}
 	
+
+
 	int num_pr = num_programm(argc, argv);// "/num_pr" - ключ номера запускаемой программы(алгоритма)
+
+	bool out = 0;//флаг вывода в файл
+	ofstream file_out;//поток выаода в файл
+	if (exist_key(argc, argv, "-o"))
+	{
+		file_out = create_file(argv[exist_key(argc, argv, "-o")]);//создание файла
+		out = 1;
+	}
 	switch (num_pr)
 	{
+
 		case 1:
-		{
-			bool out = 0;//флаг вывода в файл
-			ofstream file_out;//поток выаода в файл
-			if (exist_key(argc, argv, "-o"))
-			{
-				file_out = create_file(argv[exist_key(argc, argv, "-o")]);//создание файла
-				out = 1;
-			}
 			if (out)
 				first_task(argc, argv, GRAPH, file_out);
 			else
 				first_task(argc, argv, GRAPH, cout);
-		}
-			break;
+				break;
 		case 2:
+			if (out)
+				second_task(argc, argv, GRAPH, file_out);
+			else
+				second_task(argc, argv, GRAPH, cout);
 			break;
 		case 3:
 			break;

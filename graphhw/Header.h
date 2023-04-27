@@ -82,11 +82,12 @@ ofstream create_file(string filename);
 
 //*-------------- Ф-ии Вывода ------------------*//
 void print_matrix(vector<vector<int>>*matrix, ostream & stream_out);
-void print_vector(vector<int>* vec, ostream& stream_out);
+template<typename T>
+void print_vector(vector<T>* vec, ostream& stream_out);
 
 //*-------------- Ф-ии Программ ------------------*//
-void first_task(int argc, char* argv[],Graph g, ostream& stream_out);
-
+void first_task(int argc, char* argv[],Graph GRAPH, ostream& stream_out);
+void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix); //для 1 задания
