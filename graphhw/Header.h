@@ -1,4 +1,4 @@
-#include <iostream>
+п»ї#include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -6,7 +6,7 @@
 
 using namespace std;
 
-//класс списка
+//*-------------- РљР»Р°СЃСЃ РЎРїРёСЃРєР° ------------------*//
 template<typename T>
 struct list
 {
@@ -18,7 +18,7 @@ struct list
 
 	}
 	
-	//ф-я нахождения длины списка
+	//С„-СЏ РЅР°С…РѕР¶РґРµРЅРёСЏ РґР»РёРЅС‹ СЃРїРёСЃРєР°
 	int length()
 	{
 		int length = 0;
@@ -29,7 +29,7 @@ struct list
 		}
 		return length;
 	}
-	//ф-я удаления последнего элемента
+	//С„-СЏ СѓРґР°Р»РµРЅРёСЏ РїРѕСЃР»РµРґРЅРµРіРѕ СЌР»РµРјРµРЅС‚Р°
 	void del()
 	{
 		list* current = this;
@@ -41,10 +41,12 @@ struct list
 		delete current_before->next;
 		current_before->next = NULL;
 	}
+	
+
 
 	
 };
-//класс графа
+//*-------------- РљР»Р°СЃСЃ Р“СЂР°С„Р° ------------------*//
 class Graph
 {
 private:
@@ -55,31 +57,38 @@ public:
 	Graph() {};
 	Graph(string FPath, string FType);
 	~Graph(){};
-	int weight(int Ver1, int Ver2); //возвращает вес ребра по его вершинам
-	bool is_edge(int Ver1, int Ver2); //существует ли ребро по данным вершинам
-	vector<vector<int>>* adjacency_matrix(bool copy = true); //возвращает матрицу смежности
-	list<list<int>*>* adjacency_list(bool copy = true); //возвращает список смежности
-	list<int>* adjacency_list(int Ver); //возвращает список вершин смежных Ver
-	list<int>* adjacency_list_in(int Ver); //возвращает список вершин входящих в Ver
-	list<int[3]>* list_of_edges(bool copy = true); //возвращает список ребер
-	list<int[3]>* list_of_edges(int Ver); //возвращает список всех ребер инцидентных Ver
-	bool is_directed(); //граф ориентированный или нет
+	int weight(int Ver1, int Ver2); //РІРѕР·РІСЂР°С‰Р°РµС‚ РІРµСЃ СЂРµР±СЂР° РїРѕ РµРіРѕ РІРµСЂС€РёРЅР°Рј
+	bool is_edge(int Ver1, int Ver2); //СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЂРµР±СЂРѕ РїРѕ РґР°РЅРЅС‹Рј РІРµСЂС€РёРЅР°Рј
+	vector<vector<int>>* adjacency_matrix(bool copy = true); //РІРѕР·РІСЂР°С‰Р°РµС‚ РјР°С‚СЂРёС†Сѓ СЃРјРµР¶РЅРѕСЃС‚Рё
+	list<list<int>*>* adjacency_list(bool copy = true); //РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє СЃРјРµР¶РЅРѕСЃС‚Рё
+	list<int>* adjacency_list(int Ver); //РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ СЃРјРµР¶РЅС‹С… Ver
+	list<int>* adjacency_list_in(int Ver); //РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІРµСЂС€РёРЅ РІС…РѕРґСЏС‰РёС… РІ Ver
+	list<int[3]>* list_of_edges(bool copy = true); //РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє СЂРµР±РµСЂ
+	list<int[3]>* list_of_edges(int Ver); //РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… СЂРµР±РµСЂ РёРЅС†РёРґРµРЅС‚РЅС‹С… Ver
+	bool is_directed(); //РіСЂР°С„ РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅРЅС‹Р№ РёР»Рё РЅРµС‚
 };
-//ф-ии парсинга
+//*-------------- Р¤-РёРё РџР°СЂСЃРёРЅРіР° ------------------*//
 
-//существование ключа в строке (возвраащает (индекс + 1) или (-1))
+//СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РєР»СЋС‡Р° РІ СЃС‚СЂРѕРєРµ (РІРѕР·РІСЂР°Р°С‰Р°РµС‚ (РёРЅРґРµРєСЃ + 1) РёР»Рё (-1))
 int exist_key(int argc, char* argv[], string key);
-//есть только 1 ключ файла ввода
+//РµСЃС‚СЊ С‚РѕР»СЊРєРѕ 1 РєР»СЋС‡ С„Р°Р№Р»Р° РІРІРѕРґР°
 bool once_keyfile(int argc, char* argv[]);
-//справка
+//СЃРїСЂР°РІРєР°
 void help(int argc, char* argv[]);
-//номер программы
+//РЅРѕРјРµСЂ РїСЂРѕРіСЂР°РјРјС‹
 int num_programm(int argc, char* argv[]);
-//создает файл, если он не существует, и возвращает его поток
+//СЃРѕР·РґР°РµС‚ С„Р°Р№Р», РµСЃР»Рё РѕРЅ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚, Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РµРіРѕ РїРѕС‚РѕРє
 ofstream create_file(string filename);
 
-//ф-ии для программ
-void first_task(int argc, char* argv[],Graph g, ostream& stream_out);
-void print_matrix(vector<vector<int>>* matrix, ostream& stream_out);
+//*-------------- Р¤-РёРё Р’С‹РІРѕРґР° ------------------*//
+void print_matrix(vector<vector<int>>*matrix, ostream & stream_out);
 void print_vector(vector<int>* vec, ostream& stream_out);
-vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix); //для 1 задания
+
+//*-------------- Р¤-РёРё РџСЂРѕРіСЂР°РјРј ------------------*//
+void first_task(int argc, char* argv[],Graph g, ostream& stream_out);
+
+//*-------------- РђР»РіРѕСЂРёС‚РјС‹ ------------------*//
+//Р°Р»РіРѕСЂРёС‚Рј С„Р»РѕР№РґР°
+vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix); //РґР»СЏ 1 Р·Р°РґР°РЅРёСЏ
+//РїРѕРёСЃРє РІ С€РёСЂРёРЅСѓ
+void BFS(Graph GRAPH, vector<bool>* used, int Ver);

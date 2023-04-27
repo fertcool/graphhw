@@ -3,7 +3,7 @@
 #include "Header.h"
 #include <iomanip>
 #include <fstream>
-
+#include <queue>
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
 int Graph::weight(int Ver1, int Ver2) 
@@ -548,8 +548,7 @@ ofstream create_file(string filename)
 	return file;
 }
 
-//*-------------- ф-ии для программ ------------------*//
-//для 1 задания
+//*-------------- Ф-ии Вывода ------------------*//
 //печать матрицы
 void print_matrix(vector<vector<int>>* matrix, ostream& stream_out)
 {
@@ -577,6 +576,8 @@ void print_vector(vector<int>* vec, ostream& stream_out)
 	}
 	stream_out << (*vec)[length-1] << "]"<<endl;
 }
+
+//*-------------- Ф-ии Программ ------------------*//
 void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	
@@ -699,6 +700,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	print_vector(P, stream_out);
 }
+
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
@@ -725,3 +727,26 @@ vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 	return matrix;
 
 }
+//поиск в ширину
+void BFS(Graph GRAPH, vector<bool>& used, int Ver)
+{
+	queue<int> q;//очередь вершин
+	q.push(Ver);//вставляем в очередь начальную вершину
+	used[Ver - 1] = true;//маркируем начальную вершину
+	while (!q.empty())
+	{
+		int v = q.front();//доставем вершину
+		q.pop();
+		list<int>* current = GRAPH.adjacency_list(v);//итератор на смежные вершины v
+		for (current; current; current = current->next)//цикл по всем немаркированным смежным вершинам v
+		{
+			if (!used[current->Ver - 1])
+			{
+				q.push(current->Ver);//добавляем в очередь
+				used[current->Ver - 1];//маркируем
+			}
+		}
+
+	}
+}
+
