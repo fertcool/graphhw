@@ -356,10 +356,18 @@ Graph::Graph(string FPath, string FType)
 		{
 			string str; //текущая строка с вершинами
 			getline(fin, str); //считывание строки с вершинами
-			if (str == "") //выход если конец файла(лишняя паустая строка)
+			if (str == "" && fin.eof()) //выход если конец файла(лишняя пустая строка)
 			{
 				adjlist->del();
 				break;
+			}
+			if (str == "" && !fin.eof())
+			{
+				current->Ver = NULL;
+				current->next = new list<list<int>*>;//выделение памяти 
+				current->next->Ver = new list<int>;
+				current = current->next;//итерация
+				continue;
 			}
 
 			istringstream strstream(str); //поток по строке
@@ -766,7 +774,7 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	list<list<int>*>* adjlist = GRAPH.adjacency_list();//список смежности
 	int length = adjlist->length();//длина списка(количество вершин)
-	int num_comp = 1;//номер компоненты
+	int num_comp = 1;//номер компоненты (или их количество)
 	vector<int> used(length);//вектор с маркированными вершинами(марка - номер компоненты вершины)
 	
 	if (!GRAPH.is_directed())//если граф неориентированный
@@ -836,6 +844,10 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	
 }
+void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out) 
+{
+
+}
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
@@ -884,7 +896,7 @@ void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark)
 
 	}
 }
-//поиск в глубину(возвращает вектор заполненный последоваетльно пройденными вершинами)
+//топологическая сортировка графа
 vector<int>* TopologicalSort(Graph GRAPH)
 {
 	int length = GRAPH.adjacency_list()->length();
@@ -894,14 +906,14 @@ vector<int>* TopologicalSort(Graph GRAPH)
 	{
 		if (!used[i])
 		{
-			DFS(GRAPH, &used, i+1, 1,sortedgraph);
-			
+			DFS(GRAPH, &used, i+1, 1, sortedgraph);
 		}
 			
 	}
 	reverse(sortedgraph->begin(), sortedgraph->end());
 	return sortedgraph;
 }
+//поиск в глубину
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 {
 	stack<int> s;

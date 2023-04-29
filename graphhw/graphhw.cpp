@@ -60,6 +60,10 @@ int main(int argc, char* argv[])
 				second_task(argc, argv, GRAPH, cout);
 			break;
 		case 3:
+			if (out)
+				second_task(argc, argv, GRAPH, file_out);
+			else
+				second_task(argc, argv, GRAPH, cout);
 			break;
 		case 4:
 			break;

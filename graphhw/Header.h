@@ -93,10 +93,13 @@ void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out
 //*-------------- Ф-ии Программ ------------------*//
 void first_task(int argc, char* argv[],Graph GRAPH, ostream& stream_out);
 void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix); //для 1 задания
-//поиск в ширину
+//топологическая сортировка графа
 vector<int>* TopologicalSort(Graph GRAPH);
+//поиск в ширину
 void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark);
+//поиск в глубину
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order);
