@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <fstream>
 #include <queue>
+#include <stack>
+
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
 int Graph::weight(int Ver1, int Ver2) 
@@ -267,9 +269,9 @@ list<int[3]>* Graph::list_of_edges(bool copy)
 		int length = edgelist->length();//длина списка ребер
 		for (int i = 0; i < length; i++)//цикл копирования
 		{
-			current_c[0] = current[0];
-			current_c[1] = current[1];//копирование
-			current_c[2] = current[2];
+			current_c->Ver[0] = current->Ver[0];
+			current_c->Ver[1] = current->Ver[1];//копирование
+			current_c->Ver[2] = current->Ver[2];
 			if (i != length - 1)//выделение памяти для следующего элемента
 			{
 				current_c->next = new list<int[3]>;
@@ -585,8 +587,59 @@ void print_vector(vector<T>* vec, ostream& stream_out)
 	}
 	stream_out << (*vec)[length-1] << "]"<<endl;
 }
-
+//печать компонент связности
+void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out,bool is_directed, bool strong_comp)
+{
+	
+	bool connected = true;//флаг связности
+	for (int i = 0; i < length - 1; i++)//цикл проверки на связность
+	{
+		if (used[i] != used[i + 1])
+			connected = false;
+	}
+	if (!is_directed) {
+		if (connected)
+			stream_out << "Граф связен ";
+		else
+			stream_out << "Граф не связен ";
+	}
+	else
+	{
+		if (connected && !strong_comp)
+			stream_out << "Орграф связен ";
+		else if(!strong_comp)
+			stream_out << "Орграф не связен ";
+		else if(connected)
+			stream_out << "Орграф сильносвязен ";
+		else 
+			stream_out << "Орграф слабосвязен ";
+	}
+	if(!strong_comp)
+		stream_out << "и имеет " << num_comp << " компонент связности:" << endl;
+	else 
+		stream_out << "и имеет " << num_comp << " компонент сильной связности:" << endl;
+	stream_out << "[";
+	for (int i = 0; i < num_comp; i++)//вывод компонент
+	{
+		if (i != 0)
+			stream_out << ", ";
+		else
+			stream_out << endl << "  ";
+		vector<int> comp;//вектор с вершинами i компоненты
+		for (int j = 0; j < length; j++)
+		{
+			if (used[j] == i + 1)
+			{
+				comp.push_back(j + 1);
+			}
+		}
+		print_vector(&comp, stream_out);
+	}
+	stream_out << "]" << endl;
+	
+}
 //*-------------- Ф-ии Программ ------------------*//
+
 void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	
@@ -711,20 +764,75 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 }
 void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
-	list<list<int>*>* adjlist = GRAPH.adjacency_list();
-	int length = adjlist->length();
-	for (int i = 1; i <= length; i++)
+	list<list<int>*>* adjlist = GRAPH.adjacency_list();//список смежности
+	int length = adjlist->length();//длина списка(количество вершин)
+	int num_comp = 1;//номер компоненты
+	vector<int> used(length);//вектор с маркированными вершинами(марка - номер компоненты вершины)
+	
+	if (!GRAPH.is_directed())//если граф неориентированный
 	{
-		vector<bool> used(length);
-		vector<int> comp;
-		BFS(GRAPH, &used, i);
-		for (int j = 0; j < length; j++)
+		for (int i = 1; i <= length; i++)//цикл поиска в ширину для каждой непосещенной вершины
 		{
-			if (used[j])
-				comp.push_back(j + 1);
+			if (!used[i - 1])
+			{
+				BFS(GRAPH, &used, i, num_comp);//поиск в ширину
+				num_comp++;//инкремент номера компоненты
+			}
+
 		}
-		cout << i << " Компонента:" << endl;
-		print_vector(&comp, stream_out);
+
+		print_comp(length, used, num_comp - 1, stream_out, false, false);
+	}
+	else//если граф ориентированный
+	{
+		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрица смежности графа
+		int length = matrix->size();//количество вершин
+		//делаем соотнесенный граф
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < length; j++)
+			{
+				if ((*matrix)[i][j])
+					(*matrix)[j][i] = 1;
+			}
+		}
+		Graph GraphCor(matrix);//соотнесенный граф
+		//цикл поиска в ширину для каждой непосещенной вершины
+		for (int i = 1; i <= length; i++)
+		{
+			if (!used[i - 1])
+			{
+				BFS(GraphCor, &used, i, num_comp);//поиск в ширину
+				num_comp++;//инкремент номера компоненты
+			}
+
+		}
+		//печать компонент слабой связности
+		print_comp(length, used, num_comp - 1, stream_out, true, false);
+		
+		//инвертируем граф
+		list<int[3]>* edgelist = GRAPH.list_of_edges();
+		list<int[3]>* current = edgelist;
+		for (current; current; current = current->next)
+		{
+			swap(current->Ver[0], current->Ver[1]);
+		}
+		//обнуляем список маркеров
+		for (size_t i = 0; i < length; i++)
+			used[i] = 0;
+		
+		Graph Graph_Inv(edgelist);//инвертированный граф
+		vector<int>* order = TopologicalSort(Graph_Inv);//вектор топологической сортировки инвертированного графа
+		num_comp = 1;
+		for (size_t i = 0; i < order->size(); i++)//цикл DFS по вершинам обычного графа в порядке топологической сортировки инвертированного
+		{
+			if (!used[(*order)[i]-1]) 
+			{
+				DFS(GRAPH, &used, (*order)[i], num_comp, 0);
+				num_comp++;
+			}
+		}
+		print_comp(length, used, num_comp - 1, stream_out, true, true);
 	}
 	
 }
@@ -755,11 +863,11 @@ vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 
 }
 //поиск в ширину
-void BFS(Graph GRAPH, vector<bool>* used, int Ver)
+void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark)
 {
 	queue<int> q;//очередь вершин
 	q.push(Ver);//вставляем в очередь начальную вершину
-	(*used)[Ver - 1] = true;//маркируем начальную вершину
+	(*used)[Ver - 1] = mark;//маркируем начальную вершину
 	while (!q.empty())
 	{
 		int v = q.front();//доставем вершину
@@ -770,10 +878,51 @@ void BFS(Graph GRAPH, vector<bool>* used, int Ver)
 			if (!(*used)[current->Ver - 1])
 			{
 				q.push(current->Ver);//добавляем в очередь
-				(*used)[current->Ver - 1] = true;//маркируем
+				(*used)[current->Ver - 1] = mark;//маркируем
 			}
 		}
 
 	}
 }
-
+//поиск в глубину(возвращает вектор заполненный последоваетльно пройденными вершинами)
+vector<int>* TopologicalSort(Graph GRAPH)
+{
+	int length = GRAPH.adjacency_list()->length();
+	vector<int> used(length);
+	vector<int>* sortedgraph = new vector<int>;
+	for (int i = 0; i < length; i++)
+	{
+		if (!used[i])
+		{
+			DFS(GRAPH, &used, i+1, 1,sortedgraph);
+			
+		}
+			
+	}
+	reverse(sortedgraph->begin(), sortedgraph->end());
+	return sortedgraph;
+}
+void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
+{
+	stack<int> s;
+	s.push(Ver);
+	(*used)[Ver-1] = mark;
+	while (!s.empty())
+	{
+		int v = s.top();
+		s.pop();
+		list<int>* current = GRAPH.adjacency_list(v);
+		for (current; current; current = current->next)//цикл по всем немаркированным смежным вершинам v
+		{
+			if (!(*used)[current->Ver - 1])
+			{
+				s.push(v);
+				(*used)[current->Ver - 1] = mark;
+				s.push(current->Ver);	
+				break;
+			}
+		}
+		if(!current && order)
+			order->push_back(v);
+	}
+}

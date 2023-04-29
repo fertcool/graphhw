@@ -55,6 +55,9 @@ private:
 	vector<vector<int>>* matrix;
 public:
 	Graph() {};
+	Graph(vector<vector<int>>* Matradj) { matrix = Matradj; };
+	Graph(list<int[3]>* Edgel) { edgelist = Edgel; };
+	Graph(list<list<int>*>* Adjl) { adjlist = Adjl; };
 	Graph(string FPath, string FType);
 	~Graph(){};
 	int weight(int Ver1, int Ver2); //возвращает вес ребра по его вершинам
@@ -84,6 +87,8 @@ ofstream create_file(string filename);
 void print_matrix(vector<vector<int>>*matrix, ostream & stream_out);
 template<typename T>
 void print_vector(vector<T>* vec, ostream& stream_out);
+//печать компонент связности
+void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out, bool is_directed, bool strong_comp);
 
 //*-------------- Ф-ии Программ ------------------*//
 void first_task(int argc, char* argv[],Graph GRAPH, ostream& stream_out);
@@ -92,4 +97,6 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix); //для 1 задания
 //поиск в ширину
-void BFS(Graph GRAPH, vector<bool>* used, int Ver);
+vector<int>* TopologicalSort(Graph GRAPH);
+void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark);
+void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order);
