@@ -103,3 +103,4 @@ vector<int>* TopologicalSort(Graph GRAPH);
 void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark);
 //поиск в глубину
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order);
+void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int[2]>* bridges, int back = 0);

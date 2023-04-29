@@ -846,7 +846,19 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 }
 void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out) 
 {
-
+	list<list<int>*>* adjlist = GRAPH.adjacency_list();//список смежности
+	int length = adjlist->length();//длина списка(количество вершин)
+	vector<bool> used(length);
+	vector<int> tin(length);
+	vector<int> tup(length);
+	list<int[2]> * bridges = new list<int[2]>;
+	int timer = 0;
+	for (int i = 0; i < length; i++)
+	{
+		if (!used[i])
+			DFS(GRAPH, &used, i + 1, timer, &tin, &tup, bridges);
+	}
+	cout << "";
 }
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -914,6 +926,7 @@ vector<int>* TopologicalSort(Graph GRAPH)
 	return sortedgraph;
 }
 //поиск в глубину
+//для топологической сортировки
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 {
 	stack<int> s;
@@ -937,4 +950,36 @@ void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 		if(!current && order)
 			order->push_back(v);
 	}
+}
+//для поиска мостов
+void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int[2]>* bridges, int back)
+{   
+	int length = used->size();
+	(*used)[Ver - 1] = true;
+	(*tin)[Ver - 1] = timer++;
+	(*tup)[Ver - 1] = timer;
+	list<int>* current = GRAPH.adjacency_list(Ver);
+	for (current; current; current = current->next)
+	{
+		int next = current->Ver;
+		if (next == back)
+			continue;
+		if ((*used)[next - 1])
+			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tin)[next - 1]);
+		else
+		{
+			DFS(GRAPH, used, next, timer, tin, tup, bridges, Ver);
+			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);
+			if ((*tup)[next - 1] > (*tin)[Ver - 1])
+			{
+				list<int[2]>* current = bridges;
+				for (current; current->next; current = current->next){}
+				current->next = new list<int[2]>;
+				current->next->Ver[0] = Ver;
+				current->next->Ver[1] = next;
+				
+			}
+		}
+	}
+
 }
