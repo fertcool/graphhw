@@ -854,21 +854,49 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	list<int*> * bridges = new list<int*>;//список мостов
 	bridges->Ver = NULL;
 	int timer = 0;//таймер уровня обхода дерева DFS
+	//поиск мостов с помощью поиска в глубину
 	for (int i = 0; i < length; i++)//поиск мостов с помощью поиска в глубину
 	{
 		if (!used[i])
-			DFS(GRAPH, &used, i + 1, timer, &tin, &tup, bridges);
+			DFS_BRIDGES(GRAPH, &used, i + 1, timer, &tin, &tup, bridges);
 	}
+	//вывод мостов
 	stream_out << "Мосты в графе:" << endl<<"[";
 	list<int*>* current = bridges;
-	for (current; current; current = current->next)//вывод мостов
-	{
-		stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ")";
-		if (current->next)
-			stream_out << ", ";
+	if (current->Ver) {
+		for (current; current; current = current->next)
+		{
+			stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ")";
+			if (current->next)
+				stream_out << ", ";
+		}
 	}
 	stream_out << "]"<<endl;
-	
+	//поиск шарниров с помощью поиска в глубину
+	timer = 0;
+	vector<bool> is_cut(length);//вектор маркеров на то является ли i вершина шарниром
+	//обнуляем списки маркеров
+	for (size_t i = 0; i < length; i++) 
+	{
+		tin[i] = 0;
+		tup[i] = 0;
+		used[i] = false;
+	}
+	DFS_CUTVERTEXES(GRAPH, &used, &is_cut, 1, timer, &tin, &tup);
+	//вывод шарниров в графе
+	stream_out << "Шарниры в графе:" << endl;
+	vector<int> cut_vertexes;
+	for (size_t i = 0; i < length; i++)
+	{
+		if (is_cut[i]) 
+		{
+			cut_vertexes.push_back(i + 1);
+		}
+	}
+	if (cut_vertexes.size() != 0)
+		print_vector(&cut_vertexes, stream_out);
+	else
+		stream_out << "[]" << endl;
 }
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -962,7 +990,7 @@ void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 	}
 }
 //для поиска мостов
-void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back)
+void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back)
 {   
 	int length = used->size();
 	(*used)[Ver - 1] = true;
@@ -974,20 +1002,20 @@ void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, 
 		int next = current->Ver;
 		if (next == back)
 			continue;
-		if ((*used)[next - 1])
+		if ((*used)[next - 1])//при нахождении обратного ребра
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tin)[next - 1]);
 		else
 		{
-			DFS(GRAPH, used, next, timer, tin, tup, bridges, Ver);
-			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);
+			DFS_BRIDGES(GRAPH, used, next, timer, tin, tup, bridges, Ver);//поиск в глубину для следующей вершины
+			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);//возврат в вершину
 			if ((*tup)[next - 1] > (*tin)[Ver - 1])
 			{
-				if (bridges->Ver) 
+				if (bridges->Ver)//добавление моста в список
 				{
 					int* bridge = new int[2] { Ver, next };
 					bridges->add(bridge);
 				}
-				else
+				else//добавление первого моста
 				{
 					int* bridge = new int[2] { Ver, next };
 					bridges->Ver = bridge;
@@ -996,4 +1024,36 @@ void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, 
 		}
 	}
 
+}
+//для поиска шарниров
+void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int Ver, int timer, vector<int>* tin, vector<int>* tup, int back)
+{
+	int length = used->size();
+	(*used)[Ver - 1] = true;
+	(*tin)[Ver - 1] = timer++;
+	(*tup)[Ver - 1] = timer;
+	list<int>* current = GRAPH.adjacency_list(Ver);
+	int children = 0;
+	for (current; current; current = current->next)
+	{
+		int next = current->Ver;
+		if (next == back)
+			continue;
+		if ((*used)[next - 1])//при нахождении обратного ребра
+			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tin)[next - 1]);
+		else
+		{
+			DFS_CUTVERTEXES(GRAPH, used, is_cut, next, timer, tin, tup, Ver);//поиск в глубину для следующей вершины
+			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);//возврат в вершину
+			if ((*tup)[next - 1] >= (*tin)[Ver - 1] && back != 0)
+			{
+				(*is_cut)[Ver - 1] = true;
+			}
+			children++;
+		}
+	}
+	if (back == 0 && children > 1)
+	{
+		(*is_cut)[Ver - 1] = true;
+	}
 }

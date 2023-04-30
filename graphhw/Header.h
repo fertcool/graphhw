@@ -111,4 +111,5 @@ vector<int>* TopologicalSort(Graph GRAPH);
 void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark);
 //поиск в глубину
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order);
-void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back = 0);
+void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back = 0);
+void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int Ver, int timer, vector<int>* tin, vector<int>* tup, int back = 0);
