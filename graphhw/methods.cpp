@@ -848,17 +848,27 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	list<list<int>*>* adjlist = GRAPH.adjacency_list();//список смежности
 	int length = adjlist->length();//длина списка(количество вершин)
-	vector<bool> used(length);
-	vector<int> tin(length);
-	vector<int> tup(length);
-	list<int[2]> * bridges = new list<int[2]>;
-	int timer = 0;
-	for (int i = 0; i < length; i++)
+	vector<bool> used(length);//вектор маркеров
+	vector<int> tin(length);//векторов маркеров времени входа в врешину
+	vector<int> tup(length);//вектор маркеров выхода из вершины с учетом обратных ребер
+	list<int*> * bridges = new list<int*>;//список мостов
+	bridges->Ver = NULL;
+	int timer = 0;//таймер уровня обхода дерева DFS
+	for (int i = 0; i < length; i++)//поиск мостов с помощью поиска в глубину
 	{
 		if (!used[i])
 			DFS(GRAPH, &used, i + 1, timer, &tin, &tup, bridges);
 	}
-	cout << "";
+	stream_out << "Мосты в графе:" << endl<<"[";
+	list<int*>* current = bridges;
+	for (current; current; current = current->next)//вывод мостов
+	{
+		stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ")";
+		if (current->next)
+			stream_out << ", ";
+	}
+	stream_out << "]"<<endl;
+	
 }
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -952,7 +962,7 @@ void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 	}
 }
 //для поиска мостов
-void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int[2]>* bridges, int back)
+void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back)
 {   
 	int length = used->size();
 	(*used)[Ver - 1] = true;
@@ -972,12 +982,16 @@ void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, 
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);
 			if ((*tup)[next - 1] > (*tin)[Ver - 1])
 			{
-				list<int[2]>* current = bridges;
-				for (current; current->next; current = current->next){}
-				current->next = new list<int[2]>;
-				current->next->Ver[0] = Ver;
-				current->next->Ver[1] = next;
-				
+				if (bridges->Ver) 
+				{
+					int* bridge = new int[2] { Ver, next };
+					bridges->add(bridge);
+				}
+				else
+				{
+					int* bridge = new int[2] { Ver, next };
+					bridges->Ver = bridge;
+				}
 			}
 		}
 	}

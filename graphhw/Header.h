@@ -41,6 +41,14 @@ struct list
 		delete current_before->next;
 		current_before->next = NULL;
 	}
+	//ф-я добавления в конец списка
+	void add(T add_data)
+	{
+		list* current = this;
+		for (current; current->next; current = current->next) {}
+		current->next = new list<T>;
+		current->next->Ver = add_data;
+	}
 	
 
 
@@ -103,4 +111,4 @@ vector<int>* TopologicalSort(Graph GRAPH);
 void BFS(Graph GRAPH, vector<int>* used, int Ver, int mark);
 //поиск в глубину
 void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order);
-void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int[2]>* bridges, int back = 0);
+void DFS(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back = 0);
