@@ -337,6 +337,14 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 
 };
 
+Graph& Graph::operator=(const Graph& graph)
+{
+	matrix = graph.matrix;
+	edgelist = graph.edgelist;
+	adjlist = graph.adjlist;
+	return *this;
+}
+
 
 //конструктор
 Graph::Graph(string FPath, string FType)
@@ -846,6 +854,23 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 }
 void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out) 
 {
+	if (GRAPH.is_directed())//если граф ориентированный создаем соотнесенный граф
+	{
+		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрица смежности графа
+		int length = matrix->size();//количество вершин
+		//делаем соотнесенный граф
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < length; j++)
+			{
+				if ((*matrix)[i][j])
+					(*matrix)[j][i] = 1;
+			}
+		}
+		Graph GraphCor(matrix);
+		GRAPH = GraphCor;
+
+	}
 	list<list<int>*>* adjlist = GRAPH.adjacency_list();//список смежности
 	int length = adjlist->length();//длина списка(количество вершин)
 	vector<bool> used(length);//вектор маркеров
@@ -882,7 +907,11 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		tup[i] = 0;
 		used[i] = false;
 	}
-	DFS_CUTVERTEXES(GRAPH, &used, &is_cut, 1, timer, &tin, &tup);
+	for (int i = 0; i < length; i++)//поиск шарниров с помощью поиска в глубину
+	{
+		if (!used[i])
+			DFS_CUTVERTEXES(GRAPH, &used, &is_cut, i+1, timer, &tin, &tup);
+	}
 	//вывод шарниров в графе
 	stream_out << "Шарниры в графе:" << endl;
 	vector<int> cut_vertexes;
@@ -994,8 +1023,8 @@ void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int
 {   
 	int length = used->size();
 	(*used)[Ver - 1] = true;
-	(*tin)[Ver - 1] = timer++;
-	(*tup)[Ver - 1] = timer;
+	(*tin)[Ver - 1] = timer;
+	(*tup)[Ver - 1] = timer;//при входе в врешину tup = tin
 	list<int>* current = GRAPH.adjacency_list(Ver);
 	for (current; current; current = current->next)
 	{
@@ -1006,7 +1035,7 @@ void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tin)[next - 1]);
 		else
 		{
-			DFS_BRIDGES(GRAPH, used, next, timer, tin, tup, bridges, Ver);//поиск в глубину для следующей вершины
+			DFS_BRIDGES(GRAPH, used, next, timer + 1, tin, tup, bridges, Ver);//поиск в глубину для следующей вершины
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);//возврат в вершину
 			if ((*tup)[next - 1] > (*tin)[Ver - 1])
 			{
@@ -1030,7 +1059,7 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 {
 	int length = used->size();
 	(*used)[Ver - 1] = true;
-	(*tin)[Ver - 1] = timer++;
+	(*tin)[Ver - 1] = timer;
 	(*tup)[Ver - 1] = timer;
 	list<int>* current = GRAPH.adjacency_list(Ver);
 	int children = 0;
@@ -1043,7 +1072,7 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tin)[next - 1]);
 		else
 		{
-			DFS_CUTVERTEXES(GRAPH, used, is_cut, next, timer, tin, tup, Ver);//поиск в глубину для следующей вершины
+			DFS_CUTVERTEXES(GRAPH, used, is_cut, next, timer + 1, tin, tup, Ver);//поиск в глубину для следующей вершины
 			(*tup)[Ver - 1] = min((*tup)[Ver - 1], (*tup)[next - 1]);//возврат в вершину
 			if ((*tup)[next - 1] >= (*tin)[Ver - 1] && back != 0)
 			{
@@ -1052,7 +1081,7 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 			children++;
 		}
 	}
-	if (back == 0 && children > 1)
+	if (back == 0 && children > 1)//если начальная имеет более одного потомка
 	{
 		(*is_cut)[Ver - 1] = true;
 	}

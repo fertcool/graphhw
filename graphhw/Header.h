@@ -77,6 +77,8 @@ public:
 	list<int[3]>* list_of_edges(bool copy = true); //возвращает список ребер
 	list<int[3]>* list_of_edges(int Ver); //возвращает список всех ребер инцидентных Ver
 	bool is_directed(); //граф ориентированный или нет
+	Graph& operator=(const Graph& graph);
+	
 };
 //*-------------- Ф-ии Парсинга ------------------*//
 
