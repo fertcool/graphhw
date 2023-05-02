@@ -834,13 +834,13 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			swap(current->Ver[0], current->Ver[1]);
 		}
 		//обнуляем список маркеров
-		for (size_t i = 0; i < length; i++)
+		for (int i = 0; i < length; i++)
 			used[i] = 0;
 		
 		Graph Graph_Inv(edgelist);//инвертированный граф
 		vector<int>* order = TopologicalSort(Graph_Inv);//вектор топологической сортировки инвертированного графа
 		num_comp = 1;
-		for (size_t i = 0; i < order->size(); i++)//цикл DFS по вершинам обычного графа в порядке топологической сортировки инвертированного
+		for (int i = 0; i < order->size(); i++)//цикл DFS по вершинам обычного графа в порядке топологической сортировки инвертированного
 		{
 			if (!used[(*order)[i]-1]) 
 			{
@@ -901,7 +901,7 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	timer = 0;
 	vector<bool> is_cut(length);//вектор маркеров на то является ли i вершина шарниром
 	//обнуляем списки маркеров
-	for (size_t i = 0; i < length; i++) 
+	for (int i = 0; i < length; i++) 
 	{
 		tin[i] = 0;
 		tup[i] = 0;
@@ -915,7 +915,7 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	//вывод шарниров в графе
 	stream_out << "Шарниры в графе:" << endl;
 	vector<int> cut_vertexes;
-	for (size_t i = 0; i < length; i++)
+	for (int i = 0; i < length; i++)
 	{
 		if (is_cut[i]) 
 		{
@@ -926,6 +926,57 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		print_vector(&cut_vertexes, stream_out);
 	else
 		stream_out << "[]" << endl;
+}
+void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	int num_alg = 0;
+	if (exist_key(argc, argv, "-k"))
+		num_alg = 1;
+	if (exist_key(argc, argv, "-p"))
+		num_alg = 2;
+	if (exist_key(argc, argv, "-b"))
+		num_alg = 3;
+	if (exist_key(argc, argv, "-s"))
+		num_alg = 4;
+	if (!num_alg)
+	{
+		stream_out << "Не введен ключ алгоритма!!!" << endl;
+		return;
+	}
+	if (GRAPH.is_directed())//если граф ориентированный создаем соотнесенный граф
+	{
+		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрица смежности графа
+		int length = matrix->size();//количество вершин
+		//делаем соотнесенный граф
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < length; j++)
+			{
+				if ((*matrix)[i][j])
+					(*matrix)[j][i] = 1;
+			}
+		}
+		Graph GraphCor(matrix);
+		GRAPH = GraphCor;
+	}
+	switch (num_alg)
+	{
+	case 1://алгоритм крускала
+		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
+		//алгоритм крускала
+		int cost = Kruscal(GRAPH, spanning_tree);
+		//печать остова и его веса
+		stream_out << "Минимальное остовное дерево: " << endl << "[";
+		for (list<int*>* current = spanning_tree; current; current = current->next)
+		{
+			stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ", " << current->Ver[2] << ")";
+			if (current->next)
+				stream_out << ", ";
+		}
+		stream_out <<"]" << endl << "Вес миимального остова: " << cost << endl;
+		break;
+	}
+
 }
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -1085,4 +1136,56 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 	{
 		(*is_cut)[Ver - 1] = true;
 	}
+}
+int Kruscal(Graph GRAPH, list<int*>* spanning_tree)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	spanning_tree->Ver = 0;
+	int length = 0;//количество вершин
+	for (list<int[3]>* current = edgelist; current; current = current->next)//нахождение количества вершин(максимальная вершина в списке ребер)
+	{
+		if (length < current->Ver[0])
+			length = current->Ver[0];
+		if (length < current->Ver[1])
+			length = current->Ver[1];
+	}
+	//сортировка ребер
+	edgelist->quickSort(&edgelist, 2);
+
+	vector<int> tree_id(length);//вектор принадлежности вершины некоторой компоненте
+	int cost = 0;//вес остова
+	//изначально каждая вершина принадлежит отдельной компоненте
+	for (int i = 0; i < length; i++)
+	{
+		tree_id[i] = i;
+	}
+	//обход по ребрам (нахождение остова)
+	for (list<int[3]>* current = edgelist; current; current = current->next)
+	{
+		int a = current->Ver[0] - 1;//1 вершина
+		int b = current->Ver[1] - 1;//2 вершина
+		int l = current->Ver[2];//вес ребра
+		if (tree_id[a] != tree_id[b])//вершины из разных компонент
+		{
+			cost += l;//увеличение веса остова
+			if (spanning_tree->Ver)//добавление ребра в остов
+			{
+				int* edge = new int[3] { a + 1, b + 1, l };
+				spanning_tree->add(edge);
+			}
+			else//добавление первого ребра в остов
+			{
+				int* edge = new int[3] { a + 1, b + 1, l };
+				spanning_tree->Ver = edge;
+			}
+			int old_id = tree_id[b];
+			int new_id = tree_id[a];
+			for (int j = 0; j < length; j++)//объединение компонент
+			{
+				if (tree_id[j] == old_id)
+					tree_id[j] = new_id;
+			}
+		}
+	}
+	return cost;
 }
