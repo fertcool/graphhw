@@ -5,6 +5,7 @@
 #include <fstream>
 #include <queue>
 #include <stack>
+#include <set>
 
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
@@ -336,7 +337,7 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 	return list_out;
 
 };
-
+//копирование графа
 Graph& Graph::operator=(const Graph& graph)
 {
 	matrix = graph.matrix;
@@ -953,7 +954,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			for (int j = 0; j < length; j++)
 			{
 				if ((*matrix)[i][j])
-					(*matrix)[j][i] = 1;
+					(*matrix)[j][i] = (*matrix)[i][j];
 			}
 		}
 		Graph GraphCor(matrix);
@@ -962,6 +963,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	switch (num_alg)
 	{
 	case 1://алгоритм крускала
+	{
 		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
 		//алгоритм крускала
 		int cost = Kruscal(GRAPH, spanning_tree);
@@ -973,9 +975,31 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			if (current->next)
 				stream_out << ", ";
 		}
-		stream_out <<"]" << endl << "Вес миимального остова: " << cost << endl;
+		stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
+		break; 
+	}
+	case 2://алгоритм прима
+	{
+		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
+		int cost = Prim(GRAPH, spanning_tree);
+		
+		//печать остова и его веса
+		stream_out << "Минимальное остовное дерево: " << endl << "[";
+		for (list<int*>* current = spanning_tree; current; current = current->next)
+		{
+			stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ", " << current->Ver[2] << ")";
+			if (current->next)
+				stream_out << ", ";
+		}
+		stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
+		
 		break;
 	}
+	
+
+	}
+	
+
 
 }
 //*-------------- Алгоритмы ------------------*//
@@ -1141,14 +1165,7 @@ int Kruscal(Graph GRAPH, list<int*>* spanning_tree)
 {
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
 	spanning_tree->Ver = 0;
-	int length = 0;//количество вершин
-	for (list<int[3]>* current = edgelist; current; current = current->next)//нахождение количества вершин(максимальная вершина в списке ребер)
-	{
-		if (length < current->Ver[0])
-			length = current->Ver[0];
-		if (length < current->Ver[1])
-			length = current->Ver[1];
-	}
+	int length = edgelist->length(edgelist);
 	//сортировка ребер
 	edgelist->quickSort(&edgelist, 2);
 
@@ -1188,4 +1205,63 @@ int Kruscal(Graph GRAPH, list<int*>* spanning_tree)
 		}
 	}
 	return cost;
+}
+int Prim(Graph GRAPH, list<int*>*& spanning_tree)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	spanning_tree->Ver = 0;
+	int length = edgelist->length(edgelist);//количество вершин
+	int mst_weight = 0;//текущий вес остова
+	priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> q;//приоитетная очередь ребер смежных текущему остову
+	//q.first - вес ребра
+	//q.second.first - 1 вершина ребра
+	//q.second.second - 2 вершина ребра
+	vector<bool> used(length);//вектор маркеров посещенности вершин
+	q.push({ 0, {0, 0 } });//начинаем с 1 вершины
+	while (!q.empty())
+	{
+		pair<int, pair<int, int>> c = q.top();//винимаем из очереди ребро с минимальным весом
+		q.pop();
+
+		int dst = c.first;//вес нового ребра в остове
+		int v = c.second.second;//вершина 
+
+		if (used[v]) //вершина уже добавлена в остов
+		{      
+			continue;
+		}
+
+		used[v] = true;//вершина v в остове
+		mst_weight += dst;//увеличиваем вес остова
+
+		if (spanning_tree->Ver)//добавление ребра в остов
+		{
+			int* edge = new int[3] { c.second.first+1, v+1, dst };
+			spanning_tree->add(edge);
+		}
+		else//добавление первого ребра в остов
+		{
+			int* edge = new int[3] { c.second.first + 1, v + 1, dst};
+			spanning_tree->Ver = edge;
+		}
+
+		list<int[3]>* edges = GRAPH.list_of_edges(v + 1);
+		for (list<int[3]>* cur = edges; cur; cur = cur->next)//добавление в очередь новых ребер смежных с новой вершиной в остове V
+		{
+			pair<int, int> e;
+			int u = cur->Ver[1] - 1;
+			int len_vu = cur->Ver[2];
+
+			if (!used[u])
+			{
+				q.push({ len_vu, {v,u} });//добавление в очередь нового ребра
+			}
+		}
+	}
+	//удаление лишней 1 вершины из списка ребер остова
+	list<int*>* next = spanning_tree->next;
+	delete spanning_tree;
+	spanning_tree = next;
+
+	return mst_weight;
 }

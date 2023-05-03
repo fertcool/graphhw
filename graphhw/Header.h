@@ -29,6 +29,31 @@ struct list
 		}
 		return length;
 	}
+	int length(list<int[3]>* edgelist) 
+	{
+		int length = 0;//количество вершин
+		for (list<int[3]>* current = edgelist; current; current = current->next)//нахождение количества вершин(максимальная вершина в списке ребер)
+		{
+			if (length < current->Ver[0])
+				length = current->Ver[0];
+			if (length < current->Ver[1])
+				length = current->Ver[1];
+		}
+		return length;
+	}
+	int length(list<list<int>*>* adjlist)
+	{
+		int length = 0;
+		for (list<list<int>*>* cur = adjlist; adjlist; cur = cur->next)
+		{
+			for (list<int>* sub_cur = cur->Ver; sub_cur; sub_cur = sub_cur->next)
+			{
+				if (sub_cur->Ver > length)
+					length = sub_cur->Ver;
+			}
+		}
+		return length;
+	}
 	//ф-я удаления последнего элемента
 	void del()
 	{
@@ -175,7 +200,7 @@ public:
 	list<int[3]>* list_of_edges(bool copy = true); //возвращает список ребер
 	list<int[3]>* list_of_edges(int Ver); //возвращает список всех ребер инцидентных Ver
 	bool is_directed(); //граф ориентированный или нет
-	Graph& operator=(const Graph& graph);
+	Graph& operator=(const Graph& graph);//копирование графа
 	
 };
 //*-------------- Ф-ии Парсинга ------------------*//
@@ -218,3 +243,4 @@ void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int
 void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int Ver, int timer, vector<int>* tin, vector<int>* tup, int back = 0);
 //алгоритм Крускала
 int Kruscal(Graph GRAPH, list<int*>* spanning_tree);
+int Prim(Graph GRAPH, list<int*>*& spanning_tree);
