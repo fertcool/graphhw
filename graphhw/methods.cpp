@@ -6,7 +6,7 @@
 #include <queue>
 #include <stack>
 #include <set>
-
+#include <chrono>
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
 int Graph::weight(int Ver1, int Ver2) 
@@ -655,6 +655,20 @@ void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out
 	stream_out << "]" << endl;
 	
 }
+//печать остовного дерева
+void print_spanningtree(list<int*>* spanning_tree, ostream& stream_out, int cost)
+{
+	//печать остова и его веса
+	stream_out << "Минимальное остовное дерево: " << endl << "[";
+	for (list<int*>* current = spanning_tree; current; current = current->next)
+	{
+		stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ", " << current->Ver[2] << ")";
+		if (current->next)
+			stream_out << ", ";
+	}
+	stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
+	
+}
 //*-------------- Ф-ии Программ ------------------*//
 
 void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
@@ -968,35 +982,55 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		//алгоритм крускала
 		int cost = Kruscal(GRAPH, spanning_tree);
 		//печать остова и его веса
-		stream_out << "Минимальное остовное дерево: " << endl << "[";
-		for (list<int*>* current = spanning_tree; current; current = current->next)
-		{
-			stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ", " << current->Ver[2] << ")";
-			if (current->next)
-				stream_out << ", ";
-		}
-		stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
+		print_spanningtree(spanning_tree, stream_out, cost);
 		break; 
 	}
 	case 2://алгоритм прима
 	{
 		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
 		int cost = Prim(GRAPH, spanning_tree);
-		
 		//печать остова и его веса
-		stream_out << "Минимальное остовное дерево: " << endl << "[";
-		for (list<int*>* current = spanning_tree; current; current = current->next)
-		{
-			stream_out << "(" << current->Ver[0] << ", " << current->Ver[1] << ", " << current->Ver[2] << ")";
-			if (current->next)
-				stream_out << ", ";
-		}
-		stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
-		
+		print_spanningtree(spanning_tree, stream_out, cost);
 		break;
 	}
-	
+	case 3://алгоритм ,борувки
+	{
+		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
+		int cost = Boruvka(GRAPH, spanning_tree);
+		//печать остова и его веса
+		print_spanningtree(spanning_tree, stream_out, cost);
+		break;
+		
+	}
+	case 4:
+	{
+		list<int*>* spanning_tree = new list<int*>;//ребра остовного дерева
+		stream_out << "/*--------------Алгоритм Крускала--------------*/" << endl;
+		auto begin = chrono::steady_clock::now();//старт счётчика тактов
+		int cost = Kruscal(GRAPH, spanning_tree);
+		auto end = chrono::steady_clock::now();//стоп счётчика тактов
+		auto elapsed_micros = chrono::duration_cast<chrono::microseconds>(end - begin);//получаем время работы
+		print_spanningtree(spanning_tree, stream_out, cost);
+		stream_out << "Время Работы (мкс): " << elapsed_micros.count() << endl;
 
+		spanning_tree = new list<int*>;//ребра остовного дерева
+		stream_out << "/*--------------Алгоритм Прима--------------*/" << endl;
+		begin = chrono::steady_clock::now();//старт счётчика тактов
+		cost = Prim(GRAPH, spanning_tree);
+		end = chrono::steady_clock::now();//стоп счётчика тактов
+		elapsed_micros = chrono::duration_cast<chrono::microseconds>(end - begin);//получаем время работы
+		print_spanningtree(spanning_tree, stream_out, cost);
+		stream_out << "Время Работы (мкс): " << elapsed_micros.count() << endl;
+
+		spanning_tree = new list<int*>;//ребра остовного дерева
+		stream_out << "/*--------------Алгоритм Борувки--------------*/" << endl;
+		begin = chrono::steady_clock::now();//старт счётчика тактов
+		cost = Boruvka(GRAPH, spanning_tree);
+		end = chrono::steady_clock::now();//стоп счётчика тактов
+		elapsed_micros = chrono::duration_cast<chrono::microseconds>(end - begin);//получаем время работы
+		print_spanningtree(spanning_tree, stream_out, cost);
+		stream_out << "Время Работы (мкс): " << elapsed_micros.count() << endl;
+	}
 	}
 	
 
@@ -1264,4 +1298,130 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 	spanning_tree = next;
 
 	return mst_weight;
+}
+int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
+{
+	spanning_tree->Ver = 0;
+	list<int[3]>* edgelist = GRAPH.list_of_edges();
+	int length = edgelist->length(edgelist);
+	vector<int> parent(length);
+
+	// Массив для хранения индекса самого дешевого ребра
+	// подмножества. Он хранит [u,v,w] для каждого компонента
+	vector<int> rank(length);
+	vector<vector<int>> cheapest(length, vector<int>(3, -1));
+
+	// Изначально существует V разных деревьев.
+	// Наконец, останется одно дерево, которое будет MST
+	int numTrees = length;
+	int MSTweight = 0;//вес минимального остова
+
+	// Создать V подмножеств с отдельными элементамиts
+	for (int node = 0; node < length; node++) 
+	{
+		parent[node] = node;
+		rank[node] = 0;
+	}
+
+	// Продолжайте комбинировать компоненты (или наборы) до тех пор, пока все
+	// компоненты не будут объединены в один MST
+	while (numTrees > 1) {
+
+		// Пройдитесь по всем ребрам и обновите
+		// самый дешевый из всех компонентов
+
+		for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
+		{
+
+			// Найти компоненты (или наборы) двух углов
+			// текущего края
+			int u = cur->Ver[0]-1; 
+			int v = cur->Ver[1]-1;
+			int	w = cur->Ver[2];
+			int set1 = find(parent, u),
+				set2 = find(parent, v);
+
+			// Если два угла текущего ребра принадлежат
+			// тот же набор, игнорируйте текущее ребро. Еще раз проверьте
+			// если текущий край ближе к предыдущему
+			// самые дешевые ребра set1 и set2
+			if (set1 != set2) {
+				if (cheapest[set1][2] == -1 || cheapest[set1][2] > w) 
+				{
+					cheapest[set1] = { u, v, w };
+				}
+				if (cheapest[set2][2] == -1 || cheapest[set2][2] > w) 
+				{
+					cheapest[set2] = { u, v, w };
+				}
+			}
+		}
+
+		// Рассмотрим выбранные выше самые дешевые ребра и
+		// добавьте их в MST
+		for (int node = 0; node < length; node++) {
+
+			// Проверьте, существует ли самый дешевый вариант для текущего набора
+			if (cheapest[node][2] != -1) {
+				int u = cheapest[node][0],
+					v = cheapest[node][1],
+					w = cheapest[node][2];
+				int set1 = find(parent, u),
+					set2 = find(parent, v);
+				if (set1 != set2) 
+				{
+					MSTweight += w;
+					unionSet(parent, rank, set1, set2);
+					if (spanning_tree->Ver)//добавление ребра в остов
+					{
+						int* edge = new int[3] { u+1, v+1, w };
+						spanning_tree->add(edge);
+					}
+					else//добавление первого ребра в остов
+					{
+						int* edge = new int[3] { u+1, v+1, w};
+						spanning_tree->Ver = edge;
+					}
+					numTrees--;
+				}
+			}
+		}
+		for (int node = 0; node < length; node++) {
+
+			// сброс самого дешевого массива
+			cheapest[node][2] = -1;
+		}
+	}
+	return MSTweight;
+}
+// Вспомогательная функция для поиска набора элементов i
+// (используется метод сжатия пути)
+int find(vector<int>& parent, int i)
+{
+	if (parent[i] == i) {
+		return i;
+	}
+	return find(parent, parent[i]);
+}
+// Функция, которая выполняет объединение двух наборов x и y
+// (использует объединение по рангу)
+void unionSet(vector<int>& parent, vector<int>& rank, int x, int y)
+{
+	int xroot = find(parent, x);
+	int yroot = find(parent, y);
+
+	// Присоедините дерево меньшего ранга к корню дерева высокого ранга
+	// дерево (объединение по рангу)
+	if (rank[xroot] < rank[yroot]) {
+		parent[xroot] = yroot;
+	}
+	else if (rank[xroot] > rank[yroot]) {
+		parent[yroot] = xroot;
+	}
+	// Если ранги одинаковы, то сделайте единицу корневой и
+	// увеличьте ее ранг на единицу
+	else {
+		parent[yroot] = xroot;
+		rank[xroot]++;
+	}
 }

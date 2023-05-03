@@ -222,6 +222,8 @@ template<typename T>
 void print_vector(vector<T>* vec, ostream& stream_out);
 //печать компонент связности
 void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out, bool is_directed, bool strong_comp);
+//печать остовного дерева
+void print_spanningtree(list<int*>* spanning_tree, ostream& stream_out, int cost);
 
 //*-------------- Ф-ии Программ ------------------*//
 void first_task(int argc, char* argv[],Graph GRAPH, ostream& stream_out);
@@ -244,3 +246,6 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 //алгоритм Крускала
 int Kruscal(Graph GRAPH, list<int*>* spanning_tree);
 int Prim(Graph GRAPH, list<int*>*& spanning_tree);
+int Boruvka(Graph GRAPH, list<int*>*& spanning_tree);
+int find(vector<int>& parent, int i);
+void unionSet(vector<int>& parent, vector<int>& rank, int x, int y);
