@@ -1078,7 +1078,45 @@ void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	stream_out << "]" << endl;
 
 }
+void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	int num_alg = 0;
+	if (exist_key(argc, argv, "-d"))
+		num_alg = 1;
+	if (exist_key(argc, argv, "-b"))
+		num_alg = 2;
+	if (exist_key(argc, argv, "-t"))
+		num_alg = 3;
+	if (!num_alg)
+	{
+		cout << "Не введен ключ алгоритма!!!" << endl;
+		return;
+	}
+	if (!(exist_key(argc, argv, "-n")))
+	{
+		cout << "Не введен ключ начальной вершины!!!" << endl;
+		return;
+	}
+	int begin_Ver = stoi(argv[exist_key(argc, argv, "-n")]);//конечная вершина
+	vector<int> answ;//массив расстояний
+	vector<int> prev;//массив восстановления пути
+	switch (num_alg)
+	{
+	case 1:
+		if (Dijkstra_Ford(GRAPH, answ, prev, begin_Ver) == -1)//алгоритм дейкстры, если -1, то есть отр. цикл
+		{
+			stream_out << "В графе есть отрицательный цикл!!!" << endl;
+			return;
+		}
+		int length = answ.size();//количество вершин
+		for (int i = 0; i < length; i++)
+		{
+			
+		}
+		break;
+	}
 
+}
 
 
 //*-------------- Алгоритмы ------------------*//
@@ -1480,6 +1518,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 	int length = edgelist->length(edgelist);//количество вершин
 	prev.resize(length);
 	answ.resize(length);
+	vector<int> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
 	for (int i = 0; i < length; i++)//заполняем массивы
 	{
 		answ[i] = INF;
@@ -1495,13 +1534,65 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 		q.pop();
 		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
 		int v = c.second;//рассматриваемая минимальная вершина
-
+		count_mark[v]++;//итерируем маркер обработки
+		if (count_mark[v] >= length) //если существует отр. цикл возвращаем -1
+		{
+			return -1;
+		}
 		if (answ[v] != dst) //пропускаем повтор
 		{
 			continue;
 		}
 		//цикл по всем смежным с v вершинами
 		for (list<int[3]>* cur = GRAPH.list_of_edges(v+1); cur; cur = cur->next)
+		{
+			int u = cur->Ver[1] - 1;//смежная с v вершина
+			int len_vu = cur->Ver[2];//вес ребра (v,u)
+
+			int n_dst = dst + len_vu;//новое расстояние
+			if (n_dst < answ[u]) //ослабление пути
+			{
+				answ[u] = n_dst;
+				prev[u] = v;//изменяем путь
+				q.push({ n_dst, u });//добавляем ребро с измененным растоянием в очередь
+			}
+		}
+	}
+	return answ[end_Ver - 1];
+}
+int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	int length = edgelist->length(edgelist);//количество вершин
+	prev.resize(length);
+	answ.resize(length);
+	vector<int> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
+	for (int i = 0; i < length; i++)//заполняем массивы
+	{
+		answ[i] = INF;
+		prev[i] = -1;
+	}
+	answ[begin_Ver - 1] = 0;//начальная вершина 0
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q; //приоритетная очередь с парой: вершина и расстояние до нее
+
+	q.push({ 0, begin_Ver - 1 });
+	while (!q.empty())
+	{
+		pair<int, int> c = q.top();
+		q.pop();
+		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
+		int v = c.second;//рассматриваемая минимальная вершина
+		count_mark[v]++;//итерируем маркер обработки
+		if (count_mark[v] >= length) //если существует отр. цикл возвращаем -1
+		{
+			return -1;
+		}
+		if (answ[v] != dst) //пропускаем повтор
+		{
+			continue;
+		}
+		//цикл по всем смежным с v вершинами
+		for (list<int[3]>* cur = GRAPH.list_of_edges(v + 1); cur; cur = cur->next)
 		{
 			int u = cur->Ver[1] - 1;//смежная с v вершина
 			int len_vu = cur->Ver[2];//вес ребра (v,u)

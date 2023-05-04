@@ -78,6 +78,10 @@ int main(int argc, char* argv[])
 				fifth_task(argc, argv, GRAPH, cout);
 			break;
 		case 6:
+			if (out)
+				sixth_task(argc, argv, GRAPH, file_out);
+			else
+				sixth_task(argc, argv, GRAPH, cout);
 			break;
 		case 7:
 			break;

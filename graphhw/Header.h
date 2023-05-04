@@ -74,7 +74,7 @@ struct list
 		current->next = new list<T>;
 		current->next->Ver = add_data;
 	}
-	//*-------------- Функции для сортировки ------------------*//
+	//*-------------- Функции для сортировки списка ------------------*//
 	list* getTail(list* cur)
 	{
 		while (cur != NULL && cur->next != NULL)
@@ -217,7 +217,9 @@ int num_programm(int argc, char* argv[]);
 ofstream create_file(string filename);
 
 //*-------------- Ф-ии Вывода ------------------*//
+//печать матрицы
 void print_matrix(vector<vector<int>>*matrix, ostream & stream_out);
+//печать вектора
 template<typename T>
 void print_vector(vector<T>* vec, ostream& stream_out);
 //печать компонент связности
@@ -231,6 +233,7 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -250,7 +253,9 @@ int Kruscal(Graph GRAPH, list<int*>* spanning_tree);
 int Prim(Graph GRAPH, list<int*>*& spanning_tree);
 //алгоритм Борувки
 int Boruvka(Graph GRAPH, list<int*>*& spanning_tree);
+//доп. функции для Борувки
 int find(vector<int>& parent, int i);
 void unionSet(vector<int>& parent, vector<int>& rank, int x, int y);
 //алгоритм дейкстры
-int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver);
+int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver = 1);
+int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver = 1);
