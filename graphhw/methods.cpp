@@ -955,7 +955,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		num_alg = 4;
 	if (!num_alg)
 	{
-		stream_out << "Не введен ключ алгоритма!!!" << endl;
+		cout << "Не введен ключ алгоритма!!!" << endl;
 		return;
 	}
 	if (GRAPH.is_directed())//если граф ориентированный создаем соотнесенный граф
@@ -1036,6 +1036,51 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 
 
 }
+void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	if (!(exist_key(argc, argv, "-n") && exist_key(argc, argv, "-d")))
+	{
+		cout << "Не введены ключи начальной и конечной вершин!!!" << endl;
+		return;
+	}
+	int begin_Ver = stoi(argv[exist_key(argc, argv, "-n")]);//начальная вершина
+	int end_Ver = stoi(argv[exist_key(argc, argv, "-d")]);//конечная вершина
+	vector<int> answ;//массив расстояний
+	vector<int> prev;//массив восстановления пути
+	//дейкстра
+	int dst = Dijkstra(GRAPH, answ, prev, begin_Ver, end_Ver);
+	if (dst == INF)//если пути нет
+	{
+		stream_out << "Нет пути между " << begin_Ver<<" и " << end_Ver << "." << endl;
+		return;
+	}
+	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрицы смежности для данного графа
+	
+	int curPrev = end_Ver - 1;//текущая вершина в массиве пути
+	vector<int*>* way = new vector<int*>;//вектор пути
+	while (curPrev != begin_Ver - 1)//заполняем вектор пути
+	{
+		int* pushed_edge = new int[3] {prev[curPrev] + 1, curPrev + 1, (*matrix)[prev[curPrev]][curPrev]};
+		way->push_back(pushed_edge);
+		curPrev = prev[curPrev];
+	}
+	reverse(way->begin(), way->end());//переворачиваем путь
+
+	//вывод кратчайшего пути и его расстояния
+	stream_out << "Путь между " << begin_Ver << " и " << end_Ver << ": " <<dst<< endl<<"[";
+	int length = way->size();
+	for (int i = 0; i < length; i++)
+	{
+		stream_out << "(" << (*way)[i][0] << ", " << (*way)[i][1] << ", " << (*way)[i][2] << ")";
+		if (i != length - 1)
+			stream_out << ", ";
+	}
+	stream_out << "]" << endl;
+
+}
+
+
+
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
@@ -1195,6 +1240,7 @@ void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int 
 		(*is_cut)[Ver - 1] = true;
 	}
 }
+//алгоритм крускала
 int Kruscal(Graph GRAPH, list<int*>* spanning_tree)
 {
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
@@ -1240,6 +1286,7 @@ int Kruscal(Graph GRAPH, list<int*>* spanning_tree)
 	}
 	return cost;
 }
+//алгоритм прима
 int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 {
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
@@ -1299,6 +1346,7 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 
 	return mst_weight;
 }
+//алгоритм борувки
 int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 {
 	spanning_tree->Ver = 0;
@@ -1333,18 +1381,18 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 		for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
 		{
 
-			// Найти компоненты (или наборы) двух углов
-			// текущего края
+			// Найти компоненты (или наборы) двух вершин
+			// текущего ребра
 			int u = cur->Ver[0]-1; 
 			int v = cur->Ver[1]-1;
 			int	w = cur->Ver[2];
 			int set1 = find(parent, u),
 				set2 = find(parent, v);
 
-			// Если два угла текущего ребра принадлежат
-			// тот же набор, игнорируйте текущее ребро. Еще раз проверьте
-			// если текущий край ближе к предыдущему
-			// самые дешевые ребра set1 и set2
+			// Если две вершины текущего ребра принадлежат
+			// тому же набору, игнорируйте текущее ребро. Еще раз проверьте
+			// если текущее ребро ближе к предыдущим
+			// самые дешевым ребрам set1 и set2
 			if (set1 != set2) {
 				if (cheapest[set1][2] == -1 || cheapest[set1][2] > w) 
 				{
@@ -1361,7 +1409,7 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 		// добавьте их в MST
 		for (int node = 0; node < length; node++) {
 
-			// Проверьте, существует ли самый дешевый вариант для текущего набора
+			// Проверьте, существует ли самый дешевый вариант для текущего набора(set)
 			if (cheapest[node][2] != -1) {
 				int u = cheapest[node][0],
 					v = cheapest[node][1],
@@ -1394,7 +1442,7 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 	}
 	return MSTweight;
 }
-// Вспомогательная функция для поиска набора элементов i
+// Вспомогательная функция для поиска set элемента i
 // (используется метод сжатия пути)
 int find(vector<int>& parent, int i)
 {
@@ -1403,7 +1451,7 @@ int find(vector<int>& parent, int i)
 	}
 	return find(parent, parent[i]);
 }
-// Функция, которая выполняет объединение двух наборов x и y
+// Функция, которая выполняет объединение двух set x и y
 // (использует объединение по рангу)
 void unionSet(vector<int>& parent, vector<int>& rank, int x, int y)
 {
@@ -1424,4 +1472,48 @@ void unionSet(vector<int>& parent, vector<int>& rank, int x, int y)
 		parent[yroot] = xroot;
 		rank[xroot]++;
 	}
+}
+//алгоритм Дейкстры
+int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	int length = edgelist->length(edgelist);//количество вершин
+	prev.resize(length);
+	answ.resize(length);
+	for (int i = 0; i < length; i++)//заполняем массивы
+	{
+		answ[i] = INF;
+		prev[i] = -1;
+	}
+	answ[begin_Ver - 1] = 0;//начальная вершина 0
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q; //приоритетная очередь с парой: вершина и расстояние до нее
+
+	q.push({ 0, begin_Ver-1 });
+	while (!q.empty())
+	{
+		pair<int, int> c = q.top();
+		q.pop();
+		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
+		int v = c.second;//рассматриваемая минимальная вершина
+
+		if (answ[v] != dst) //пропускаем повтор
+		{
+			continue;
+		}
+		//цикл по всем смежным с v вершинами
+		for (list<int[3]>* cur = GRAPH.list_of_edges(v+1); cur; cur = cur->next)
+		{
+			int u = cur->Ver[1] - 1;//смежная с v вершина
+			int len_vu = cur->Ver[2];//вес ребра (v,u)
+
+			int n_dst = dst + len_vu;//новое расстояние
+			if (n_dst < answ[u]) //ослабление пути
+			{
+				answ[u] = n_dst;
+				prev[u] = v;//изменяем путь
+				q.push({ n_dst, u });//добавляем ребро с измененным растоянием в очередь
+			}
+		}
+	}
+	return answ[end_Ver - 1];
 }

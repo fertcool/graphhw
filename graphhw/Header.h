@@ -18,7 +18,7 @@ struct list
 
 	}
 	
-	//ф-я нахождения длины списка
+	//ф-ии нахождения длины списка
 	int length()
 	{
 		int length = 0;
@@ -230,6 +230,7 @@ void first_task(int argc, char* argv[],Graph GRAPH, ostream& stream_out);
 void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -245,7 +246,11 @@ void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int
 void DFS_CUTVERTEXES(Graph GRAPH, vector<bool>* used, vector<bool>* is_cut, int Ver, int timer, vector<int>* tin, vector<int>* tup, int back = 0);
 //алгоритм Крускала
 int Kruscal(Graph GRAPH, list<int*>* spanning_tree);
+//алгоритм Прима
 int Prim(Graph GRAPH, list<int*>*& spanning_tree);
+//алгоритм Борувки
 int Boruvka(Graph GRAPH, list<int*>*& spanning_tree);
 int find(vector<int>& parent, int i);
 void unionSet(vector<int>& parent, vector<int>& rank, int x, int y);
+//алгоритм дейкстры
+int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver);
