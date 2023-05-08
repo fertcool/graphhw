@@ -1050,21 +1050,41 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		cout << "Не введен ключ начальной вершины!!!" << endl;
 		return;
 	}
-	int begin_Ver = stoi(argv[exist_key(argc, argv, "-n")]);//конечная вершина
+	int begin_Ver = stoi(argv[exist_key(argc, argv, "-n")]);//начальная вершина
 	vector<int> answ;//массив расстояний
-	vector<int> prev;//массив восстановления пути
+	vector<int> prev;//массив восстановления пути(в данной программе не нужен, только для работы дейкстры)
 	switch (num_alg)
 	{
 	case 1:
+		//запускаем модификацию форда для дейкстры
 		if (Dijkstra_Ford(GRAPH, answ, prev, begin_Ver) == -1)//алгоритм дейкстры, если -1, то есть отр. цикл
 		{
 			stream_out << "В графе есть отрицательный цикл!!!" << endl;
 			return;
 		}
+		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
+		//проверка на ребра отрицательного веса
+		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
+		{
+			if (cur->Ver[2] < 0)
+				negedge_exist = true;
+		}
+		if (!negedge_exist)
+			stream_out << "Граф не имеет ребер отрицательного веса." << endl;
+		else
+			stream_out << "Граф имеет ребра отрицательного веса." << endl;
+		stream_out << "Длины кратчайших путей:"<<endl;
 		int length = answ.size();//количество вершин
+		//вывод расстояний
 		for (int i = 0; i < length; i++)
 		{
-			
+			if (i + 1 != begin_Ver)
+			{
+				if (answ[i]!=INF)
+					stream_out << begin_Ver << " - "<<i+1<<": " << answ[i] << endl;
+				else
+					stream_out << begin_Ver << " - " << i + 1 << ": INF " << endl;
+			}
 		}
 		break;
 	}
@@ -1523,8 +1543,8 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 	int length = edgelist->length(edgelist);//количество вершин
 	prev.resize(length);
 	answ.resize(length);
-	vector<int> colored(length);
-	vector<bool> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
+	vector<bool> colored(length);
+	vector<int> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
 	for (int i = 0; i < length; i++)//заполняем массивы
 	{
 		answ[i] = INF;
