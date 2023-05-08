@@ -32,6 +32,9 @@ int main(int argc, char* argv[])
 		}
 
 	}
+	if (GRAPH.list_of_edges()->length()==1)//если данные не введены
+		return 0;
+	list<int[3]>* dsjdsj = GRAPH.list_of_edges();
 	
 
 

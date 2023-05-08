@@ -66,6 +66,25 @@ struct list
 		delete current_before->next;
 		current_before->next = NULL;
 	}
+	void clear()
+	{
+		list* current = this;
+		list* boof;//буферный указатель для удаления
+		if (current->next == NULL) //если пуст
+		{
+			delete current;
+			current = new list;//создаем новый
+			return;
+		}
+		while (current)//цикл по элементам списка
+		{
+			boof = current;//запоминаем текущий
+			current = current->next;//делаем текущий следующим
+			delete boof;//удаляем текущий
+		}
+		delete current;//удаляем лишний элемент
+		current = new list;//создаем новый
+	}
 	//ф-я добавления в конец списка
 	void add(T add_data)
 	{
@@ -181,23 +200,23 @@ struct list
 class Graph
 {
 private:
-	list<list<int>*>* adjlist;
 	list<int[3]>* edgelist;
-	vector<vector<int>>* matrix;
 public:
 	inline Graph() {};
-	inline Graph(vector<vector<int>>* Matradj) { matrix = Matradj; };
+	inline Graph(vector<vector<int>>* Matradj) { edgelist = list_of_edges(Matradj); };
 	inline Graph(list<int[3]>* Edgel) { edgelist = Edgel; };
-	inline Graph(list<list<int>*>* Adjl) { adjlist = Adjl; };
+	inline Graph(list<list<int>*>* Adjl) { edgelist = list_of_edges(Adjl); };
 	Graph(string FPath, string FType);
 	~Graph(){};
 	int weight(int Ver1, int Ver2); //возвращает вес ребра по его вершинам
 	bool is_edge(int Ver1, int Ver2); //существует ли ребро по данным вершинам
-	vector<vector<int>>* adjacency_matrix(bool copy = true); //возвращает матрицу смежности
-	list<list<int>*>* adjacency_list(bool copy = true); //возвращает список смежности
+	vector<vector<int>>* adjacency_matrix();//возвращает матрицу смежности из списка ребер
+	list<list<int>*>* adjacency_list();//возвращает список сежности из списка ребер
+	list<int[3]>* list_of_edges();//возвращает копию списка ребер
+	list<int[3]>* list_of_edges(vector<vector<int>>* matrix);//возвращает список ребер из введенной матрицы смежности
+	list<int[3]>* list_of_edges(list<list<int>*>* adjlist);//возвращает список ребер из введенного списка смежности
 	list<int>* adjacency_list(int Ver); //возвращает список вершин смежных Ver
 	list<int>* adjacency_list_in(int Ver); //возвращает список вершин входящих в Ver
-	list<int[3]>* list_of_edges(bool copy = true); //возвращает список ребер
 	list<int[3]>* list_of_edges(int Ver); //возвращает список всех ребер инцидентных Ver
 	bool is_directed(); //граф ориентированный или нет
 	Graph& operator=(const Graph& graph);//копирование графа

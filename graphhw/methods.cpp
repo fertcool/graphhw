@@ -11,9 +11,12 @@
 //возвращает вес ребра по его вершинам
 int Graph::weight(int Ver1, int Ver2) 
 {
-	if (!matrix)
-		adjacency_matrix(false);
-	return (*matrix)[Ver1-1][Ver2-1];
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
+	{
+		if (cur->Ver[0] == Ver1 && cur->Ver[1] == Ver2)
+			return cur->Ver[2];
+	}
+	return NULL;
 };
 
 //существует ли ребро по данным вершинам
@@ -27,8 +30,7 @@ bool Graph::is_edge(int Ver1, int Ver2)
 //граф ориентированный или нет
 bool Graph::is_directed() 
 {
-	if (!matrix)
-		adjacency_matrix(false);
+	vector<vector<int>>* matrix = adjacency_matrix();
 	int msize = matrix->size();
 	for (int i = 0; i < msize - 1; i++)//цикл по элементам выше главной диаганали
 	{
@@ -43,142 +45,49 @@ bool Graph::is_directed()
 };
 
 //возвращает матрицу смежности
-vector<vector<int>>* Graph::adjacency_matrix(bool copy)
+vector<vector<int>>* Graph::adjacency_matrix()
 {
-	if (matrix && copy)//возврат копии матрицы
+	//нахождение размера матрицы(максимальная вершина в списке ребер)
+	int h_matr = 0;
+	list<int[3]>* current = edgelist;
+	for (current; current; current = current->next)//нахождение размера матрицы(максимальная вершина в списке ребер)
 	{
-		vector<vector<int>>* matr_c;//копия матрицы
-		int h_matr = matrix->size();
-		matr_c = new vector<vector<int>>;
-		(*matr_c).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
-		{
-			(*matr_c)[i].resize(h_matr);
-		}
-		for (int i = 0; i < h_matr; i++)//копирование матрицы
-		{
-			for (int j = 0; j < h_matr; j++)
-			{
-				(*matr_c)[i][j] = (*matrix)[i][j];
-			}
-		}
-		return matr_c;
+		if (h_matr < current->Ver[0])
+			h_matr = current->Ver[0];
+		if (h_matr < current->Ver[1])
+			h_matr = current->Ver[1];
 	}
-	else if (matrix && !copy)//если нужно было только создать матрицу смежности без копии
-		return NULL;
-	if (edgelist)//заполнение матрицы из списка ребер
+
+	vector<vector<int>>* matrix = new vector<vector<int>>;
+	(*matrix).resize(h_matr);
+	for (int i = 0; i < h_matr; i++)//выделение памяти
 	{
-		//нахождение размера матрицы(максимальная вершина в списке ребер)
-		int h_matr = 0;
-		list<int[3]>* current = edgelist;
-		for (current; current; current = current->next)//нахождение размера матрицы(максимальная вершина в списке ребер)
-		{
-			if (h_matr < current->Ver[0])
-				h_matr = current->Ver[0];
-			if (h_matr < current->Ver[1])
-				h_matr = current->Ver[1];
-		}
-
-		matrix = new vector<vector<int>>;
-		(*matrix).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
-		{
-			(*matrix)[i].resize(h_matr);
-		}
-		for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
-		{
-			for (int j = 0; j < h_matr; j++)
-			{
-				(*matrix)[i][j] = 0;
-			}
-		}
-
-		current = edgelist;
-		for (current; current; current = current->next)//цикл заполнения матрицы
-		{
-			(*matrix)[current->Ver[0]-1][current->Ver[1]-1] = current->Ver[2];
-		}
-		return adjacency_matrix(copy);
+		(*matrix)[i].resize(h_matr);
 	}
-	if (adjlist)//заполнение матрицы из списка смежности
+	for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
 	{
-
-		int h_matr = adjlist->length();//длина матрицы
-
-		matrix = new vector<vector<int>>;
-		(*matrix).resize(h_matr);
-		for (int i = 0; i < h_matr; i++)//выделение памяти
+		for (int j = 0; j < h_matr; j++)
 		{
-			(*matrix)[i].resize(h_matr);
+			(*matrix)[i][j] = 0;
 		}
-
-		for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
-		{
-			for (int j = 0; j < h_matr; j++)
-			{
-				(*matrix)[i][j] = 0;
-			}
-		}
-
-		list<list<int>*>* current = adjlist;
-		int i = 0;
-		for (current; current; current = current->next)//цикл заполнения матрицы
-		{
-			list<int>* subcurrent = current->Ver;
-			for (subcurrent; subcurrent; subcurrent = subcurrent->next)
-			{
-				(*matrix)[i][subcurrent->Ver-1] = 1;
-			}
-			i++;
-		}
-		return adjacency_matrix(copy);
 	}
-	return NULL;
-};
+
+	current = edgelist;
+	for (current; current; current = current->next)//цикл заполнения матрицы
+	{
+		(*matrix)[current->Ver[0] - 1][current->Ver[1] - 1] = current->Ver[2];
+	}
+
+	return matrix;
+
+}
 
 //возвращает список смежности
-list<list<int>*>* Graph::adjacency_list(bool copy)
+list<list<int>*>* Graph::adjacency_list()
 {
-	if (adjlist && copy)//возврат копии списка смежности
-	{
-		list<list<int>*>* list_adj_c = new list<list<int>*>; //копия списка
-		list_adj_c->Ver = new list<int>;
-		list<list<int>*>* current_c = list_adj_c; //текущая вершина в копии списка
-		list<list<int>*>* current = adjlist; //текущая вершина в обычном списке
-		int length = adjlist->length();
-		for (int i = 0; i < length ; i++)//цикл по вершинам
-		{
-
-			int length_subl = current->Ver->length();//длина подсписка (количество смежных вершин j с текущей вершиной i)
-			list<int>* current_c_subl = current_c->Ver;//текущая вершина j в копии списка смежных вершин с текущей i
-			list<int>* current_subl = current->Ver;//текущая вершина j в обычном списке смежная с текущей i
-			for (int j = 0; j < length_subl; j++)//цикл по смежным вершинам j с текущей i
-			{
-				current_c_subl->Ver = current_subl->Ver;//копирование
-				if (j != length_subl - 1)//создание следующего элемента в копии списка смежных вершин с текущей i
-				{
-					current_c_subl->next = new list<int>;
-					current_c_subl = current_c_subl->next;//итерация
-					current_subl = current_subl->next;
-				}
-			}
-			if (i != length - 1)//создание следующего элемента в копии списка 
-			{
-				current_c->next = new list<list<int>*>;
-				current_c->next->Ver = new list<int>;
-				current_c = current_c->next;//итерация
-				current = current->next;
-			}
-
- 		}
-		return list_adj_c;
-	}
-	else if (adjlist && !copy)//если нужно было только создать список смежности (без копирования)
-		return NULL;
-	if (!matrix)//создание матрицы смежности
-		adjacency_matrix(false);
+	vector<vector<int>>* matrix = adjacency_matrix();
 	int lsize = matrix->size();//размер списка (матрицы)
-	adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
+	list<list<int>*>* adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
 	adjlist->Ver = new list<int>; //выделение памяти под список вершин
 	list<list<int>*>* current = adjlist;
 	for (int i = 0; i < lsize; i++)
@@ -199,14 +108,13 @@ list<list<int>*>* Graph::adjacency_list(bool copy)
 		current = current->next;
 	}
 	adjlist->del();//удаляем лишний элемент
-	return adjacency_list(copy);
+	return adjlist;
 };
 
 //возвращает список вершин смежных Ver
 list<int>* Graph::adjacency_list(int Ver)
 {
-	if (!adjlist)//сохдание списка смежности
-		adjacency_list(false);
+	list<list<int>*>* adjlist = adjacency_list();
 
 	list<int>* adjlist_c = new list<int>;//копия списка смежных вершин
 	int init = adjlist_c->Ver;//изначальный мусор в списке
@@ -233,8 +141,9 @@ list<int>* Graph::adjacency_list(int Ver)
 //возвращает список вершин входящих в Ver
 list<int>* Graph::adjacency_list_in(int Ver)
 {
-	if (!matrix)//сохдание списка смежности
-		adjacency_matrix(false);
+	//со3дание списка смежности
+	vector<vector<int>>* matrix = adjacency_matrix();
+
 	list<int>* adjlistin_c = new list<int>;//копия списка смежных вершин
 	int init = adjlistin_c->Ver;//изначальный мусор в списке
 	list<int>* current_c = adjlistin_c; // текущая вершина в копии списка
@@ -259,16 +168,15 @@ list<int>* Graph::adjacency_list_in(int Ver)
 	return adjlistin_c;
 }
 
-//возвращает список ребер
-list<int[3]>* Graph::list_of_edges(bool copy)
+//возвращает копию списка ребер
+list<int[3]>* Graph::list_of_edges()
 {
-	if (edgelist && copy)//возврат копии списка ребер
-	{
-		list<int[3]>* edgelist_c = new list<int[3]>;//копия списка ребер
-		list<int[3]>* current_c = edgelist_c;//текущее ребро в копии
-		list<int[3]>* current = edgelist;//текущее ребро в основном списке
-		int length = edgelist->length();//длина списка ребер
-		for (int i = 0; i < length; i++)//цикл копирования
+	//возврат копии списка ребер
+	list<int[3]>* edgelist_c = new list<int[3]>;//копия списка ребер
+	list<int[3]>* current_c = edgelist_c;//текущее ребро в копии
+	list<int[3]>* current = edgelist;//текущее ребро в основном списке
+	int length = edgelist->length();//длина списка ребер
+	for (int i = 0; i < length; i++)//цикл копирования
 		{
 			current_c->Ver[0] = current->Ver[0];
 			current_c->Ver[1] = current->Ver[1];//копирование
@@ -280,13 +188,14 @@ list<int[3]>* Graph::list_of_edges(bool copy)
 				current = current->next;
 			}
 		}
-		return edgelist_c;
-	}
-	else if (edgelist && !copy)
-		return NULL;
-		
-	if (!matrix)//создание матрицы смежности
-		adjacency_matrix(false);
+	
+	return edgelist_c;
+	
+
+};
+list<int[3]>* Graph::list_of_edges(vector<vector<int>>* matrix)
+{
+	
 	int lsize = matrix->size();//размер списка (матрицы)
 	edgelist = new list<int[3]>;//выделенеи памяти для ребра
 	list<int[3]>* current = edgelist; //текущее ребро
@@ -305,33 +214,64 @@ list<int[3]>* Graph::list_of_edges(bool copy)
 		}
 	}
 	edgelist->del();
-	return list_of_edges(copy);
+	return list_of_edges();
+}
 
-};
+list<int[3]>* Graph::list_of_edges(list<list<int>*>* adjlist)
+{
+	int h_matr = adjlist->length();//длина матрицы
 
+	vector<vector<int>>* matrix = new vector<vector<int>>;
+	(*matrix).resize(h_matr);
+	for (int i = 0; i < h_matr; i++)//выделение памяти
+	{
+		(*matrix)[i].resize(h_matr);
+	}
+
+	for (int i = 0; i < h_matr; i++)//заполнение матрицы 0
+	{
+		for (int j = 0; j < h_matr; j++)
+		{
+			(*matrix)[i][j] = 0;
+		}
+	}
+
+	list<list<int>*>* current = adjlist;
+	int i = 0;
+	for (current; current; current = current->next)//цикл заполнения матрицы
+	{
+		list<int>* subcurrent = current->Ver;
+		for (subcurrent; subcurrent; subcurrent = subcurrent->next)
+		{
+			(*matrix)[i][subcurrent->Ver - 1] = 1;
+		}
+		i++;
+	}
+	//возврат списка ребер по полученной из списка смежности матрицы
+	return list_of_edges(matrix);
+}
 //возвращает список всех ребер иcходящих из Ver
 list<int[3]>* Graph::list_of_edges(int Ver)
 {
-	if (!matrix)//создание матрицы смежности
-		adjacency_matrix(false);
+	
 	list<int[3]>* list_out = new list<int[3]>;//выделение памяти для списка исходящих ребер
 	int init = list_out->Ver[0];//изначальный мусор в списке
 	list<int[3]>* current_out = list_out;//текущее ребро, исходящее из Ver
-	int lmatr = matrix->size();//размер матрицы смежности
 	
-	for (int i = 0; i < lmatr; i++)//цикл просмотра смежных с Ver вершин и добавления исходящего ребра в список ребер
+	
+	for (list<int[3]>* cur = edgelist; cur;cur = cur->next)//цикл просмотра смежных с Ver вершин и добавления исходящего ребра в список ребер
 	{
-		if ((*matrix)[Ver - 1][i])
+		if (cur->Ver[0]==Ver)
 		{
 			current_out->Ver[0] = Ver;//добавление 1 вершины
-			current_out->Ver[1] = i + 1;//добавление исходящей вершины
-			current_out->Ver[2] = (*matrix)[Ver - 1][i];//добавление веса ребра
+			current_out->Ver[1] = cur->Ver[1];//добавление исходящей вершины
+			current_out->Ver[2] = cur->Ver[2];//добавление веса ребра
 
 			current_out->next = new list<int[3]>;//выделение памяти
 			current_out = current_out->next;//итерация
 		}
 	}
-	list_out->del();
+	list_out->del();//удаление лишнего элемента
 	if (list_out->Ver[0] == init)//если список вершин пуст
 		return NULL;
 	return list_out;
@@ -340,9 +280,7 @@ list<int[3]>* Graph::list_of_edges(int Ver)
 //копирование графа
 Graph& Graph::operator=(const Graph& graph)
 {
-	matrix = graph.matrix;
 	edgelist = graph.edgelist;
-	adjlist = graph.adjlist;
 	return *this;
 }
 
@@ -350,15 +288,18 @@ Graph& Graph::operator=(const Graph& graph)
 //конструктор
 Graph::Graph(string FPath, string FType)
 {
-	adjlist = NULL;
 	edgelist = NULL;
-	matrix = NULL;
+
 	if (FType == "-l")//ввод списка смежности
 	{
 		//реализовано без удаления лишних элементов//
 
 		ifstream fin(FPath); //поток по файлу
-		adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
+		if (!fin.is_open()) {
+			cout << "Файл с списком смежности не найден!!!" << endl;
+			return;
+		}
+		list<list<int>*>* adjlist = new list<list<int>*>; //выделение памяти под список списков вершин
 		adjlist->Ver = new list<int>; //выделение памяти под список вершин
 		list<list<int>*>* current = adjlist;//указатель на текущий список с вершинами
 		while (!fin.eof())
@@ -403,7 +344,7 @@ Graph::Graph(string FPath, string FType)
 			current = current->next;//итерация
 			
 		}
-		
+		edgelist = list_of_edges(adjlist);
 
 	}
 	if (FType == "-e")//ввод списка ребер
@@ -411,6 +352,10 @@ Graph::Graph(string FPath, string FType)
 		//реализовано без удаления лишних элементов//
 
 		ifstream fin(FPath); //поток по файлу
+		if (!fin.is_open()) {
+			cout << "Файл с списком ребер не найден!!!" << endl;
+			return;
+		}
 		edgelist = new list<int[3]>; //выделение памяти под список ребер
 
 		list<int[3]>* current = edgelist;//указатель на текущий ребро
@@ -451,6 +396,10 @@ Graph::Graph(string FPath, string FType)
 	{
 		//нахождение высоты матрицы
 		ifstream in_ch(FPath); //поток по файлу
+		if (!in_ch.is_open()) {
+			cout << "Файл с матрицей смежности не найден!!!" << endl;
+			return;
+		}
 		int h_matr = 0;
 		string str_ch;
 		string substr_ch;//проверочные переменные
@@ -466,7 +415,7 @@ Graph::Graph(string FPath, string FType)
 		string substr;
 		ifstream fin(FPath); //поток по файлу
 
-		matrix = new vector<vector<int>>;
+		vector<vector<int>>* matrix = new vector<vector<int>>;
 		(*matrix).resize(h_matr);
 		for (int i = 0; i < h_matr; i++)//выделение памяти
 		{
@@ -481,7 +430,9 @@ Graph::Graph(string FPath, string FType)
 			}
 		}
 
+		edgelist = list_of_edges(matrix);
 	}
+	
 }
 
 
@@ -751,47 +702,49 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			break;
 
 	}
+	if (is_directed)//выход из программы если граф ориентированный
+		return;
 	if (!inf)//выводим эксцентриситеты, если они существуют
 	{
 		stream_out << "Eccentricity:" << endl;
 		print_vector(exc, stream_out);
+
+
+		//нахождение диаметра
+		max = 0;
+		for (int i = 0; i < length; i++)
+		{
+			if ((*exc)[i] > max && (*exc)[i] != 0 && (*exc)[i] != INF)
+				max = (*exc)[i];
+		}
+		stream_out << "D = " << max << endl;
+		//нахождение радиуса
+		int min = INF;
+		for (int i = 0; i < length; i++)
+		{
+			if ((*exc)[i] < min && (*exc)[i] != 0 && (*exc)[i] != INF)
+				min = (*exc)[i];
+		}
+		stream_out << "R = " << min << endl;
+		//нахождение центральных вершин
+		vector<int>* Z = new vector<int>;
+		stream_out << "Z = ";
+		for (int i = 0; i < length; i++)
+		{
+			if ((*exc)[i] == min)
+				Z->push_back(i + 1);
+		}
+		print_vector(Z, stream_out);
+		//нахождение переферийных вершин
+		vector<int>* P = new vector<int>;
+		stream_out << "P = ";
+		for (int i = 0; i < length; i++)
+		{
+			if ((*exc)[i] == max)
+				P->push_back(i + 1);
+		}
+		print_vector(P, stream_out);
 	}
-	if (is_directed)//выход из программы если граф ориентированный
-		return;
-	//нахождение диаметра
-	max = 0;
-	for (int i = 0; i < length; i++)
-	{
-		if ((*exc)[i] > max)
-			max = (*exc)[i];
-	}
-	stream_out << "D = " << max<<endl;
-	//нахождение радиуса
-	int min = INF;
-	for (int i = 0; i < length; i++)
-	{
-		if ((*exc)[i] < min)
-			min = (*exc)[i];
-	}
-	stream_out << "R = " << min << endl;
-	//нахождение центральных вершин
-	vector<int>* Z = new vector<int>;
-	stream_out << "Z = ";
-	for (int i = 0; i < length; i++)
-	{
-		if ((*exc)[i] == min)
-			Z->push_back(i + 1);
-	}
-	print_vector(Z, stream_out);
-	//нахождение переферийных вершин
-	vector<int>* P = new vector<int>;
-	stream_out << "P = ";
-	for (int i = 0; i < length; i++)
-	{
-		if ((*exc)[i] == max)
-			P->push_back(i + 1);
-	}
-	print_vector(P, stream_out);
 }
 void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
@@ -1376,12 +1329,12 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 				q.push({ len_vu, {v,u} });//добавление в очередь нового ребра
 			}
 		}
+		
 	}
 	//удаление лишней 1 вершины из списка ребер остова
 	list<int*>* next = spanning_tree->next;
 	delete spanning_tree;
 	spanning_tree = next;
-
 	return mst_weight;
 }
 //алгоритм борувки
@@ -1556,6 +1509,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 				prev[u] = v;//изменяем путь
 				q.push({ n_dst, u });//добавляем ребро с измененным растоянием в очередь
 			}
+			
 		}
 	}
 	return answ[end_Ver - 1];
