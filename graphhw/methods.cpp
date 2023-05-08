@@ -1471,7 +1471,8 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 	int length = edgelist->length(edgelist);//количество вершин
 	prev.resize(length);
 	answ.resize(length);
-	vector<int> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
+	vector<int> colored(length);
+	vector<bool> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
 	for (int i = 0; i < length; i++)//заполняем массивы
 	{
 		answ[i] = INF;
@@ -1487,7 +1488,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 		q.pop();
 		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
 		int v = c.second;//рассматриваемая минимальная вершина
-		count_mark[v]++;//итерируем маркер обработки
+		count_mark[v] = count_mark[v]+1;//итерируем маркер обработки
 		if (count_mark[v] >= length) //если существует отр. цикл возвращаем -1
 		{
 			return -1;
@@ -1495,6 +1496,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 		if (answ[v] != dst) //пропускаем повтор
 		{
 			continue;
+
 		}
 		//цикл по всем смежным с v вершинами
 		for (list<int[3]>* cur = GRAPH.list_of_edges(v+1); cur; cur = cur->next)
@@ -1514,13 +1516,15 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 	}
 	return answ[end_Ver - 1];
 }
+//модификация форда для работы дейкстры с отрицательными весами
 int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver)
 {
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
 	int length = edgelist->length(edgelist);//количество вершин
 	prev.resize(length);
 	answ.resize(length);
-	vector<int> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
+	vector<int> colored(length);
+	vector<bool> count_mark(length);//вектора количества обработки вершины (если = length у какойто вершины, то существует отр. цикл)
 	for (int i = 0; i < length; i++)//заполняем массивы
 	{
 		answ[i] = INF;
@@ -1536,7 +1540,8 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 		q.pop();
 		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
 		int v = c.second;//рассматриваемая минимальная вершина
-		count_mark[v]++;//итерируем маркер обработки
+		colored[v] = true;//масиив меток окрашивания
+		count_mark[v] = count_mark[v] + 1;//итерируем маркер обработки
 		if (count_mark[v] >= length) //если существует отр. цикл возвращаем -1
 		{
 			return -1;
@@ -1544,8 +1549,10 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 		if (answ[v] != dst) //пропускаем повтор
 		{
 			continue;
+
 		}
 		//цикл по всем смежным с v вершинами
+		int count_changes = 0;//счётчик изменений расстояния (нашлось новое поменьше)
 		for (list<int[3]>* cur = GRAPH.list_of_edges(v + 1); cur; cur = cur->next)
 		{
 			int u = cur->Ver[1] - 1;//смежная с v вершина
@@ -1557,8 +1564,23 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 				answ[u] = n_dst;
 				prev[u] = v;//изменяем путь
 				q.push({ n_dst, u });//добавляем ребро с измененным растоянием в очередь
+				count_changes++;
 			}
+			else if (colored[v])//если новое расстояние больше, то делаем неокрашенными обе вершины
+			{
+				colored[v] = false;
+				colored[u] = false;
+			}
+
 		}
+		bool color_check = true;//проверка на то что все вершины окрашены
+		for (size_t i = 0; i < length; i++)
+		{
+			if (!colored[i])
+				color_check = false;
+		}
+		if (!count_changes && color_check)//если все вершины окрашены и изменения не происходят - выходим из алгоритма
+			break;
 	}
 	return answ[end_Ver - 1];
 }
