@@ -253,6 +253,7 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -283,3 +284,4 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 int Bellman_Ford(Graph GRAPH, vector<int>& answ, int begin_Ver);
 //алгоритм Левита
 int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);
+int Jonson(Graph GRAPH, vector<vector<int>>& answ);

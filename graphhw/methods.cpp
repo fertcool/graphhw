@@ -1165,7 +1165,40 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 
 }
+void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	vector<vector<int>> answ;
+	if (Jonson(GRAPH, answ) == -1)
+	{
+		stream_out << "В графе есть отрицательный цикл!!!" << endl;
+		return;
+	}
+	bool negedge_exist = false;//флаг существования ребер отрицательного веса\
+							//проверка на ребра отрицательного веса
+	for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
+	{
+		if (cur->Ver[2] < 0)
+			negedge_exist = true;
+	}
+	if (!negedge_exist)
+		stream_out << "Граф не имеет ребер отрицательного веса." << endl;
+	else
+		stream_out << "Граф имеет ребра отрицательного веса." << endl;
+	stream_out << "Длины кратчайших путей:" << endl;
+	int length = answ.size();
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < length; j++)
+		{
+			if (i == j || answ[i][j] == INF)
+				continue;
+			else
+				stream_out << i + 1 << " - " << j + 1 << ": " << answ[i][j] << endl;
+			
+		}
+	}
 
+}
 
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -1790,6 +1823,59 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 		}
 		//помещаем u в М0
 		M0.insert(u);
+	}
+	return 1;
+}
+int Jonson(Graph GRAPH, vector<vector<int>>& answ)
+{
+	
+	list<int[3]>* edgelist = GRAPH.list_of_edges();
+	int length = edgelist->length(edgelist);
+	answ.resize(length);
+	for (size_t i = 0; i < length; i++)//выделение памяти
+		answ[i].resize(length);
+	
+	//создание нового списка ребер с доп. вершиной
+	list<int[3]>* last = 0;
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
+		last = cur;
+	for (int i = 0; i < length; i++)
+	{
+		last->next = new list<int[3]>;
+		last = last->next;
+		last->Ver[0] = length + 1;
+		last->Ver[1] = i + 1;
+		last->Ver[2] = 0;
+		
+	}
+	
+	//создание новного графа с доп. вершиной
+	Graph GRAPH_PLUS1(edgelist);
+
+	vector<int> h(length+1);//вектор весовых меток
+	//запускаем беллмана форда для поиска расстояний от новой вершины до остальных
+	if (Bellman_Ford(GRAPH_PLUS1, h, length + 1) == -1)
+		return -1;
+	//удаляем новые ребра
+	for (size_t i = 0; i < length; i++)
+		edgelist->del();
+	
+	//пересчитываем веса ребер
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
+		cur->Ver[2] = cur->Ver[2] + h[cur->Ver[0] - 1] - h[cur->Ver[1] - 1];
+	
+	//GRAPH_PLUS1 - теперь без доп. ребер
+	//запускаем дейкстру для каждой вершины
+	for (size_t i = 0; i < length; i++)
+	{
+		vector<int> prev;
+		Dijkstra(GRAPH_PLUS1, answ[i], prev,i+1);
+		//изменяем расстояния согласно массиву меток
+		for (size_t j = 0; j < length; j++)
+		{
+			if(answ[i][j]!=INF)
+				answ[i][j] = answ[i][j] + h[j] - h[i];
+		}
 	}
 	return 1;
 }
