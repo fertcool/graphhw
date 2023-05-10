@@ -277,4 +277,9 @@ int find(vector<int>& parent, int i);
 void unionSet(vector<int>& parent, vector<int>& rank, int x, int y);
 //алгоритм дейкстры
 int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver = 1);
+//модификация форда дейкстры для работы с отриц. весами 
 int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, int end_Ver = 1);
+//алгоритм Беллмана-Форда
+int Bellman_Ford(Graph GRAPH, vector<int>& answ, int begin_Ver);
+//алгоритм Левита
+int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);

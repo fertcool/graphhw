@@ -7,6 +7,7 @@
 #include <stack>
 #include <set>
 #include <chrono>
+#include <map>
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
 int Graph::weight(int Ver1, int Ver2) 
@@ -1055,7 +1056,8 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<int> prev;//массив восстановления пути(в данной программе не нужен, только для работы дейкстры)
 	switch (num_alg)
 	{
-	case 1:
+	case 1://алгоритм дейкстры
+	{
 		//запускаем модификацию форда для дейкстры
 		if (Dijkstra_Ford(GRAPH, answ, prev, begin_Ver) == -1)//алгоритм дейкстры, если -1, то есть отр. цикл
 		{
@@ -1063,7 +1065,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			return;
 		}
 		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
-		//проверка на ребра отрицательного веса
+				//проверка на ребра отрицательного веса
 		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
 		{
 			if (cur->Ver[2] < 0)
@@ -1073,20 +1075,93 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			stream_out << "Граф не имеет ребер отрицательного веса." << endl;
 		else
 			stream_out << "Граф имеет ребра отрицательного веса." << endl;
-		stream_out << "Длины кратчайших путей:"<<endl;
+		stream_out << "Длины кратчайших путей:" << endl;
 		int length = answ.size();//количество вершин
 		//вывод расстояний
 		for (int i = 0; i < length; i++)
 		{
 			if (i + 1 != begin_Ver)
 			{
-				if (answ[i]!=INF)
-					stream_out << begin_Ver << " - "<<i+1<<": " << answ[i] << endl;
+				if (answ[i] != INF)
+					stream_out << begin_Ver << " - " << i + 1 << ": " << answ[i] << endl;
+				else
+					stream_out << begin_Ver << " - " << i + 1 << ": INF " << endl;
+			}
+		}
+		break; 
+	}
+	case 2://алгоритм беллмана форда
+	{
+		//запускаем алгоритм Беллмана-Форда
+		if (Bellman_Ford(GRAPH, answ, begin_Ver) == -1)//алгоритм дейкстры, если -1, то есть отр. цикл
+		{
+			stream_out << "В графе есть отрицательный цикл!!!" << endl;
+			return;
+		}
+		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
+						//проверка на ребра отрицательного веса
+		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
+		{
+			if (cur->Ver[2] < 0)
+				negedge_exist = true;
+		}
+		if (!negedge_exist)
+			stream_out << "Граф не имеет ребер отрицательного веса." << endl;
+		else
+			stream_out << "Граф имеет ребра отрицательного веса." << endl;
+		stream_out << "Длины кратчайших путей:" << endl;
+		int length = answ.size();//количество вершин
+		//вывод расстояний
+		for (int i = 0; i < length; i++)
+		{
+			if (i + 1 != begin_Ver)
+			{
+				if (answ[i] != INF)
+					stream_out << begin_Ver << " - " << i + 1 << ": " << answ[i] << endl;
 				else
 					stream_out << begin_Ver << " - " << i + 1 << ": INF " << endl;
 			}
 		}
 		break;
+	}
+	case 3://алгоритм левита
+	{
+		//запускаем алгоритм Беллмана-Форда
+		if (Bellman_Ford(GRAPH, answ, begin_Ver) == -1)//алгоритм дейкстры, если -1, то есть отр. цикл
+		{
+			stream_out << "В графе есть отрицательный цикл!!!" << endl;
+			return;
+		}
+		answ.clear();
+
+		//если нет отриц цикла запускаем левита
+		Levit(GRAPH, answ, begin_Ver);
+		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
+								//проверка на ребра отрицательного веса
+		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
+		{
+			if (cur->Ver[2] < 0)
+				negedge_exist = true;
+		}
+		if (!negedge_exist)
+			stream_out << "Граф не имеет ребер отрицательного веса." << endl;
+		else
+			stream_out << "Граф имеет ребра отрицательного веса." << endl;
+		stream_out << "Длины кратчайших путей:" << endl;
+		int length = answ.size();//количество вершин
+		//вывод расстояний
+		for (int i = 0; i < length; i++)
+		{
+			if (i + 1 != begin_Ver)
+			{
+				if (answ[i] != INF)
+					stream_out << begin_Ver << " - " << i + 1 << ": " << answ[i] << endl;
+				else
+					stream_out << begin_Ver << " - " << i + 1 << ": INF " << endl;
+			}
+		}
+		break;
+	}
 	}
 
 }
@@ -1603,4 +1678,118 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 			break;
 	}
 	return answ[end_Ver - 1];
+}
+//алгоритм беллмана форда
+int Bellman_Ford(Graph GRAPH, vector<int>& answ, int begin_Ver)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	int length = edgelist->length(edgelist);//количество вершин
+	answ.resize(length);
+	for (int i = 0; i < length; i++)//заполняем массив
+	{
+		answ[i] = INF;
+	}
+	answ[begin_Ver - 1] = 0;
+
+	//цикл |V|-1 раз
+	for (int i = 0; i < length-1; i++)
+	{
+		//цикл по всем ребрам
+		for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
+		{
+			//релаксация
+			if (answ[cur->Ver[1]-1] > answ[cur->Ver[0]-1] + cur->Ver[2])
+				answ[cur->Ver[1]-1] = answ[cur->Ver[0]-1] + cur->Ver[2];
+		}
+	}
+	//проверка на отриц. цикл
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
+	{
+		//релаксация
+		if (answ[cur->Ver[1]-1] > answ[cur->Ver[0]-1] + cur->Ver[2])
+			return -1;
+
+	}
+	return 1;
+}
+//алгоритм левита
+int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	int length = edgelist->length(edgelist);//количество вершин
+	answ.resize(length);
+
+	set<int> M0;//вершины, расстояние до которых уже вычислено
+	set<int> M1;//множество элементов в очереди
+	queue<int> M1_1;//основнаяя очередь на обработку
+	queue<int> M1_2;//срочная очередь
+	set<int> M2;//вершины, расстояние до которых еще не вычисленоы
+	for (int i = 0; i < length; i++)//заполняем массив
+	{
+		answ[i] = INF;
+	}
+	answ[begin_Ver - 1] = 0;
+
+	M1_1.push(begin_Ver);//добавляем начальную вершину в очередь
+	M1.insert(begin_Ver);
+	//заполянем множество необработанных вершин
+	for (int i = 0;i < length; i++)
+	{
+		M2.insert(i + 1);
+	}
+	M2.erase(begin_Ver);
+	//пока обе очереди не пусты
+	while (!M1.empty())
+	{
+		int u;//вершина, которую берем либо из M1 либо из M2
+		//если M2 пуста, то берем из M1
+		if (M1_2.empty())
+		{
+			u = M1_1.front();
+			M1_1.pop();
+			M1.erase(u);
+		}
+		//если M2 не пуста, то берем из неё
+		else
+		{
+			u = M1_2.front();
+			M1.erase(u);
+			M1_2.pop();
+		}
+		//цикл по ребрам uv c 3-мя случаями
+		for (list<int[3]>* cur = GRAPH.list_of_edges(u); cur; cur = cur->next)
+		{
+			//1 случай
+			//v принадлежит M2
+			if (M2.find(cur->Ver[1]) != M2.end())
+			{
+				//переводим v в конец очереди M1_1 и производим релаксацию ребра uv
+				M1_1.push(cur->Ver[1]);
+				M1.insert(cur->Ver[1]);
+				M2.erase(cur->Ver[1]);
+				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u-1] + cur->Ver[2]);
+
+			}
+			//2 случай
+			//v принадлежит M1
+			else if (M1.find(cur->Ver[1]) != M1.end())
+			{
+				//производим релаксацию ребра uv
+				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u-1] + cur->Ver[2]);
+			}
+			//3 случай
+			//v принадлежит M0 и answ[v]>answ[u]+w(uv)
+			else if (M0.find(cur->Ver[1]) != M0.end() && answ[cur->Ver[1] - 1] > answ[u - 1] + cur->Ver[2])
+			{
+				//v помещается в М1_2 и производится релаксация ребра uv
+				M1_2.push(cur->Ver[1]);
+				M1.insert(cur->Ver[1]);
+				M0.erase(cur->Ver[1]);
+				answ[cur->Ver[1] - 1] = answ[u - 1] + cur->Ver[2];
+			}
+		}
+		//помещаем u в М0
+		M0.insert(u);
+	}
+	return 1;
 }
