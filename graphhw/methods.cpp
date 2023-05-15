@@ -284,6 +284,88 @@ Graph& Graph::operator=(const Graph& graph)
 	edgelist = graph.edgelist;
 	return *this;
 }
+//*-------------- Функции Класса Map ------------------*//
+Map::Map(string FPath) 
+{
+	//нахождение высоты матрицы
+	ifstream in_ch(FPath); //поток по файлу
+	if (!in_ch.is_open()) {
+		cout << "Файл с картой!!!" << endl;
+		return;
+	}
+	int h_matr = 1;
+	string str_ch;
+	string substr_ch;//проверочные переменные
+	getline(in_ch, str_ch);
+	istringstream strstream_ch(str_ch); //поток по строке
+	while (!strstream_ch.eof()) //цикл считывания 
+	{
+		strstream_ch >> substr_ch;
+		if (!strstream_ch.eof())
+			h_matr++;
+	}
+	string str;
+	string substr;
+	ifstream fin(FPath); //поток по файлу
+
+	map = new vector<vector<int>>;
+	(*map).resize(h_matr);
+	for (int i = 0; i < h_matr; i++)//выделение памяти
+	{
+		(*map)[i].resize(h_matr);
+	}
+
+	for (int i = 0; i < h_matr; i++)
+	{
+		for (int j = 0; j < h_matr; j++)
+		{
+			fin >> (*map)[i][j];
+		}
+	}
+}
+int Map::GetHeight(Cell c) 
+{
+	if (c.x >= 0 && c.x < map->size() && c.y >= 0 && c.y < map->size())
+		return (*map)[c.x][c.y];
+	else
+		return -1;
+}
+list<pair<int,Cell>>* Map::neighbors(Cell c)
+{
+	list<pair<int,Cell>>* nbrs = new list<pair<int,Cell>>;
+	nbrs->Ver.second.x = -1;
+	for (int dx = -1; dx <= 1; dx++)
+	{
+		for (int dy = -1; dy <= 1; dy++)
+		{
+			if (!(dy || dx)||(dx == 1 && dy == 1)||(dx==-1&&dy==-1)|| (dx == 1 && dy == -1)|| (dx == -1 && dy == 1))
+				continue;
+			if (c.x + dx < 0 || c.x + dx >= map->size() || c.y + dy < 0 || c.y + dy >= map->size())
+				continue;
+			else
+			{
+				if (nbrs->Ver.second.x == -1)
+				{
+					nbrs->Ver.second.x = c.x + dx;
+					nbrs->Ver.second.y = c.y + dy;
+					nbrs->Ver.first = (*map)[c.x+dx][c.y+dy];
+				}
+				else
+				{
+					nbrs->add(pair<int, Cell>((*map)[c.x+dx][c.y+dy], Cell(c.x + dx, c.y + dy)));
+				}
+
+			}
+		}
+	}
+	return nbrs;
+}
+Cell& Cell::operator=(const Cell cell)
+{
+	x = cell.x;
+	y = cell.y;
+	return *this;
+}
 
 
 //конструктор
@@ -1199,6 +1281,23 @@ void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 
 }
+void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
+{
+	if (!(exist_key(argc, argv, "-n")))
+	{
+		cout << "Не введен ключ начальной вершины!!!" << endl;
+		return;
+	}
+	if (!(exist_key(argc, argv, "-d")))
+	{
+		cout << "Не введен ключ конечной вершины!!!" << endl;
+		return;
+	}
+	list<Cell>* way;
+	int length = AStar(MAP, way, Cell(stoi(argv[exist_key(argc, argv, "-n")]), stoi(argv[exist_key(argc, argv, "-n") + 1])),
+		Cell(stoi(argv[exist_key(argc, argv, "-d")]), stoi(argv[exist_key(argc, argv, "-d") + 1])), &Manhattan);
+	cout << "dsds";
+}
 
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -1878,4 +1977,130 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 		}
 	}
 	return 1;
+}
+int AStar(Map MAP, list<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
+{
+	int length = MAP.length();
+	way = new list<Cell>;
+	int way_length = 0;
+	vector<vector<int>> gScore(length);
+	vector<vector<int>> fScore(length);
+	vector<vector<Cell>> cameFrom(length);
+	for (size_t i = 0; i < length; i++)
+	{
+		gScore[i].resize(length);
+		fScore[i].resize(length);
+		cameFrom[i].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			gScore[i][j] = INF;
+			fScore[i][j] = INF;
+		}
+	}
+	fScore[begin_Ver.x][begin_Ver.y] = h(begin_Ver, end_Ver);
+	gScore[begin_Ver.x][begin_Ver.y] = 0;
+	
+	priority_queue<pair<int, Cell>, vector<pair<int, Cell>>, PairWithCellGreater> q;
+	q.push(pair<int, Cell>(fScore[begin_Ver.x][begin_Ver.y], begin_Ver));
+
+	while (!q.empty())
+	{
+		pair<int, Cell> curVer = q.top();
+		q.pop();
+
+	}
+	////приоритетная очередь рассматриваемых вершин
+	//priority_queue<pair<int, Cell>, vector<pair<int, Cell>>, PairWithCellGreater> q;
+	///*set <int> copyq;*/
+	////вставляем в очередь начальную вершину
+	//q.push(pair<int, Cell>(MAP.GetHeight(begin_Ver), begin_Ver));
+	//
+	///*copyq.insert(MAP.GetHeight(begin_Ver));*/
+	//way->Ver = begin_Ver;
+
+	//bool find_way = false;//флаг конца поиска
+	//while (!find_way) 
+	//{
+	//	//вынемаем минимальную вершину из очереди
+	//	pair<int, Cell> curVer = q.top();
+	//	//добавляем длину ребра к длине пути
+	//	if (MAP.GetHeight(curVer.second) == 0)
+	//		way_length++;
+	//	else if (curVer.second.x != begin_Ver.x || curVer.second.y != begin_Ver.y)
+	//		way_length += MAP.GetHeight(curVer.second);
+	//	//добавление вершины в путь
+	//	if (curVer.second.x != begin_Ver.x || curVer.second.y != begin_Ver.y)
+	//		way->add(curVer.second);
+	//	q.pop();
+	//	/*copyq.erase(curVer.first);*/
+
+	//	list<pair<int, Cell>>* nbrs = MAP.neighbors(curVer.second);//список соседних вершин к текущей
+	//	//прибавляем эвристику к каждой вершине
+	//	for (list<pair<int, Cell>>* cur = nbrs; cur; cur = cur->next)
+	//	{	
+	//		bool gonext = false;
+	//		for (list<Cell>* curinway = way; curinway; curinway = curinway->next)
+	//		{
+	//			if (curinway->Ver.x == cur->Ver.second.x && curinway->Ver.y == cur->Ver.second.y)
+	//				gonext = true;
+	//		}
+	//		if (gonext)
+	//			continue;
+	//		//если соседняя вершина конечная, то заканчиваем алгоритм
+	//		if (cur->Ver.second.x == end_Ver.x && cur->Ver.second.y == end_Ver.y)
+	//		{
+	//			if (cur->Ver.first == 0)
+	//				way_length++;
+	//			else
+	//				way_length += cur->Ver.first;
+
+	//			way->add(cur->Ver.second);
+	//			find_way = true;
+	//			break;
+	//		}
+	//		cur->Ver.first += h(cur->Ver.second, end_Ver);
+	//		if (MAP.GetHeight(cur->Ver.second) == 0)
+	//			cur->Ver.first+=way_length;
+	//		
+	//		
+	//		//добавляем соседнюю вершину в очередь
+	//		q.push(cur->Ver);
+	//	}
+	//	
+
+	//	
+
+	//}
+	//if (MAP.GetHeight(begin_Ver) == 0)
+	//	way_length--;
+	//else
+	//	way_length -= MAP.GetHeight(begin_Ver);
+	return way_length;
+}
+vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell current, Cell begin)
+{
+	vector<Cell>* path = new vector<Cell>;
+	(*path).push_back(current);
+	Cell cur = current;
+	while (cur.x != begin.x || cur.y != begin.y)
+	{
+		(*path).push_back(cameFrom[cur.x][cur.y]);
+		cur = cameFrom[cur.x][cur.y];
+	}
+	reverse((*path).begin(), (*path).end());
+	return path;
+}
+
+//*-------------- Эвристические функции ---------------*//
+int Euclid(Cell Ver1, Cell Ver2)
+{
+	return round(sqrt((Ver1.x - Ver2.x) * (Ver1.x - Ver2.x) + (Ver1.y - Ver2.y) * (Ver1.y - Ver2.y)));
+}
+int Chebyshev(Cell Ver1, Cell Ver2)
+{
+	return max(abs(Ver1.x - Ver2.x), abs(Ver1.y - Ver2.y));
+}
+int Manhattan(Cell Ver1, Cell Ver2)
+{
+	return abs(Ver1.x - Ver2.x) + abs(Ver1.y - Ver2.y);
 }

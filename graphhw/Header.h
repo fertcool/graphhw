@@ -222,6 +222,39 @@ public:
 	Graph& operator=(const Graph& graph);//копирование графа
 	
 };
+//*-------------- Класс Cell ------------------*//
+class Cell
+{
+public:
+	int x;
+	int y;
+	inline Cell() {};
+	Cell(int initx, int inity)
+	{
+		x = initx; y = inity;
+	}
+	Cell& operator=(const Cell cell);
+};
+struct PairWithCellGreater
+{
+	bool operator()(const pair<int, Cell>& _onep, const pair<int, Cell>& _secp)
+	{
+		return _onep.first > _secp.first;
+	}
+};
+//*-------------- Класс Map ------------------*//
+class Map
+{
+private:
+	vector<vector<int>>* map;
+public:
+	int length() { return map->size(); }
+	Map(string FPath);
+	inline Map() {};
+	int GetHeight(Cell c);
+	list<pair<int,Cell>>* neighbors(Cell c);
+};
+
 //*-------------- Ф-ии Парсинга ------------------*//
 
 //существование ключа в строке (возвраащает (индекс + 1) или (-1))
@@ -254,6 +287,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -284,4 +318,11 @@ int Dijkstra_Ford(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_V
 int Bellman_Ford(Graph GRAPH, vector<int>& answ, int begin_Ver);
 //алгоритм Левита
 int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);
+//алгоритм джонсона
 int Jonson(Graph GRAPH, vector<vector<int>>& answ);
+//алгоритм A*
+int AStar(Map MAP, list<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
+//*-------------- Эвристические функции ---------------*//
+int Euclid(Cell Ver1, Cell Ver2);
+int Chebyshev(Cell Ver1, Cell Ver2);
+int Manhattan(Cell Ver1, Cell Ver2);

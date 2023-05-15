@@ -22,21 +22,37 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	string types[3] = { "-e","-m","-l" };
+	//создание графа
 	Graph GRAPH;
-	for (auto s : types) 
+	Map MAP;
+	if (!exist_key(argc, argv, "-8")) 
 	{
-		if (exist_key(argc, argv, s))
+		
+		for (auto s : types)
 		{
-			GRAPH=Graph(argv[exist_key(argc, argv, s)], s);
-			break;
+			if (exist_key(argc, argv, s))
+			{
+				GRAPH = Graph(argv[exist_key(argc, argv, s)], s);
+				break;
+			}
+
 		}
-
+		if (GRAPH.list_of_edges()->length() == 1)//если данные не введены
+			return 0;
 	}
-	if (GRAPH.list_of_edges()->length()==1)//если данные не введены
-		return 0;
-	list<int[3]>* dsjdsj = GRAPH.list_of_edges();
+	//создание карты
 	
-
+	else if(exist_key(argc,argv,"-m"))
+	{
+		MAP = Map(argv[exist_key(argc, argv, "-m")]);
+		
+	}
+	else
+	{
+		cout << "Ключ карты не введен!";
+		return -1;
+	}
+	
 
 	int num_pr = num_programm(argc, argv);// "/num_pr" - ключ номера запускаемой программы(алгоритма)
 
@@ -93,6 +109,10 @@ int main(int argc, char* argv[])
 				seventh_task(argc, argv, GRAPH, cout);
 			break;
 		case 8:
+			if (out)
+				eighth_task(argc, argv, MAP, file_out);
+			else
+				eighth_task(argc, argv, MAP, cout);
 			break;
 		case 9:
 			break;
