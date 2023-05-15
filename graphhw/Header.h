@@ -237,9 +237,9 @@ public:
 };
 struct PairWithCellGreater
 {
-	bool operator()(const pair<int, Cell>& _onep, const pair<int, Cell>& _secp)
+	bool operator()(const pair<int*, Cell>& _onep, const pair<int*, Cell>& _secp)
 	{
-		return _onep.first > _secp.first;
+		return (*_onep.first) > (*_secp.first);
 	}
 };
 //*-------------- Класс Map ------------------*//
@@ -321,7 +321,8 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);
 //алгоритм джонсона
 int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 //алгоритм A*
-int AStar(Map MAP, list<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
+int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
+vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);

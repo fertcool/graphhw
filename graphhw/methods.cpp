@@ -1293,10 +1293,21 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 		cout << "Не введен ключ конечной вершины!!!" << endl;
 		return;
 	}
-	list<Cell>* way;
-	int length = AStar(MAP, way, Cell(stoi(argv[exist_key(argc, argv, "-n")]), stoi(argv[exist_key(argc, argv, "-n") + 1])),
-		Cell(stoi(argv[exist_key(argc, argv, "-d")]), stoi(argv[exist_key(argc, argv, "-d") + 1])), &Manhattan);
-	cout << "dsds";
+	vector<Cell>* way;
+	Cell begin = Cell(stoi(argv[exist_key(argc, argv, "-n")]), stoi(argv[exist_key(argc, argv, "-n") + 1]));
+	Cell end = Cell(stoi(argv[exist_key(argc, argv, "-d")]), stoi(argv[exist_key(argc, argv, "-d") + 1]));
+	int length = AStar(MAP, way, begin, end, &Chebyshev);
+	//вывод длины пути и маршрута
+	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl<<"[";
+	for (size_t i = 0; i < length+1; i++)
+	{
+		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
+		if (i != length)
+			stream_out << ", ";
+
+	}
+	stream_out << "]" << endl;
+
 }
 
 //*-------------- Алгоритмы ------------------*//
@@ -1978,115 +1989,131 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 	}
 	return 1;
 }
-int AStar(Map MAP, list<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
+int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
 {
-	int length = MAP.length();
-	way = new list<Cell>;
-	int way_length = 0;
-	vector<vector<int>> gScore(length);
-	vector<vector<int>> fScore(length);
+	int length = MAP.length();//размер стороны карты
+	way = new vector<Cell>;//вектор пути
+	int way_length = 0;//длина пути
+
+	//приоритетная очередь рассматриваемых вершин
+	priority_queue<pair<int*, Cell>, vector<pair<int*, Cell>>, PairWithCellGreater> q;
+
+	//матрица указателей на веса путей ячеек(изначально бесконечности)
+	vector<vector<int*>> d(length);
+	for (size_t i = 0; i < length; i++)//выделение памяти
+	{
+		d[i].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			d[i][j] = new int;
+			*d[i][j] = INF;
+		}
+	}
+	*d[begin_Ver.x][begin_Ver.y] = 0;
+
+	//матрица предыдущих вершин (для нахождения пути)
 	vector<vector<Cell>> cameFrom(length);
 	for (size_t i = 0; i < length; i++)
 	{
-		gScore[i].resize(length);
-		fScore[i].resize(length);
 		cameFrom[i].resize(length);
 		for (size_t j = 0; j < length; j++)
 		{
-			gScore[i][j] = INF;
-			fScore[i][j] = INF;
+			cameFrom[i][j] = Cell(-1, -1);
 		}
 	}
-	fScore[begin_Ver.x][begin_Ver.y] = h(begin_Ver, end_Ver);
-	gScore[begin_Ver.x][begin_Ver.y] = 0;
-	
-	priority_queue<pair<int, Cell>, vector<pair<int, Cell>>, PairWithCellGreater> q;
-	q.push(pair<int, Cell>(fScore[begin_Ver.x][begin_Ver.y], begin_Ver));
 
-	while (!q.empty())
+	//матрица пройденности вершин
+	vector<vector<bool>> used(length);
+	for (size_t i = 0; i < length; i++)
 	{
-		pair<int, Cell> curVer = q.top();
+		used[i].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			used[i][j] = false;
+		}
+	}
+
+	//вставляем в очередь начальную вершину
+	q.push(pair<int*, Cell>(d[begin_Ver.x][begin_Ver.y], begin_Ver));
+
+	bool find_way = false;
+	while (!q.empty()) 
+	{
+		//вынемаем минимальную вершину из очереди
+		pair<int*, Cell> curVer = q.top();
 		q.pop();
+		used[curVer.second.x][curVer.second.y] = true;
+
+		
+
+		list<pair<int, Cell>>* nbrs = MAP.neighbors(curVer.second);//список соседних вершин к текущей
+		//прибавляем эвристику к каждой вершине
+		for (list<pair<int, Cell>>* curnbr = nbrs; curnbr; curnbr = curnbr->next)
+		{	
+			//если ячейке еще ни разу не устанавливали направление, то указываем его как к извлеченной из очереди вершины
+			//для нее мы сосед
+			if (cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y].x == -1)
+				cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);
+			
+			//если соседняя вершина конечная, то заканчиваем алгоритм
+			if (curnbr->Ver.second.x == end_Ver.x && curnbr->Ver.second.y == end_Ver.y)
+			{
+				find_way = true;
+				break;
+			}
+			//если у текущего соседа вес 0, то проводим релаксацию и эвристику с весом 1 
+			if (MAP.GetHeight(Cell(curnbr->Ver.second.x, curnbr->Ver.second.y)) == 0)
+			{
+				if (*d[curnbr->Ver.second.x][curnbr->Ver.second.y]
+						> *d[curVer.second.x][curVer.second.y] + 1 + h(curnbr->Ver.second, end_Ver))
+				{
+					*d[curnbr->Ver.second.x][curnbr->Ver.second.y] =
+					*d[curVer.second.x][curVer.second.y] + 1 + h(curnbr->Ver.second, end_Ver);
+					//обновляем направление
+					/*cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);*/
+				}
+			}
+			//иначе делаем тоже самое но не с 1, а с весом из карты
+			else 
+			{
+				if (*d[curnbr->Ver.second.x][curnbr->Ver.second.y]
+						> *d[curVer.second.x][curVer.second.y] + 1 + h(curnbr->Ver.second, end_Ver))
+				{
+					*d[curnbr->Ver.second.x][curnbr->Ver.second.y] =
+					*d[curVer.second.x][curVer.second.y] + MAP.GetHeight(curnbr->Ver.second) + h(curnbr->Ver.second, end_Ver);
+					//обновляем направление
+					/*cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);*/
+				}
+			}
+			
+			//добавляем соседнюю вершину в очередь
+			if (!used[curnbr->Ver.second.x][curnbr->Ver.second.y]) 
+			{
+				q.push(pair<int*, Cell>(d[curnbr->Ver.second.x][curnbr->Ver.second.y], curnbr->Ver.second));
+				used[curnbr->Ver.second.x][curnbr->Ver.second.y] = true;
+			}
+		}
+		
+		if (find_way)
+			break;
+		
 
 	}
-	////приоритетная очередь рассматриваемых вершин
-	//priority_queue<pair<int, Cell>, vector<pair<int, Cell>>, PairWithCellGreater> q;
-	///*set <int> copyq;*/
-	////вставляем в очередь начальную вершину
-	//q.push(pair<int, Cell>(MAP.GetHeight(begin_Ver), begin_Ver));
-	//
-	///*copyq.insert(MAP.GetHeight(begin_Ver));*/
-	//way->Ver = begin_Ver;
-
-	//bool find_way = false;//флаг конца поиска
-	//while (!find_way) 
-	//{
-	//	//вынемаем минимальную вершину из очереди
-	//	pair<int, Cell> curVer = q.top();
-	//	//добавляем длину ребра к длине пути
-	//	if (MAP.GetHeight(curVer.second) == 0)
-	//		way_length++;
-	//	else if (curVer.second.x != begin_Ver.x || curVer.second.y != begin_Ver.y)
-	//		way_length += MAP.GetHeight(curVer.second);
-	//	//добавление вершины в путь
-	//	if (curVer.second.x != begin_Ver.x || curVer.second.y != begin_Ver.y)
-	//		way->add(curVer.second);
-	//	q.pop();
-	//	/*copyq.erase(curVer.first);*/
-
-	//	list<pair<int, Cell>>* nbrs = MAP.neighbors(curVer.second);//список соседних вершин к текущей
-	//	//прибавляем эвристику к каждой вершине
-	//	for (list<pair<int, Cell>>* cur = nbrs; cur; cur = cur->next)
-	//	{	
-	//		bool gonext = false;
-	//		for (list<Cell>* curinway = way; curinway; curinway = curinway->next)
-	//		{
-	//			if (curinway->Ver.x == cur->Ver.second.x && curinway->Ver.y == cur->Ver.second.y)
-	//				gonext = true;
-	//		}
-	//		if (gonext)
-	//			continue;
-	//		//если соседняя вершина конечная, то заканчиваем алгоритм
-	//		if (cur->Ver.second.x == end_Ver.x && cur->Ver.second.y == end_Ver.y)
-	//		{
-	//			if (cur->Ver.first == 0)
-	//				way_length++;
-	//			else
-	//				way_length += cur->Ver.first;
-
-	//			way->add(cur->Ver.second);
-	//			find_way = true;
-	//			break;
-	//		}
-	//		cur->Ver.first += h(cur->Ver.second, end_Ver);
-	//		if (MAP.GetHeight(cur->Ver.second) == 0)
-	//			cur->Ver.first+=way_length;
-	//		
-	//		
-	//		//добавляем соседнюю вершину в очередь
-	//		q.push(cur->Ver);
-	//	}
-	//	
-
-	//	
-
-	//}
-	//if (MAP.GetHeight(begin_Ver) == 0)
-	//	way_length--;
-	//else
-	//	way_length -= MAP.GetHeight(begin_Ver);
-	return way_length;
+	way = reconstruct_path(cameFrom, end_Ver, begin_Ver);
+	
+	return way->size()-1;
 }
-vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell current, Cell begin)
+vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin)
 {
 	vector<Cell>* path = new vector<Cell>;
-	(*path).push_back(current);
-	Cell cur = current;
+	(*path).push_back(end);
+	Cell cur = end;
 	while (cur.x != begin.x || cur.y != begin.y)
 	{
 		(*path).push_back(cameFrom[cur.x][cur.y]);
 		cur = cameFrom[cur.x][cur.y];
 	}
+	
 	reverse((*path).begin(), (*path).end());
 	return path;
 }
