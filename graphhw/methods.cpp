@@ -2090,11 +2090,15 @@ int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Ce
 				{
 					*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] =
 					*dwe[curVer.second.x][curVer.second.y] + MAP.GetHeight(curnbr->Ver.second);
+
 					//обновляем направление
 					/*cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);*/
 				}
 			}
-			*d[curnbr->Ver.second.x][curnbr->Ver.second.y] += h(curnbr->Ver.second, end_Ver);
+			//эвристика
+			*d[curnbr->Ver.second.x][curnbr->Ver.second.y] = 
+			*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] +  h(curnbr->Ver.second, end_Ver);
+
 			//если соседняя вершина конечная, то заканчиваем алгоритм
 			if (curnbr->Ver.second.x == end_Ver.x && curnbr->Ver.second.y == end_Ver.y)
 			{
@@ -2115,7 +2119,10 @@ int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Ce
 
 	}
 	way = reconstruct_path(cameFrom, end_Ver, begin_Ver);
-	
+	for (size_t i = 1; i < way->size(); i++)
+	{
+		way_length += MAP.GetHeight((*way)[i]);
+	}
 	return way->size()-1;
 }
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin)
