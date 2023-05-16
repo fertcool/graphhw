@@ -1294,20 +1294,81 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 		return;
 	}
 	vector<Cell>* way;
+	vector<vector<bool>> used;
 	Cell begin = Cell(stoi(argv[exist_key(argc, argv, "-n")]), stoi(argv[exist_key(argc, argv, "-n") + 1]));
 	Cell end = Cell(stoi(argv[exist_key(argc, argv, "-d")]), stoi(argv[exist_key(argc, argv, "-d") + 1]));
-	int length = AStar(MAP, way, begin, end, &Chebyshev);
+	stream_out << "Эвристика Евклида: " << endl;
+	int length = AStar(MAP, way, used, begin, end, &Euclid);
 	//вывод длины пути и маршрута
 	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl<<"[";
-	for (size_t i = 0; i < length+1; i++)
+	for (size_t i = 0; i < way->size(); i++)
 	{
 		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
-		if (i != length)
+		if (i != way->size()-1)
 			stream_out << ", ";
 
 	}
 	stream_out << "]" << endl;
+	int count_used = 0;
+	for (size_t i = 0; i < used.size(); i++)
+	{
+		for (size_t j = 0; j < used.size(); j++)
+		{
+			if (used[i][j])
+				count_used++;
+		}
+	}
+	stream_out << "Процент посещенных вершин: " <<float(count_used)/float(used.size() * used.size()) * 100.0 << endl;
 
+	way->clear();
+	used.clear();
+	stream_out << "Эвристика Чебышева: " << endl;
+	length = AStar(MAP, way, used, begin, end, &Chebyshev);
+	//вывод длины пути и маршрута
+	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl << "[";
+	for (size_t i = 0; i < way->size(); i++)
+	{
+		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
+		if (i != way->size()-1)
+			stream_out << ", ";
+
+	}
+	stream_out << "]" << endl;
+	count_used = 0;
+	for (size_t i = 0; i < used.size(); i++)
+	{
+		for (size_t j = 0; j < used.size(); j++)
+		{
+			if (used[i][j])
+				count_used++;
+		}
+	}
+	stream_out << "Процент посещенных вершин: " << float(count_used) / float(used.size() * used.size()) * 100.0 << endl;
+
+	way->clear();
+	used.clear();
+	stream_out << "Эвристика Манхеттена: " << endl;
+	length = AStar(MAP, way, used, begin, end, &Manhattan);
+	//вывод длины пути и маршрута
+	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl << "[";
+	for (size_t i = 0; i < way->size(); i++)
+	{
+		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
+		if (i != way->size()-1)
+			stream_out << ", ";
+
+	}
+	stream_out << "]" << endl;
+	count_used = 0;
+	for (size_t i = 0; i < used.size(); i++)
+	{
+		for (size_t j = 0; j < used.size(); j++)
+		{
+			if (used[i][j])
+				count_used++;
+		}
+	}
+	stream_out << "Процент посещенных вершин: " << float(count_used) / float(used.size() * used.size()) * 100.0 << endl;
 }
 
 //*-------------- Алгоритмы ------------------*//
@@ -1936,6 +1997,7 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 	}
 	return 1;
 }
+//алгоритм джонсона
 int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 {
 	
@@ -1989,7 +2051,8 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 	}
 	return 1;
 }
-int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
+//алгоритм А*
+int AStar(Map MAP, vector<Cell>*& way,vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
 {
 	int length = MAP.length();//размер стороны карты
 	way = new vector<Cell>;//вектор пути
@@ -2036,7 +2099,7 @@ int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Ce
 	}
 
 	//матрица пройденности вершин
-	vector<vector<bool>> used(length);
+	used.resize(length);
 	for (size_t i = 0; i < length; i++)
 	{
 		used[i].resize(length);
@@ -2119,12 +2182,13 @@ int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Ce
 
 	}
 	way = reconstruct_path(cameFrom, end_Ver, begin_Ver);
-	for (size_t i = 1; i < way->size(); i++)
+	/*for (size_t i = 1; i < way->size(); i++)
 	{
 		way_length += MAP.GetHeight((*way)[i]);
-	}
-	return way->size()-1;
+	}*/
+	return *dwe[end_Ver.x][end_Ver.y];
 }
+//восстановление пути из матрицы пути для клеток карты
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin)
 {
 	vector<Cell>* path = new vector<Cell>;

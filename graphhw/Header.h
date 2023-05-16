@@ -321,7 +321,7 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);
 //алгоритм джонсона
 int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 //алгоритм A*
-int AStar(Map MAP, vector<Cell>*& way, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
+int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
