@@ -15,8 +15,8 @@ struct list
 	list()
 	{
 		next = NULL;
-
 	}
+	
 	
 	//ф-ии нахождения длины списка
 	int length()
@@ -84,6 +84,20 @@ struct list
 		}
 		delete current;//удаляем лишний элемент
 		current = new list;//создаем новый
+	}
+	
+	//ф-я нахождения элемента списка по индексу
+	list<T>* element_byindex(int index)
+	{
+		list<T>* current = this;
+		int num = 0;
+		for (current; current; current = current->next)
+		{
+			if (num == index)
+				return current;
+			num++;
+		}
+		return NULL;
 	}
 	//ф-я добавления в конец списка
 	void add(T add_data)
@@ -288,6 +302,7 @@ void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out);
+void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -323,6 +338,7 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 //алгоритм A*
 int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
+int Choose_Edge(vector<double> probalities);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);

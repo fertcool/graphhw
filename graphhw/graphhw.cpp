@@ -8,7 +8,6 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	
-
 	setlocale(LC_ALL, "rus");
 	if (exist_key(argc, argv, "-h"))//справка
 	{
@@ -115,6 +114,10 @@ int main(int argc, char* argv[])
 				eighth_task(argc, argv, MAP, cout);
 			break;
 		case 9:
+			if (out)
+				ninth_task(argc, argv, GRAPH, file_out);
+			else
+				ninth_task(argc, argv, GRAPH, cout);
 			break;
 		case 10:
 			break;
