@@ -1380,6 +1380,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		cout << "Не введен ключ начальной вершины!!!" << endl;
 		return;
 	}
+	int begin_VER = stoi(argv[exist_key(argc, argv, "-n")]);
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
 	int length = edgelist->length(edgelist); //количество вершин
 	//поиск максимального ребра в графе
@@ -1394,9 +1395,9 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	const float p = 0.2;//коэффициент испарения
 	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
 	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
-	const float alpha = 1;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
-	const float beta = 0.4;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
-	const int K = 200;//количество итераций
+	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
+	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
+	const int K = 400;//количество итераций
 	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
 	const float infinum_pheromone = 0.001;//нижняя граница феромона
 	//матрица феромонов
@@ -1417,7 +1418,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<int> L(length);
 
 	//вектор текущего минимального пути
-	vector<int> current_minpath;
+	vector<int> current_mincycle;
 	int minpath_length = INF;
 	//вектор прохождения муравья через вершины
 	vector<bool> used(length);
@@ -1484,6 +1485,17 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 					//если болше некуда пойти
 					if (available_nbrs->Ver[0] == -1)
 					{
+						//проверка на цикл
+						for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+						{
+							//если цикл, то добавляем в путь начальную вершину и добавляем к весу
+							if (cur_nbr->Ver[1] == pathes[m][0])
+							{
+								pathes[m].push_back(pathes[m][0]);
+								//увеличение пути m-го муравья
+								L[m] += cur_nbr->Ver[2];
+							}
+						}
 						can_move = false;
 						break;
 					}
@@ -1520,13 +1532,13 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			//нахождение нового минимального пути
 			for (size_t i = 0; i < length; i++)
 			{
-				if (pathes[i].size() == length && L[i] < minpath_length)
+				if (pathes[i].size() == length +1  && L[i] < minpath_length)
 				{
 					minpath_length = L[i];
-					current_minpath.clear();
-					for (size_t j = 0; j < length; j++)
+					current_mincycle.clear();
+					for (size_t j = 0; j < length+1; j++)
 					{
-						current_minpath.push_back(pathes[i][j]);
+						current_mincycle.push_back(pathes[i][j]);
 					}
 				}
 			}
@@ -1553,15 +1565,35 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				}
 			}
 		}
-		if (current_minpath.size() == 0)
+		if (current_mincycle.size() == 0)
 		{
-			stream_out << "Гамильтонова пути в графе нет!!!" << endl;
+			stream_out << "Гамильтонова цикла в графе нет!!!" << endl;
 		}
 		else
 		{
-			stream_out << "Вес найденного гамильтонова пути: " << minpath_length << endl;
-			stream_out << "Гамильтонов путь: " << endl;
-			print_vector(&current_minpath, stream_out);
+			stream_out << "Вес найденного гамильтонова цикла: " << minpath_length << endl;
+			stream_out << "Гамильтонов цикл: " << endl;
+			int start_index;
+			for (size_t i = 0; i < length+1; i++)
+			{
+				if (current_mincycle[i] == begin_VER)
+					start_index = i;
+			}
+			if (start_index==0)
+				print_vector(&current_mincycle, stream_out);
+			else
+			{
+				vector<int> result;
+				for (size_t i = start_index; i < length; i++)
+				{
+					result.push_back(current_mincycle[i]);
+				}
+				for (size_t i = 0; i < start_index+1; i++)
+				{
+					result.push_back(current_mincycle[i]);
+				}
+				print_vector(&result, stream_out);
+			}
 		}
 	}
 
