@@ -73,7 +73,7 @@ struct list
 		if (current->next == NULL) //если пуст
 		{
 			delete current;
-			current = new list;//создаем новый
+			current = NULL;//создаем новый
 			return;
 		}
 		while (current)//цикл по элементам списка
@@ -83,7 +83,47 @@ struct list
 			delete boof;//удаляем текущий
 		}
 		delete current;//удаляем лишний элемент
-		current = new list;//создаем новый
+		current = NULL;//создаем новый
+	}
+	void clear(list<int[3]>*& p)
+	{
+		
+		list* boof;//буферный указатель для удаления
+		if (p->next == NULL) //если пуст
+		{
+			delete p;
+			p = NULL;//создаем новый
+			return;
+		}
+		while (p)//цикл по элементам списка
+		{
+			boof = p;//запоминаем текущий
+			p = p->next;//делаем текущий следующим
+			delete boof;//удаляем текущий
+		}
+		delete p;//удаляем лишний элемент
+		p = NULL;//создаем новый
+	}
+	void clear(list<int*>*& p)
+	{
+		
+		list* boof;//буферный указатель для удаления
+		if (p->next == NULL) //если пуст
+		{
+			delete[] p->Ver;
+			delete p;
+			p = NULL;//создаем новый
+			return;
+		}
+		while (p)//цикл по элементам списка
+		{
+			boof = p;//запоминаем текущий
+			p = p->next;//делаем текущий следующим
+			delete[] boof->Ver;
+			delete boof;//удаляем текущий
+		}
+		delete p;//удаляем лишний элемент
+		p = NULL;//создаем новый
 	}
 	
 	//ф-я нахождения элемента списка по индексу
@@ -338,7 +378,7 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 //алгоритм A*
 int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
-int Choose_Edge(vector<double> probalities);
+int Choose_Edge(vector<float> probalities);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);

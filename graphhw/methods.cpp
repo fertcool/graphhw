@@ -1389,17 +1389,18 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		if (cur->Ver[2] > max_edge)
 			max_edge = cur->Ver[2];
 	}
-
-	const double start_pheromone = 10;//значение начального количества феромонов для всех ребер
-	const double p = 0.01;//коэффициент испарения
-	const double Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
-	const double Qd = max_edge;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
-	const double alpha = 1.0;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
-	const double beta = 1.0;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
-	const int K = 100;//количество итераций
-
+	bool directed = GRAPH.is_directed();
+	const float start_pheromone = 1;//значение начального количества феромонов для всех ребер
+	const float p = 0.2;//коэффициент испарения
+	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
+	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
+	const float alpha = 1;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
+	const float beta = 0.4;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
+	const int K = 200;//количество итераций
+	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
+	const float infinum_pheromone = 0.001;//нижняя граница феромона
 	//матрица феромонов
-	vector<vector<double>> pheromone(length);
+	vector<vector<float>> pheromone(length);
 	for (size_t i = 0; i < length; i++)
 	{
 		pheromone[i].resize(length);
@@ -1422,126 +1423,146 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<bool> used(length);
 
 	//вектор распределения вероятности для выбора следующего ребра в пути
-	vector<double> probabilities;
-
-	for (size_t t = 0; t < 3000; t++)
+	vector<float> probabilities;
+	for(int y = 0;y<10;y++)
 	{
-		for (size_t c = 0; c < length; c++)
+		
+		for (size_t q = 0; q < length; q++)
 		{
-			pathes[c].clear();
-		}
-		L.clear();
-		L.resize(length);
-		for (size_t m = 0; m < length; m++)
-		{
-			used.clear();
-			used = vector<bool>(length);
-			
 
-			bool can_move = true;//флаг существования ребра, куда может пойти муравей
-			int current_Ver = m + 1;//текущая вершина, где находится муравей
-			pathes[m].push_back(current_Ver);
-			//цикл нахождения пути муравья
-			while (can_move)
-			{
-				probabilities.clear();
-				used[current_Ver - 1] = true;
-				list<int[3]>* nbrs = GRAPH.list_of_edges(current_Ver);//список соседних вершин к текущей
-				//нахождение списка смежных ребер, которые еще не посещены
-				list<int*>* available_nbrs = new list<int*>;
-				available_nbrs->Ver = new int[3];
-				available_nbrs->Ver[0] = -1;
-				for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-				{
-					if (!used[cur_nbr->Ver[1] - 1])
-					{
-						if (available_nbrs->Ver[0] == -1)
-						{
-							available_nbrs->Ver[0] = cur_nbr->Ver[0];
-							available_nbrs->Ver[1] = cur_nbr->Ver[1];
-							available_nbrs->Ver[2] = cur_nbr->Ver[2];
-						}
-						else
-						{
-							int* new_av_edge = new int[3]{cur_nbr->Ver[0], cur_nbr->Ver[1] , cur_nbr->Ver[2]};
-							available_nbrs->add(new_av_edge);
-						}
-					}
-				}
-				//если болше некуда пойти
-				if (available_nbrs->Ver[0] == -1)
-				{
-					can_move = false;
-					break;
-				}
-				//нахождение суммы желаний пойти в вершины
-				double sum_wishes = 0;
-				for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-				{
-					sum_wishes += pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha) * pow(Qp / double(cur_nbr->Ver[2]), beta);
-				}
-				//нахождения вектора распределения вероятностей
-				for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-				{
-					probabilities.push_back(  
-										      pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha) 
-											* pow(Qp / double(cur_nbr->Ver[2]), beta)
-											/ sum_wishes
-										   );
-
-				}
-				//выбор следующего ребра в пути
-				int index_edge = Choose_Edge(probabilities);
-				//нахождение следующей вершины в пути
-				current_Ver = available_nbrs->element_byindex(index_edge)->Ver[1];
-				//добавление вершины в путь
-				pathes[m].push_back(current_Ver);
-				//увеличение пути m-го муравья
-				L[m] += available_nbrs->element_byindex(index_edge)->Ver[2];
-			}
-		}
-		//нахождение нового минимального пути
-		for (size_t i = 0; i < length; i++)
-		{
-			if (pathes[i].size() == length && L[i] < minpath_length)
-			{
-				minpath_length = L[i];
-				current_minpath.clear();
-				for (size_t j = 0; j < length; j++)
-				{
-					current_minpath.push_back(pathes[i][j]);
-				}
-			}
-		}
-		//испарение феромонов
-		for (size_t i = 0; i < length; i++)
-		{
+			pheromone[q].clear();
+			pheromone[q].resize(length);
 			for (size_t j = 0; j < length; j++)
 			{
-				pheromone[i][j] *= 1 - p;
+				pheromone[q][j] = start_pheromone;
 			}
 		}
-		//добавка к феромонам
-		for (size_t i = 0; i < length; i++)
+		for (size_t t = 0; t < K; t++)
 		{
-			if (pathes[i].size() == length)
+			for (size_t c = 0; c < length; c++)
 			{
-				for (size_t n = 0; n < length-1; n++)
+				pathes[c].clear();
+			}
+			L.clear();
+			L.resize(length);
+			for (size_t m = 0; m < length; m++)
+			{
+				used.clear();
+				used.resize(length);
+
+
+				bool can_move = true;//флаг существования ребра, куда может пойти муравей
+				int current_Ver = m + 1;//текущая вершина, где находится муравей
+				pathes[m].push_back(current_Ver);
+				//цикл нахождения пути муравья
+				while (can_move)
 				{
-					pheromone[pathes[i][n] - 1][pathes[i][n + 1] - 1] += Qd / L[i];
+					probabilities.clear();
+					used[current_Ver - 1] = true;
+					list<int[3]>* nbrs = GRAPH.list_of_edges(current_Ver);//список соседних вершин к текущей
+					//нахождение списка смежных ребер, которые еще не посещены
+					list<int*>* available_nbrs = new list<int*>;
+					available_nbrs->Ver = new int[3];
+					available_nbrs->Ver[0] = -1;
+					for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+					{
+						if (!used[cur_nbr->Ver[1] - 1])
+						{
+							if (available_nbrs->Ver[0] == -1)
+							{
+								available_nbrs->Ver[0] = cur_nbr->Ver[0];
+								available_nbrs->Ver[1] = cur_nbr->Ver[1];
+								available_nbrs->Ver[2] = cur_nbr->Ver[2];
+							}
+							else
+							{
+								int* new_av_edge = new int[3] {cur_nbr->Ver[0], cur_nbr->Ver[1], cur_nbr->Ver[2]};
+								available_nbrs->add(new_av_edge);
+							}
+						}
+					}
+					//если болше некуда пойти
+					if (available_nbrs->Ver[0] == -1)
+					{
+						can_move = false;
+						break;
+					}
+					//нахождение суммы желаний пойти в вершины
+					float sum_wishes = 0;
+					for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+					{
+						sum_wishes += pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha) * pow(Qp / float(cur_nbr->Ver[2]), beta);
+					}
+					//нахождения вектора распределения вероятностей
+					for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+					{
+						probabilities.push_back(
+							pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha)
+							* pow(Qp / float(cur_nbr->Ver[2]), beta)
+							/ sum_wishes
+						);
+
+					}
+					//выбор следующего ребра в пути
+					int index_edge = Choose_Edge(probabilities);
+					//нахождение следующей вершины в пути
+					current_Ver = available_nbrs->element_byindex(index_edge)->Ver[1];
+					//добавление вершины в путь
+					pathes[m].push_back(current_Ver);
+					//увеличение пути m-го муравья
+					L[m] += available_nbrs->element_byindex(index_edge)->Ver[2];
+
+					//чистка
+					nbrs->clear(nbrs);
+					available_nbrs->clear(available_nbrs);
+				}
+			}
+			//нахождение нового минимального пути
+			for (size_t i = 0; i < length; i++)
+			{
+				if (pathes[i].size() == length && L[i] < minpath_length)
+				{
+					minpath_length = L[i];
+					current_minpath.clear();
+					for (size_t j = 0; j < length; j++)
+					{
+						current_minpath.push_back(pathes[i][j]);
+					}
+				}
+			}
+			//испарение феромонов
+			for (size_t i = 0; i < length; i++)
+			{
+				for (size_t j = 0; j < length; j++)
+				{
+					if(pheromone[i][j] > infinum_pheromone)
+						pheromone[i][j] *= 1 - p;
+				}
+			}
+			//добавка к феромонам
+			for (size_t i = 0; i < length; i++)
+			{
+				if (pathes[i].size() >= length * percent_max_length)
+				{
+					for (size_t n = 0; n < pathes[i].size() - 1; n++)
+					{
+						pheromone[pathes[i][n] - 1][pathes[i][n + 1] - 1] += Qd / L[i];
+						if (!directed)
+							pheromone[pathes[i][n + 1] - 1][pathes[i][n] - 1] += Qd / L[i];
+					}
 				}
 			}
 		}
-	}
-	if (current_minpath.size() == 0)
-	{
-		stream_out << "Гамильтонова пути в графе нет!!!" << endl;
-	}
-	else
-	{
-		stream_out << "Вес найденного гамильтонова пути: " << minpath_length << endl;
-		stream_out << "Гамильтонов путь: " << endl;
-		print_vector(&current_minpath, stream_out);
+		if (current_minpath.size() == 0)
+		{
+			stream_out << "Гамильтонова пути в графе нет!!!" << endl;
+		}
+		else
+		{
+			stream_out << "Вес найденного гамильтонова пути: " << minpath_length << endl;
+			stream_out << "Гамильтонов путь: " << endl;
+			print_vector(&current_minpath, stream_out);
+		}
 	}
 
 
@@ -2381,9 +2402,9 @@ vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell be
 	return path;
 }
 //возращает номер ребра (из списка ребер), куда должен пойти муравей 
-int Choose_Edge(vector<double> probalities)
+int Choose_Edge(vector<float> probalities)
 {
-	srand(time(NULL));
+	/*srand(time(NULL));*/
 	int length = probalities.size();
 	double value = (rand() % 100 + 1) / 100.0;
 	double current_in_numberline = 0;
@@ -2393,6 +2414,7 @@ int Choose_Edge(vector<double> probalities)
 		if (current_in_numberline >= value)
 			return i;
 	}
+	return length - 1;
 }
 
 //*-------------- Эвристические функции ---------------*//

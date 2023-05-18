@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
 			return 0;
 	}
 	//создание карты
-	
 	else if(exist_key(argc,argv,"-m"))
 	{
 		MAP = Map(argv[exist_key(argc, argv, "-m")]);
@@ -52,7 +51,9 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
-
+	/*list<int[3]>* edgelist = GRAPH.list_of_edges();
+	edgelist->clear(edgelist);*/
+	
 	int num_pr = num_programm(argc, argv);// "/num_pr" - ключ номера запускаемой программы(алгоритма)
 
 	bool out = 0;//флаг вывода в файл
