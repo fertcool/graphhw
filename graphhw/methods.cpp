@@ -2311,54 +2311,51 @@ int AStar(Map MAP, vector<Cell>*& way,vector<vector<bool>>& used, Cell begin_Ver
 	q.push(pair<int*, Cell>(d[begin_Ver.x][begin_Ver.y], begin_Ver));
 
 	bool find_way = false;
-	while (!q.empty()) 
+	while (!q.empty())
 	{
 		//вынемаем минимальную вершину из очереди
 		pair<int*, Cell> curVer = q.top();
 		q.pop();
 		used[curVer.second.x][curVer.second.y] = true;
 
-		
+
 
 		list<pair<int, Cell>>* nbrs = MAP.neighbors(curVer.second);//список соседних вершин к текущей
 		//прибавляем эвристику к каждой вершине
 		for (list<pair<int, Cell>>* curnbr = nbrs; curnbr; curnbr = curnbr->next)
-		{	
+		{
 			//если ячейке еще ни разу не устанавливали направление, то указываем его как к извлеченной из очереди вершины
 			//для нее мы сосед
 			if (cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y].x == -1)
 				cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);
-			
-			
-			//если у текущего соседа вес 0, то проводим релаксацию и эвристику с весом 1 
-			if (MAP.GetHeight(Cell(curnbr->Ver.second.x, curnbr->Ver.second.y)) == 0)
-			{
-				if (*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y]
-						> *dwe[curVer.second.x][curVer.second.y] + 1)
-				{
-					*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] =
-					*dwe[curVer.second.x][curVer.second.y] + 1;
 
-					//обновляем направление
-					/*cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);*/
-				}
-			}
-			//иначе делаем тоже самое но не с 1, а с весом из карты
-			else 
-			{
-				if (*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y]
-						> *dwe[curVer.second.x][curVer.second.y] + MAP.GetHeight(curnbr->Ver.second))
-				{
-					*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] =
-					*dwe[curVer.second.x][curVer.second.y] + MAP.GetHeight(curnbr->Ver.second);
 
-					//обновляем направление
-					/*cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);*/
-				}
+			//проводим релаксацию 
+
+			if (*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] > *dwe[curVer.second.x][curVer.second.y]
+				+ Manhattan(curnbr->Ver.second, curVer.second)
+				+ abs(
+					MAP.GetHeight(curnbr->Ver.second)
+					- MAP.GetHeight(curVer.second)
+				)
+				)
+			{
+				*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] =
+					*dwe[curVer.second.x][curVer.second.y]
+					+ Manhattan(curnbr->Ver.second, curVer.second)
+					+ abs(
+						MAP.GetHeight(curnbr->Ver.second)
+						- MAP.GetHeight(curVer.second)
+					);
+
+				//обновляем направление
+				cameFrom[curnbr->Ver.second.x][curnbr->Ver.second.y] = Cell(curVer.second.x, curVer.second.y);
 			}
+
+
 			//эвристика
-			*d[curnbr->Ver.second.x][curnbr->Ver.second.y] = 
-			*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] +  h(curnbr->Ver.second, end_Ver);
+			*d[curnbr->Ver.second.x][curnbr->Ver.second.y] =
+				*dwe[curnbr->Ver.second.x][curnbr->Ver.second.y] + h(curnbr->Ver.second, end_Ver);
 
 			//если соседняя вершина конечная, то заканчиваем алгоритм
 			if (curnbr->Ver.second.x == end_Ver.x && curnbr->Ver.second.y == end_Ver.y)
@@ -2367,16 +2364,16 @@ int AStar(Map MAP, vector<Cell>*& way,vector<vector<bool>>& used, Cell begin_Ver
 				break;
 			}
 			//добавляем соседнюю вершину в очередь
-			if (!used[curnbr->Ver.second.x][curnbr->Ver.second.y]) 
+			if (!used[curnbr->Ver.second.x][curnbr->Ver.second.y])
 			{
 				q.push(pair<int*, Cell>(d[curnbr->Ver.second.x][curnbr->Ver.second.y], curnbr->Ver.second));
 				used[curnbr->Ver.second.x][curnbr->Ver.second.y] = true;
 			}
 		}
-		
+
 		if (find_way)
 			break;
-		
+
 
 	}
 	way = reconstruct_path(cameFrom, end_Ver, begin_Ver);
