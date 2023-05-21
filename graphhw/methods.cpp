@@ -1373,224 +1373,59 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 }
 void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
+	int num_alg = 0;
+	if (exist_key(argc, argv, "-a"))
+		num_alg = 1;
+	if (exist_key(argc, argv, "-b"))
+		num_alg = 2;
 	
-
+	if (!num_alg)
+	{
+		cout << "Не введен ключ алгоритма!!!" << endl;
+		return;
+	}
 	if (!(exist_key(argc, argv, "-n")))
 	{
 		cout << "Не введен ключ начальной вершины!!!" << endl;
 		return;
 	}
 	int begin_VER = stoi(argv[exist_key(argc, argv, "-n")]);
-	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
-	int length = edgelist->length(edgelist); //количество вершин
-	//поиск максимального ребра в графе
-	int max_edge = 0;
-	for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
+	if (num_alg == 1) 
 	{
-		if (cur->Ver[2] > max_edge)
-			max_edge = cur->Ver[2];
-	}
-	bool directed = GRAPH.is_directed();
-	const float start_pheromone = 1;//значение начального количества феромонов для всех ребер
-	const float p = 0.2;//коэффициент испарения
-	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
-	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
-	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
-	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
-	const int K = 400;//количество итераций
-	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
-	const float infinum_pheromone = 0.001;//нижняя граница феромона
-	//матрица феромонов
-	vector<vector<float>> pheromone(length);
-	for (size_t i = 0; i < length; i++)
-	{
-		pheromone[i].resize(length);
-		for (size_t j = 0; j < length; j++)
+		const int K = 10;//количество запусков муравьиного алгоритма
+		const int KA = 400;//количество итераций в муравьином алгоритме
+		vector<int> mincycle;
+		int mincycle_length;
+		for (size_t i = 0; i < K; i++)
 		{
-			pheromone[i][j] = start_pheromone;
+			mincycle_length = Ant_Agorithm(GRAPH, mincycle, KA, begin_VER);
 		}
-	}
-
-	//матрица путей, где i элемент - вектор пути i-го муравья для t итерации
-	vector<vector<int>> pathes(length);
-	
-	//вектор веса пути, где i элемент - вес пути пройденный i-ым муравьем на t итерации
-	vector<int> L(length);
-
-	//вектор текущего минимального пути
-	vector<int> current_mincycle;
-	int minpath_length = INF;
-	//вектор прохождения муравья через вершины
-	vector<bool> used(length);
-
-	//вектор распределения вероятности для выбора следующего ребра в пути
-	vector<float> probabilities;
-	for(int y = 0;y<10;y++)
-	{
-		
-		for (size_t q = 0; q < length; q++)
-		{
-
-			pheromone[q].clear();
-			pheromone[q].resize(length);
-			for (size_t j = 0; j < length; j++)
-			{
-				pheromone[q][j] = start_pheromone;
-			}
-		}
-		for (size_t t = 0; t < K; t++)
-		{
-			for (size_t c = 0; c < length; c++)
-			{
-				pathes[c].clear();
-			}
-			L.clear();
-			L.resize(length);
-			for (size_t m = 0; m < length; m++)
-			{
-				used.clear();
-				used.resize(length);
-
-
-				bool can_move = true;//флаг существования ребра, куда может пойти муравей
-				int current_Ver = m + 1;//текущая вершина, где находится муравей
-				pathes[m].push_back(current_Ver);
-				//цикл нахождения пути муравья
-				while (can_move)
-				{
-					probabilities.clear();
-					used[current_Ver - 1] = true;
-					list<int[3]>* nbrs = GRAPH.list_of_edges(current_Ver);//список соседних вершин к текущей
-					//нахождение списка смежных ребер, которые еще не посещены
-					list<int*>* available_nbrs = new list<int*>;
-					available_nbrs->Ver = new int[3];
-					available_nbrs->Ver[0] = -1;
-					for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-					{
-						if (!used[cur_nbr->Ver[1] - 1])
-						{
-							if (available_nbrs->Ver[0] == -1)
-							{
-								available_nbrs->Ver[0] = cur_nbr->Ver[0];
-								available_nbrs->Ver[1] = cur_nbr->Ver[1];
-								available_nbrs->Ver[2] = cur_nbr->Ver[2];
-							}
-							else
-							{
-								int* new_av_edge = new int[3] {cur_nbr->Ver[0], cur_nbr->Ver[1], cur_nbr->Ver[2]};
-								available_nbrs->add(new_av_edge);
-							}
-						}
-					}
-					//если болше некуда пойти
-					if (available_nbrs->Ver[0] == -1)
-					{
-						//проверка на цикл
-						for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-						{
-							//если цикл, то добавляем в путь начальную вершину и добавляем к весу
-							if (cur_nbr->Ver[1] == pathes[m][0])
-							{
-								pathes[m].push_back(pathes[m][0]);
-								//увеличение пути m-го муравья
-								L[m] += cur_nbr->Ver[2];
-							}
-						}
-						can_move = false;
-						break;
-					}
-					//нахождение суммы желаний пойти в вершины
-					float sum_wishes = 0;
-					for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-					{
-						sum_wishes += pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha) * pow(Qp / float(cur_nbr->Ver[2]), beta);
-					}
-					//нахождения вектора распределения вероятностей
-					for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
-					{
-						probabilities.push_back(
-							pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha)
-							* pow(Qp / float(cur_nbr->Ver[2]), beta)
-							/ sum_wishes
-						);
-
-					}
-					//выбор следующего ребра в пути
-					int index_edge = Choose_Edge(probabilities);
-					//нахождение следующей вершины в пути
-					current_Ver = available_nbrs->element_byindex(index_edge)->Ver[1];
-					//добавление вершины в путь
-					pathes[m].push_back(current_Ver);
-					//увеличение пути m-го муравья
-					L[m] += available_nbrs->element_byindex(index_edge)->Ver[2];
-
-					//чистка
-					nbrs->clear(nbrs);
-					available_nbrs->clear(available_nbrs);
-				}
-			}
-			//нахождение нового минимального пути
-			for (size_t i = 0; i < length; i++)
-			{
-				if (pathes[i].size() == length +1  && L[i] < minpath_length)
-				{
-					minpath_length = L[i];
-					current_mincycle.clear();
-					for (size_t j = 0; j < length+1; j++)
-					{
-						current_mincycle.push_back(pathes[i][j]);
-					}
-				}
-			}
-			//испарение феромонов
-			for (size_t i = 0; i < length; i++)
-			{
-				for (size_t j = 0; j < length; j++)
-				{
-					if(pheromone[i][j] > infinum_pheromone)
-						pheromone[i][j] *= 1 - p;
-				}
-			}
-			//добавка к феромонам
-			for (size_t i = 0; i < length; i++)
-			{
-				if (pathes[i].size() >= length * percent_max_length)
-				{
-					for (size_t n = 0; n < pathes[i].size() - 1; n++)
-					{
-						pheromone[pathes[i][n] - 1][pathes[i][n + 1] - 1] += Qd / L[i];
-						if (!directed)
-							pheromone[pathes[i][n + 1] - 1][pathes[i][n] - 1] += Qd / L[i];
-					}
-				}
-			}
-		}
-		if (current_mincycle.size() == 0)
+		if (mincycle.size() == 0)
 		{
 			stream_out << "Гамильтонова цикла в графе нет!!!" << endl;
 		}
 		else
 		{
-			stream_out << "Вес найденного гамильтонова цикла: " << minpath_length << endl;
+			stream_out << "Вес найденного гамильтонова цикла: " << mincycle_length << endl;
 			stream_out << "Гамильтонов цикл: " << endl;
-			int start_index;
-			for (size_t i = 0; i < length+1; i++)
+			int start_index = 0;
+			for (size_t i = 0; i < mincycle.size(); i++)
 			{
-				if (current_mincycle[i] == begin_VER)
+				if (mincycle[i] == begin_VER)
 					start_index = i;
 			}
-			if (start_index==0)
-				print_vector(&current_mincycle, stream_out);
+			if (start_index == 0)
+				print_vector(&mincycle, stream_out);
 			else
 			{
 				vector<int> result;
-				for (size_t i = start_index; i < length; i++)
+				for (size_t i = start_index; i < mincycle.size() - 1; i++)
 				{
-					result.push_back(current_mincycle[i]);
+					result.push_back(mincycle[i]);
 				}
-				for (size_t i = 0; i < start_index+1; i++)
+				for (size_t i = 0; i < start_index + 1; i++)
 				{
-					result.push_back(current_mincycle[i]);
+					result.push_back(mincycle[i]);
 				}
 				print_vector(&result, stream_out);
 			}
@@ -1599,7 +1434,137 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 
 
 
+}
+void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	vector<vector<int>>* bandwidth = GRAPH.adjacency_matrix();//матрица пропускной способности
+	int length = bandwidth->size();//количество вершин
+	vector<vector<int>> remain_band(length);//матрица остаточной пропускной способности
+	list<int[3]>* nbrs;//список сосдених ребер
+	vector<int> back(length);//вектор предыдуще посещенных вершин
+	for (size_t i = 0; i < length; i++)
+	{
+		remain_band[i].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			remain_band[i][j] = (*bandwidth)[i][j];
+		}
+	}
+	int source;//исток
+	int sink;//сток
+	
+	//поиск стока и истока
+	for (size_t i = 1; i <= length; i++)
+	{
+		list<int[3]>* nbrs = GRAPH.list_of_edges(i);
+		if (!nbrs) 
+		{
+			sink = i;
+			continue;
+		}
+		nbrs->clear(nbrs);
+		delete nbrs;
+		list <int>* innbrs = GRAPH.adjacency_list_in(i);
+		if (!innbrs) 
+		{
+			source = i;
+			continue;
+		}
+	}
 
+	
+	bool not_avail = false;
+	vector<pair<int,int>> a;//вектор пропускных способностей дополняющей цепи
+	int f = 0;//сумма минимальных остаточных пропускных способностях в дополняющих путях (то есть максимальный поток в сети)
+	while (true) 
+	{
+		int current_Ver = source;
+		back.clear();
+		back.resize(length);
+		a.clear();
+		
+		while (current_Ver != sink) 
+		{
+			//нахожденеи вершины с максимальным остаточным потоком
+			nbrs = GRAPH.list_of_edges(current_Ver);
+			int max_Ver = 0;
+			int max_bandwidth = 0;
+			for (list<int[3]>* cur = nbrs;cur;cur = cur->next)
+			{
+				if (remain_band[current_Ver - 1][cur->Ver[1] - 1] > max_bandwidth && back[cur->Ver[1]-1] == 0 && remain_band[current_Ver-1][cur->Ver[1]-1]>0)
+				{
+					max_bandwidth = remain_band[current_Ver - 1][cur->Ver[1] - 1];
+					max_Ver = cur->Ver[1];
+				}
+
+			}
+			//если нету доступных соседних вершин
+			if (!max_Ver) 
+			{
+				//если текущая вершина исток, то выходим из циклов
+				if (current_Ver == source)
+				{
+					not_avail = true;
+					break;
+				}
+				else//иначе откат
+				{
+					a.pop_back();
+					current_Ver = back[current_Ver - 1];
+					continue;
+				}
+			}
+			//помещаем в начало вектора вершину истока
+			if (current_Ver == source)
+				a.push_back(pair<int, int>(INF, source));
+			//если есть доступные вершины, то идем в вершину с максимальным остаточной пропускной способностью
+			back[max_Ver - 1] = current_Ver;
+			current_Ver = max_Ver;
+			a.push_back(pair<int,int>(max_bandwidth, max_Ver));
+			
+
+		}
+		//если нет доступных вершин из истока, то выходим из основного цикла (больше нет дополняющих цепей)
+		if (not_avail)
+			break;
+		else
+		{
+			//нахождение минимальной остаточной пропускной способности во всем пути
+			int min_remainband = INF;//вершина с минимальной остаточной пропускной способностью из пройденного пути
+			for (size_t i = 0; i < a.size(); i++)
+			{
+				if (a[i].first < min_remainband)
+				{
+					min_remainband = a[i].first;
+				}
+			}
+			
+			//изменение остаточых пропускных способностей у прямых и обратных вершин
+			for (size_t i = 0; i < a.size()-1; i++)
+			{
+				remain_band[a[i].second - 1][a[i + 1].second - 1] -= min_remainband;
+				remain_band[a[i+1].second - 1][a[i].second - 1] += min_remainband;
+			}
+			f += min_remainband;
+		}
+	}
+	//вывод найденного потока и оптимальных потоков через ребра
+	stream_out << f << " - Максимальный поток от " << source << " до " << sink << endl;
+	for (size_t i = 0; i < length; i++)
+	{
+		for (size_t j = 0; j < length; j++)
+		{
+			if ((*bandwidth)[i][j])
+			{
+				stream_out << i + 1 << " - " << j + 1 << " : ";
+				if ((remain_band[i][j] - (*bandwidth)[i][j]) > 0)
+					stream_out << remain_band[i][j] - (*bandwidth)[i][j];
+				else
+					stream_out << remain_band[j][i] - (*bandwidth)[j][i];
+				stream_out << "/" << (*bandwidth)[i][j] << endl;
+			}
+		}
+	}
 }
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
@@ -2444,6 +2409,191 @@ int Choose_Edge(vector<float> probalities)
 			return i;
 	}
 	return length - 1;
+}
+int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	int length = edgelist->length(edgelist); //количество вершин
+	//поиск максимального ребра в графе
+	int max_edge = 0;
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
+	{
+		if (cur->Ver[2] > max_edge)
+			max_edge = cur->Ver[2];
+	}
+	bool directed = GRAPH.is_directed();
+	const float start_pheromone = 1;//значение начального количества феромонов для всех ребер
+	const float p = 0.2;//коэффициент испарения
+	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
+	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
+	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
+	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
+	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
+	const float infinum_pheromone = 0.001;//нижняя граница феромона
+	//матрица феромонов
+	vector<vector<float>> pheromone(length);
+	for (size_t i = 0; i < length; i++)
+	{
+		pheromone[i].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			pheromone[i][j] = start_pheromone;
+		}
+	}
+
+	//матрица путей, где i элемент - вектор пути i-го муравья для t итерации
+	vector<vector<int>> pathes(length);
+
+	//вектор веса пути, где i элемент - вес пути пройденный i-ым муравьем на t итерации
+	vector<int> L(length);
+
+	int mincycle_length = INF;
+	//вектор прохождения муравья через вершины
+	vector<bool> used(length);
+
+	//вектор распределения вероятности для выбора следующего ребра в пути
+	vector<float> probabilities;
+
+	for (size_t q = 0; q < length; q++)
+	{
+
+		pheromone[q].clear();
+		pheromone[q].resize(length);
+		for (size_t j = 0; j < length; j++)
+		{
+			pheromone[q][j] = start_pheromone;
+		}
+	}
+	for (size_t t = 0; t < Num_iter; t++)
+	{
+		for (size_t c = 0; c < length; c++)
+		{
+			pathes[c].clear();
+		}
+		L.clear();
+		L.resize(length);
+		for (size_t m = 0; m < length; m++)
+		{
+			used.clear();
+			used.resize(length);
+
+
+			bool can_move = true;//флаг существования ребра, куда может пойти муравей
+			int current_Ver = m + 1;//текущая вершина, где находится муравей
+			pathes[m].push_back(current_Ver);
+			//цикл нахождения пути муравья
+			while (can_move)
+			{
+				probabilities.clear();
+				used[current_Ver - 1] = true;
+				list<int[3]>* nbrs = GRAPH.list_of_edges(current_Ver);//список соседних вершин к текущей
+				//нахождение списка смежных ребер, которые еще не посещены
+				list<int*>* available_nbrs = new list<int*>;
+				available_nbrs->Ver = new int[3];
+				available_nbrs->Ver[0] = -1;
+				for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+				{
+					if (!used[cur_nbr->Ver[1] - 1])
+					{
+						if (available_nbrs->Ver[0] == -1)
+						{
+							available_nbrs->Ver[0] = cur_nbr->Ver[0];
+							available_nbrs->Ver[1] = cur_nbr->Ver[1];
+							available_nbrs->Ver[2] = cur_nbr->Ver[2];
+						}
+						else
+						{
+							int* new_av_edge = new int[3] {cur_nbr->Ver[0], cur_nbr->Ver[1], cur_nbr->Ver[2]};
+							available_nbrs->add(new_av_edge);
+						}
+					}
+				}
+				//если болше некуда пойти
+				if (available_nbrs->Ver[0] == -1)
+				{
+					//проверка на цикл
+					for (list<int[3]>* cur_nbr = nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+					{
+						//если цикл, то добавляем в путь начальную вершину и добавляем к весу
+						if (cur_nbr->Ver[1] == pathes[m][0])
+						{
+							pathes[m].push_back(pathes[m][0]);
+							//увеличение пути m-го муравья
+							L[m] += cur_nbr->Ver[2];
+						}
+					}
+					can_move = false;
+					break;
+				}
+				//нахождение суммы желаний пойти в вершины
+				float sum_wishes = 0;
+				for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+				{
+					sum_wishes += pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha) * pow(Qp / float(cur_nbr->Ver[2]), beta);
+				}
+				//нахождения вектора распределения вероятностей
+				for (list<int*>* cur_nbr = available_nbrs; cur_nbr; cur_nbr = cur_nbr->next)
+				{
+					probabilities.push_back(
+						pow(pheromone[cur_nbr->Ver[0] - 1][cur_nbr->Ver[1] - 1], alpha)
+						* pow(Qp / float(cur_nbr->Ver[2]), beta)
+						/ sum_wishes
+					);
+
+				}
+				//выбор следующего ребра в пути
+				int index_edge = Choose_Edge(probabilities);
+				//нахождение следующей вершины в пути
+				current_Ver = available_nbrs->element_byindex(index_edge)->Ver[1];
+				//добавление вершины в путь
+				pathes[m].push_back(current_Ver);
+				//увеличение пути m-го муравья
+				L[m] += available_nbrs->element_byindex(index_edge)->Ver[2];
+
+				//чистка
+				nbrs->clear(nbrs);
+				available_nbrs->clear(available_nbrs);
+			}
+		}
+		//нахождение нового минимального пути
+		for (size_t i = 0; i < length; i++)
+		{
+			if (pathes[i].size() == length + 1 && L[i] < mincycle_length)
+			{
+				mincycle_length = L[i];
+				mincycle.clear();
+				for (size_t j = 0; j < length + 1; j++)
+				{
+					mincycle.push_back(pathes[i][j]);
+				}
+			}
+		}
+		//испарение феромонов
+		for (size_t i = 0; i < length; i++)
+		{
+			for (size_t j = 0; j < length; j++)
+			{
+				if (pheromone[i][j] > infinum_pheromone)
+					pheromone[i][j] *= 1 - p;
+			}
+		}
+		//добавка к феромонам
+		for (size_t i = 0; i < length; i++)
+		{
+			if (pathes[i].size() >= length * percent_max_length)
+			{
+				for (size_t n = 0; n < pathes[i].size() - 1; n++)
+				{
+					pheromone[pathes[i][n] - 1][pathes[i][n + 1] - 1] += Qd / L[i];
+					if (!directed)
+						pheromone[pathes[i][n + 1] - 1][pathes[i][n] - 1] += Qd / L[i];
+				}
+			}
+		}
+	}
+	
+	
+	return mincycle_length;
 }
 
 //*-------------- Эвристические функции ---------------*//

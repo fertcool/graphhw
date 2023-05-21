@@ -343,6 +343,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out);
 void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -379,6 +380,7 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
 int Choose_Edge(vector<float> probalities);
+int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);
