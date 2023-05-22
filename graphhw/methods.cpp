@@ -492,8 +492,9 @@ Graph::Graph(string FPath, string FType)
 		while (!strstream_ch.eof()) //цикл считывания 
 		{
 			strstream_ch >> substr_ch;
-			if (!strstream_ch.eof())
+			if (substr_ch!="")
 				h_matr++;
+			substr_ch.clear();
 		}
 		string str;
 		string substr;
@@ -1373,6 +1374,8 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 }
 void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
+	
+
 	int num_alg = 0;
 	if (exist_key(argc, argv, "-a"))
 		num_alg = 1;
@@ -1392,8 +1395,8 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	int begin_VER = stoi(argv[exist_key(argc, argv, "-n")]);
 	if (num_alg == 1) 
 	{
-		const int K = 10;//количество запусков муравьиного алгоритма
-		const int KA = 400;//количество итераций в муравьином алгоритме
+		const int K = 4;//количество запусков муравьиного алгоритма
+		const int KA = 100;//количество итераций в муравьином алгоритме
 		vector<int> mincycle;
 		int mincycle_length;
 		for (size_t i = 0; i < K; i++)
@@ -1481,6 +1484,7 @@ void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		int current_Ver = source;
 		back.clear();
 		back.resize(length);
+		
 		a.clear();
 		
 		while (current_Ver != sink) 
@@ -1543,7 +1547,7 @@ void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			for (size_t i = 0; i < a.size()-1; i++)
 			{
 				remain_band[a[i].second - 1][a[i + 1].second - 1] -= min_remainband;
-				remain_band[a[i+1].second - 1][a[i].second - 1] += min_remainband;
+				remain_band[a[i + 1].second - 1][a[i].second - 1] += min_remainband;
 			}
 			f += min_remainband;
 		}
@@ -2412,7 +2416,13 @@ int Choose_Edge(vector<float> probalities)
 }
 int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver)
 {
-	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
+	//уоршелл для лучшей работы алгоритма(опционально)
+	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
+	Floyd_Warshall(matrix);
+	Graph GRAPHFW = Graph(matrix);
+	vector<vector<int>>* matrix_old = GRAPH.adjacency_matrix();
+
+	list<int[3]>* edgelist = GRAPHFW.list_of_edges();//список ребер
 	int length = edgelist->length(edgelist); //количество вершин
 	//поиск максимального ребра в графе
 	int max_edge = 0;
@@ -2421,13 +2431,13 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 		if (cur->Ver[2] > max_edge)
 			max_edge = cur->Ver[2];
 	}
-	bool directed = GRAPH.is_directed();
+	bool directed = GRAPHFW.is_directed();
 	const float start_pheromone = 1;//значение начального количества феромонов для всех ребер
 	const float p = 0.2;//коэффициент испарения
 	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
 	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
 	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
-	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
+	const float beta = 4;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
 	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
 	const float infinum_pheromone = 0.001;//нижняя граница феромона
 	//матрица феромонов
@@ -2486,7 +2496,7 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 			{
 				probabilities.clear();
 				used[current_Ver - 1] = true;
-				list<int[3]>* nbrs = GRAPH.list_of_edges(current_Ver);//список соседних вершин к текущей
+				list<int[3]>* nbrs = GRAPHFW.list_of_edges(current_Ver);//список соседних вершин к текущей
 				//нахождение списка смежных ребер, которые еще не посещены
 				list<int*>* available_nbrs = new list<int*>;
 				available_nbrs->Ver = new int[3];
@@ -2560,6 +2570,18 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 		{
 			if (pathes[i].size() == length + 1 && L[i] < mincycle_length)
 			{
+				//проверка корректности ребер (сравнивание с начальной матрицей)
+				bool not_edge = false;
+				for (size_t j = 0; j < length; j++)
+				{
+					if (!(*matrix_old)[pathes[i][j] - 1][pathes[i][j + 1] - 1]) 
+					{
+						not_edge = true;
+						break;
+					}
+				}
+				if (not_edge)
+					continue;
 				mincycle_length = L[i];
 				mincycle.clear();
 				for (size_t j = 0; j < length + 1; j++)
