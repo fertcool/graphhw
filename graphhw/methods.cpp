@@ -1390,10 +1390,11 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		return;
 	}
 	int begin_VER = stoi(argv[exist_key(argc, argv, "-n")]);
+	//муравьиный алгоритм
 	if (num_alg == 1) 
 	{
 		const int K = 10;//количество запусков муравьиного алгоритма
-		const int KA = 2000;//количество итераций в муравьином алгоритме
+		const int KA = 200;//количество итераций в муравьином алгоритме
 		vector<int> mincycle;
 		int mincycle_length = INF;
 		for (size_t i = 0; i < K; i++)
@@ -1432,6 +1433,29 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				print_vector(&result, stream_out);
 			}
 		}
+	}
+	//метод ветвей и границ
+	if (num_alg == 2)
+	{
+		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
+		int length = matrix->size();//количество вершин
+		// final_path[] хранит окончательное решение, т.е. путь коммивояжера.
+		vector<int> final_path(length+1);
+
+		// visited[] отслеживает уже посещенные узлы по определенному пути
+		vector<bool> visited(length);
+
+		// Сохраняет конечный минимальный вес самого короткого пути.
+		int final_res = INF;
+
+		TSP(matrix,final_path, final_res, visited);
+		if (final_path[0] != 0)
+		{
+			stream_out << "Вес найденного гамильтонова пути: " << final_res << endl;
+			print_vector(&final_path, stream_out);
+		}
+		else
+			stream_out << "Гамильтонова цикла нет в графе!!!"<<endl;
 	}
 
 
@@ -1505,42 +1529,11 @@ void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 
 	if (bipartide)
 	{
-		//строим сеть для поиска максимального паросочетания через алгоритм форда фалекрсона
-
-		//добавляем исток и сток в список ребер (исток присоединяем к 1 доле сток ко 2)
-		int source = length + 1;
-		int sink = length + 2;
-		list<int[3]>* tail = edgelist->getTail(edgelist);
-		//добавление истока
-		for (size_t i = 0; i < length; i++)
-		{
-			if (color[i] == 1)
-			{
-				tail->next = new list<int[3]>;
-				tail->next->Ver[0] = source;
-				tail->next->Ver[1] = i + 1;
-				tail->next->Ver[2] = 1;
-				tail = tail->next;
-			}
-		}
-		//добавление стока
-		for (size_t i = 0; i < length; i++)
-		{
-			if (color[i] == 2)
-			{
-				tail->next = new list<int[3]>;
-				tail->next->Ver[0] = i+1;
-				tail->next->Ver[1] = sink;
-				tail->next->Ver[2] = 1;
-				tail = tail->next;
-			}
-		}
-		//новый граф - сеть
-		Graph WEB = Graph(edgelist);
-		vector<vector<int>>* web_matrix = WEB.adjacency_matrix();//изначальная сеть
-		vector<vector<int>>* web_matrix_new = WEB.adjacency_matrix();//сеть после форда фалекрсона
-		//запускаем форда фалкерсона
-		int answ = Ford_Fulkerson(WEB, web_matrix_new, source, sink);
+		vector<vector<int>>* web_matrix = new vector<vector<int>>;//изначальная сеть с доп вершинами для форда фалкерсона
+		vector<vector<int>>* web_matrix_new = new vector<vector<int>>;//сеть после форда фалкерсона
+		
+		//поиск максимального паросочетания фордом фалкерсоном
+		int answ = Max_Matching_Bipatrid(GRAPH, web_matrix, web_matrix_new, color);
 		stream_out << answ << " - Количество ребер в максимальном паросочетании." << endl << "Рёбра: " << endl;
 		//вывод ребер паросочетания
 		for (size_t i = 0; i < length; i++)
@@ -1554,18 +1547,7 @@ void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				}
 
 			}
-			/*for (size_t j = 0; j < length+2; j++)
-			{
-				if ((*bandwidth)[i][j])
-				{
-					stream_out << i + 1 << " - " << j + 1 << " : ";
-					if (((*bandwidth)[i][j] - (*bandwidth_new)[i][j]) > 0)
-						stream_out << (*bandwidth)[i][j] - (*bandwidth_new)[i][j];
-					else
-						stream_out << (*bandwidth)[j][i] - (*bandwidth)[j][i];
-					stream_out << "/" << (*bandwidth)[i][j] << endl;
-				}
-			}*/
+			
 		}
 
 	}
@@ -2695,7 +2677,7 @@ bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<in
 	}
 	return false;
 }
-//поиск в глубину для определения 
+//поиск в глубину для определения двудольности графа
 bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color)
 {
 	color[v-1] = c;
@@ -2716,7 +2698,188 @@ bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color)
 	}
 	return true;
 }
-//поиск максимального паросочетания
+//поиск максимального паросочетания в двудольном графе
+int Max_Matching_Bipatrid(Graph GRAPH, vector<vector<int>>*& web, vector<vector<int>>*& new_web, vector<int>& color)
+{
+	list<int[3]>* edgelist = GRAPH.list_of_edges();
+	int length = edgelist->length(edgelist);
+	//строим сеть для поиска максимального паросочетания через алгоритм форда фалекрсона
+
+	//добавляем исток и сток в список ребер (исток присоединяем к 1 доле сток ко 2)
+	int source = length + 1;
+	int sink = length + 2;
+	list<int[3]>* tail = edgelist->getTail(edgelist);
+	//добавление истока
+	for (size_t i = 0; i < length; i++)
+	{
+		if (color[i] == 1)
+		{
+			tail->next = new list<int[3]>;
+			tail->next->Ver[0] = source;
+			tail->next->Ver[1] = i + 1;
+			tail->next->Ver[2] = 1;
+			tail = tail->next;
+		}
+	}
+	//добавление стока
+	for (size_t i = 0; i < length; i++)
+	{
+		if (color[i] == 2)
+		{
+			tail->next = new list<int[3]>;
+			tail->next->Ver[0] = i + 1;
+			tail->next->Ver[1] = sink;
+			tail->next->Ver[2] = 1;
+			tail = tail->next;
+		}
+	}
+	//новый граф - сеть
+	Graph WEB = Graph(edgelist);
+	web = WEB.adjacency_matrix();//изначальная сеть
+	new_web = WEB.adjacency_matrix();//сеть после форда фалекрсона
+	//запускаем форда фалкерсона
+	int answ = Ford_Fulkerson(WEB, new_web, source, sink);
+	
+	return answ;
+}
+// функция, которая принимает в качестве аргументов:
+// curr_bound -> нижняя граница корневого узла
+// curr_weight-> сохраняет вес пути на данный момент
+// level-> текущий уровень при перемещении в поиске дерева
+// curr_path[] -> где хранится решение, которое позже будет скопирован в final_path[]
+void TSPRec(vector<vector<int>>* matr_adj, int curr_bound, int curr_weight, int level, 
+		    vector<int>& curr_path, vector<int>& final_path, int& final_res, vector<bool>& visited)
+{
+	int length = matr_adj->size();
+	// базовый случай - это когда мы достигли уровня N, который означает, что мы охватили все узлы один раз
+	if (level == length)
+	{
+		// проверяем, есть ли ребро от последней вершины в обратном пути к первой вершине
+		if ((*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1] != 0)
+		{
+			// curr_res имеет текущий вес решения, которое мы получили
+			int curr_res = curr_weight +
+				(*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1];
+
+			// Обновляем конечный результат и конечный путь, если текущий результат лучше.
+			if (curr_res < final_res)
+			{
+				copyToFinal(curr_path,final_path);
+				final_res = curr_res;
+			}
+		}
+		return;
+	}
+
+	// для любого другого уровня выполняем итерацию для всех вершин, чтобы рекурсивно построить дерево пространства поиска
+	for (int i = 0; i < length; i++)
+	{
+		// Рассмотрим следующую вершину, если она не такая же 
+		// (диагональная запись в матрице смежности, не посещенная)
+		if ((*matr_adj)[curr_path[level - 1]-1][i] != 0 && visited[i] == false)
+		{
+			int temp = curr_bound;
+			curr_weight += (*matr_adj)[curr_path[level - 1]-1][i];
+
+			// другое вычисление curr_bound для второго уровня отличающегося от других уровней
+			if (level == 1)
+				curr_bound -= ((firstMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
+			else
+				curr_bound -= ((secondMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
+
+			// curr_bound + curr_weight - фактическая нижняя граница для узла, на который мы прибыли
+			// Если текущая нижняя граница < final_res, нам нужно исследоватьузел далее
+			if (curr_bound + curr_weight < final_res)
+			{
+				curr_path[level] = i+1;
+				visited[i] = true;
+
+				// вызываем TSPRec на слудующий уровень
+				TSPRec(matr_adj, curr_bound, curr_weight, level + 1, curr_path, final_path, final_res, visited);
+			}
+
+			// В противном случае нам придется обрезать узел путем сброса настроек к curr_weight и curr_bound
+			curr_weight -= (*matr_adj)[curr_path[level - 1]-1][i];
+			curr_bound = temp;
+
+			// Также сбросить посещенный массив
+			visited.clear();
+			visited.resize(length);
+			for (int j = 0; j <= level - 1; j++)
+				visited[curr_path[j]-1] = true;
+		}
+	}
+}
+// Функция для копирования текущего решения в окончательное решение
+void copyToFinal(vector<int>& curr_path, vector<int>& final_path)
+{
+	int length = curr_path.size()-1;
+	for (int i = 0; i < length; i++)
+		final_path[i] = curr_path[i];
+	final_path[length] = curr_path[0];
+}
+// Функция для определения минимальной стоимости ребра имеющего конец в вершине i
+int firstMin(vector<vector<int>>* matr_adj, int i)
+{
+	int length = matr_adj->size();
+	int min = INF;
+	for (int k = 0; k < length; k++)
+		if ((*matr_adj)[i][k] < min && i != k)
+			min = (*matr_adj)[i][k];
+	return min;
+}
+// функция для нахождения второй минимального веса ребра имеющего конец в вершине i
+int secondMin(vector<vector<int>>* matr_adj, int i)
+{
+	int length = matr_adj->size();
+	int first = INF;
+	int second = INF;
+	for (int j = 0; j < length; j++)
+	{
+		if (i == j)
+			continue;
+
+		if ((*matr_adj)[i][j] <= first)
+		{
+			second = first;
+			first = (*matr_adj)[i][j];
+		}
+		else if ((*matr_adj)[i][j] <= second &&
+			(*matr_adj)[i][j] != first)
+			second = (*matr_adj)[i][j];
+	}
+	return second;
+}
+// Эта функция устанавливает final_path[]
+void TSP(vector<vector<int>>* matr_adj, vector<int>& final_path, int& final_res, vector<bool>& visited)
+{
+	int length = matr_adj->size();
+	vector<int> curr_path(length + 1);
+	visited.resize(length+1);
+	for (size_t i = 0; i < length+1; i++)
+	{
+		curr_path[i] = -1;
+	}
+
+	// Вычисляем начальную нижнюю границу для корневого узла
+	// используя формулу 1/2 * (сумма первого минимума + второго минимума) для всех ребер.
+	// Также инициализируем curr_path и посещенный массив
+	int curr_bound = 0;
+	
+	// Вычисляем начальную границу
+	for (int i = 0; i < length; i++)
+		curr_bound += (firstMin(matr_adj, i) + secondMin(matr_adj, i));
+
+	// Округление нижней границы до целого числа
+	curr_bound = (curr_bound & 1) ? curr_bound / 2 + 1 : curr_bound / 2;
+
+	// Мы начинаем с вершины 1, так что первая вершина в curr_path[] равна 1
+	visited[0] = true;
+	curr_path[0] = 1;
+
+	// Вызов TSPRec для curb_weight, равного 0 и уровню 1
+	TSPRec(matr_adj, curr_bound, 0, 1, curr_path, final_path, final_res, visited);
+}
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2)
 {

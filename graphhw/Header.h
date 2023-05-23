@@ -389,7 +389,25 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 int Ford_Fulkerson(Graph GRAPH, vector<vector<int>>* bandwidth, int& source, int& sink);
 //поиск в ширину для поиска максимального потока
 bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<int>& parent);
+//поиск в глубину для определения двудольности графа
 bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color);
+//поиск максимального паросочетания в двудольном графе
+int Max_Matching_Bipatrid(Graph GRAPH, vector<vector<int>>*& web, vector<vector<int>>*& new_web, vector<int>& color);
+// функция, которая принимает в качестве аргументов:
+// curr_bound -> нижняя граница корневого узла
+// curr_weight-> сохраняет вес пути на данный момент
+// level-> текущий уровень при перемещении в поиске дерева
+// curr_path[] -> где хранится решение, которое позже будет скопирован в final_path[]
+void TSPRec(vector<vector<int>>* matr_adj, int curr_bound, int curr_weight, int level,
+	vector<int>& curr_path, vector<int>& final_path, int& final_res, vector<bool>& visited);
+// Функция для копирования текущего решения в окончательное решение
+void copyToFinal(vector<int>& curr_path, vector<int>& final_path);
+// Функция для определения минимальной стоимости ребра имеющего конец в вершине i
+int firstMin(vector<vector<int>>* matr_adj, int i);
+// функция для нахождения второй минимального веса ребра имеющего конец в вершине i
+int secondMin(vector<vector<int>>* matr_adj, int i);
+// Эта функция устанавливает final_path[]
+void TSP(vector<vector<int>>* matr_adj, vector<int>& final_path, int& final_res, vector<bool>& visited);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);
