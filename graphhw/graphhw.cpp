@@ -127,6 +127,10 @@ int main(int argc, char* argv[])
 				tenth_task(argc, argv, GRAPH, cout);
 			break;
 		case 11:
+			if (out)
+				eleventh_task(argc, argv, GRAPH, file_out);
+			else
+				eleventh_task(argc, argv, GRAPH, cout);
 			break;
 		default:
 			break;

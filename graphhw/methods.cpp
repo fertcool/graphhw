@@ -1393,12 +1393,14 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	if (num_alg == 1) 
 	{
 		const int K = 10;//количество запусков муравьиного алгоритма
-		const int KA = 400;//количество итераций в муравьином алгоритме
+		const int KA = 2000;//количество итераций в муравьином алгоритме
 		vector<int> mincycle;
-		int mincycle_length;
+		int mincycle_length = INF;
 		for (size_t i = 0; i < K; i++)
 		{
-			mincycle_length = Ant_Agorithm(GRAPH, mincycle, KA, begin_VER);
+			int cycle = Ant_Agorithm(GRAPH, mincycle, KA, begin_VER);
+			if (cycle < mincycle_length)
+				mincycle_length = cycle;
 		}
 		if (mincycle.size() == 0)
 		{
@@ -1438,116 +1440,13 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	vector<vector<int>>* bandwidth = GRAPH.adjacency_matrix();//матрица пропускной способности
-	int length = bandwidth->size();//количество вершин
-	vector<vector<int>> remain_band(length);//матрица остаточной пропускной способности
-	list<int[3]>* nbrs;//список сосдених ребер
-	vector<int> back(length);//вектор предыдуще посещенных вершин
-	for (size_t i = 0; i < length; i++)
-	{
-		remain_band[i].resize(length);
-		for (size_t j = 0; j < length; j++)
-		{
-			remain_band[i][j] = (*bandwidth)[i][j];
-		}
-	}
-	int source;//исток
-	int sink;//сток
-	
-	//поиск стока и истока
-	for (size_t i = 1; i <= length; i++)
-	{
-		list<int[3]>* nbrs = GRAPH.list_of_edges(i);
-		if (!nbrs) 
-		{
-			sink = i;
-			continue;
-		}
-		nbrs->clear(nbrs);
-		delete nbrs;
-		list <int>* innbrs = GRAPH.adjacency_list_in(i);
-		if (!innbrs) 
-		{
-			source = i;
-			continue;
-		}
-	}
+	vector<vector<int>>* bandwidth_new = GRAPH.adjacency_matrix();//матрица пропускной способности после поиска максимального потока
+	int length = bandwidth_new->size();
 
-	
-	bool not_avail = false;
-	vector<pair<int,int>> a;//вектор пропускных способностей дополняющей цепи
-	int f = 0;//сумма минимальных остаточных пропускных способностях в дополняющих путях (то есть максимальный поток в сети)
-	while (true) 
-	{
-		int current_Ver = source;
-		back.clear();
-		back.resize(length);
-		a.clear();
-		
-		while (current_Ver != sink) 
-		{
-			//нахожденеи вершины с максимальным остаточным потоком
-			nbrs = GRAPH.list_of_edges(current_Ver);
-			int max_Ver = 0;
-			int max_bandwidth = 0;
-			for (list<int[3]>* cur = nbrs;cur;cur = cur->next)
-			{
-				if (remain_band[current_Ver - 1][cur->Ver[1] - 1] > max_bandwidth && back[cur->Ver[1]-1] == 0 && remain_band[current_Ver-1][cur->Ver[1]-1]>0)
-				{
-					max_bandwidth = remain_band[current_Ver - 1][cur->Ver[1] - 1];
-					max_Ver = cur->Ver[1];
-				}
+	int source;
+	int sink;
 
-			}
-			//если нету доступных соседних вершин
-			if (!max_Ver) 
-			{
-				//если текущая вершина исток, то выходим из циклов
-				if (current_Ver == source)
-				{
-					not_avail = true;
-					break;
-				}
-				else//иначе откат
-				{
-					a.pop_back();
-					current_Ver = back[current_Ver - 1];
-					continue;
-				}
-			}
-			//помещаем в начало вектора вершину истока
-			if (current_Ver == source)
-				a.push_back(pair<int, int>(INF, source));
-			//если есть доступные вершины, то идем в вершину с максимальным остаточной пропускной способностью
-			back[max_Ver - 1] = current_Ver;
-			current_Ver = max_Ver;
-			a.push_back(pair<int,int>(max_bandwidth, max_Ver));
-			
-
-		}
-		//если нет доступных вершин из истока, то выходим из основного цикла (больше нет дополняющих цепей)
-		if (not_avail)
-			break;
-		else
-		{
-			//нахождение минимальной остаточной пропускной способности во всем пути
-			int min_remainband = INF;//вершина с минимальной остаточной пропускной способностью из пройденного пути
-			for (size_t i = 0; i < a.size(); i++)
-			{
-				if (a[i].first < min_remainband)
-				{
-					min_remainband = a[i].first;
-				}
-			}
-			
-			//изменение остаточых пропускных способностей у прямых и обратных вершин
-			for (size_t i = 0; i < a.size()-1; i++)
-			{
-				remain_band[a[i].second - 1][a[i + 1].second - 1] -= min_remainband;
-				remain_band[a[i+1].second - 1][a[i].second - 1] += min_remainband;
-			}
-			f += min_remainband;
-		}
-	}
+	int f = Ford_Fulkerson(GRAPH, bandwidth_new, source, sink);
 	//вывод найденного потока и оптимальных потоков через ребра
 	stream_out << f << " - Максимальный поток от " << source << " до " << sink << endl;
 	for (size_t i = 0; i < length; i++)
@@ -1557,13 +1456,118 @@ void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			if ((*bandwidth)[i][j])
 			{
 				stream_out << i + 1 << " - " << j + 1 << " : ";
-				if ((remain_band[i][j] - (*bandwidth)[i][j]) > 0)
-					stream_out << remain_band[i][j] - (*bandwidth)[i][j];
+				if (((*bandwidth)[i][j] - (*bandwidth_new)[i][j]) > 0)
+					stream_out << (*bandwidth)[i][j] - (*bandwidth_new)[i][j];
+				else if ((*bandwidth_new)[i][j] - (*bandwidth)[i][j] > 0)
+					stream_out << (*bandwidth_new)[i][j] - (*bandwidth)[i][j];
 				else
-					stream_out << remain_band[j][i] - (*bandwidth)[j][i];
+					stream_out << 0;
 				stream_out << "/" << (*bandwidth)[i][j] << endl;
 			}
 		}
+	}
+}
+void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
+{
+	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
+	int length = matrix->size();
+	//делаем соотнесенный граф
+	if (GRAPH.is_directed()) 
+	{
+		for (size_t i = 0; i < length; i++)
+		{
+			for (size_t j = 0; j < length; j++)
+			{
+				if ((*matrix)[i][j])
+				{
+					(*matrix)[j][i] = (*matrix)[i][j];
+				}
+			}
+		}
+	}
+	list<int[3]>* edgelist = GRAPH.list_of_edges();
+
+	vector<int> color(length);//вектор принадлежности вершины доле
+	bool bipartide = true;//флаг является ли граф двудольным
+	//проверка графа на двудольность через поиск в глубину
+	for (int i = 0; i < length; i++) 
+	{
+		if (color[i] == 0) 
+		{
+			if (!DFS_BIPARTITE_CHECK(GRAPH, i+1, 1, color))
+				bipartide = false;
+		}
+	}
+	if (!bipartide)
+		stream_out << "Граф не является двудольным!!!" << endl;
+	else 
+		stream_out << "Граф является двудольным" << endl;
+
+	if (bipartide)
+	{
+		//строим сеть для поиска максимального паросочетания через алгоритм форда фалекрсона
+
+		//добавляем исток и сток в список ребер (исток присоединяем к 1 доле сток ко 2)
+		int source = length + 1;
+		int sink = length + 2;
+		list<int[3]>* tail = edgelist->getTail(edgelist);
+		//добавление истока
+		for (size_t i = 0; i < length; i++)
+		{
+			if (color[i] == 1)
+			{
+				tail->next = new list<int[3]>;
+				tail->next->Ver[0] = source;
+				tail->next->Ver[1] = i + 1;
+				tail->next->Ver[2] = 1;
+				tail = tail->next;
+			}
+		}
+		//добавление стока
+		for (size_t i = 0; i < length; i++)
+		{
+			if (color[i] == 2)
+			{
+				tail->next = new list<int[3]>;
+				tail->next->Ver[0] = i+1;
+				tail->next->Ver[1] = sink;
+				tail->next->Ver[2] = 1;
+				tail = tail->next;
+			}
+		}
+		//новый граф - сеть
+		Graph WEB = Graph(edgelist);
+		vector<vector<int>>* web_matrix = WEB.adjacency_matrix();//изначальная сеть
+		vector<vector<int>>* web_matrix_new = WEB.adjacency_matrix();//сеть после форда фалекрсона
+		//запускаем форда фалкерсона
+		int answ = Ford_Fulkerson(WEB, web_matrix_new, source, sink);
+		stream_out << answ << " - Количество ребер в максимальном паросочетании." << endl << "Рёбра: " << endl;
+		//вывод ребер паросочетания
+		for (size_t i = 0; i < length; i++)
+		{
+			if (color[i] == 1)
+			{
+				for (size_t j = 0; j < length; j++)
+				{
+					if (((*web_matrix)[i][j] - (*web_matrix_new)[i][j]) > 0 || (*web_matrix_new)[i][j] - (*web_matrix)[i][j] > 0)
+						stream_out << i + 1 << " - " << j + 1 << endl;
+				}
+
+			}
+			/*for (size_t j = 0; j < length+2; j++)
+			{
+				if ((*bandwidth)[i][j])
+				{
+					stream_out << i + 1 << " - " << j + 1 << " : ";
+					if (((*bandwidth)[i][j] - (*bandwidth_new)[i][j]) > 0)
+						stream_out << (*bandwidth)[i][j] - (*bandwidth_new)[i][j];
+					else
+						stream_out << (*bandwidth)[j][i] - (*bandwidth)[j][i];
+					stream_out << "/" << (*bandwidth)[i][j] << endl;
+				}
+			}*/
+		}
+
 	}
 }
 //*-------------- Алгоритмы ------------------*//
@@ -2410,6 +2414,7 @@ int Choose_Edge(vector<float> probalities)
 	}
 	return length - 1;
 }
+//муравьиный алгоритм
 int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver)
 {
 	list<int[3]>* edgelist = GRAPH.list_of_edges();//список ребер
@@ -2595,7 +2600,123 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 	
 	return mincycle_length;
 }
+//алгоритм форда-флакерсона
+int Ford_Fulkerson(Graph GRAPH, vector<vector<int>>* bandwidth, int& source, int& sink)
+{
+	int length = bandwidth->size();//количество вершин
 
+
+	//поиск стока и истока
+	for (size_t i = 1; i <= length; i++)
+	{
+		list<int[3]>* nbrs = GRAPH.list_of_edges(i);
+		if (!nbrs)
+		{
+			sink = i;
+			continue;
+		}
+		nbrs->clear(nbrs);
+		delete nbrs;
+		list <int>* innbrs = GRAPH.adjacency_list_in(i);
+		if (!innbrs)
+		{
+			source = i;
+			continue;
+		}
+	}
+	int u, v;
+
+
+	vector<int> parent(length);//вектор восстановления дополняющей цепи
+
+	int max_flow = 0;//максимальный поток
+
+	//поиск дополняющей цепи
+	while (BFS_FlowSearch(bandwidth, source, sink, parent)) 
+	{
+		//находим минимальный остаточный поток в цепи
+		int path_flow = INF;
+		for (v = sink; v != source; v = parent[v-1]) 
+		{
+			u = parent[v-1];
+			path_flow = min(path_flow, (*bandwidth)[u-1][v-1]);
+		}
+
+		//обновляем остаточные потоки ребер в цепи
+		for (v = sink; v != source; v = parent[v-1]) 
+		{
+			u = parent[v-1];
+			(*bandwidth)[u-1][v-1] -= path_flow;
+			(*bandwidth)[v-1][u-1] += path_flow;
+		}
+
+		//дополняем максимальный поток
+		max_flow += path_flow;
+		
+	}
+
+	return max_flow;
+}
+//поиск в ширину для поиска максимального потока
+bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<int>& parent)
+{
+	int length = matrix->size();
+	parent.clear();
+	parent.resize(length);
+	//вектор посещеней
+	vector<bool> visited(length);
+
+	queue<int> q;//очередь поиска
+	q.push(source);
+	visited[source - 1] = true;
+	parent[source - 1] = -1;
+
+	//основной цикл поиска
+	while (!q.empty()) {
+		int u = q.front();
+		q.pop();
+
+		for (int v = 0; v < length; v++) 
+		{
+			//если соседняя вершина не посещена и ее остаточный поток положительный, то добавляем вершину в очередь
+			if (visited[v] == false && (*matrix)[u-1][v] > 0)
+			{
+				//если попали в сток, то выходим из поиска
+				if (v == sink - 1)
+				{
+					parent[v] = u;
+					return true;
+				}
+				q.push(v+1);
+				parent[v] = u;
+				visited[v] = true;
+			}
+		}
+	}
+	return false;
+}
+//поиск в глубину для определения 
+bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color)
+{
+	color[v-1] = c;
+
+	for (list<int[3]>* cur = GRAPH.list_of_edges(v); cur; cur = cur->next)
+	{
+		if (color[cur->Ver[1]-1] == 0) 
+		{    
+			//непосещённая вершина
+			int new_col = c == 1 ? 2 : 1;
+			if (!DFS_BIPARTITE_CHECK(GRAPH, cur->Ver[1], new_col, color))
+				return false;
+		}
+		else if (color[cur->Ver[1] - 1] == c) 
+		{
+			return false;
+		}
+	}
+	return true;
+}
+//поиск максимального паросочетания
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2)
 {

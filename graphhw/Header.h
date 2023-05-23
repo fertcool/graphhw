@@ -344,6 +344,7 @@ void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out);
 void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 void tenth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
+void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out);
 //*-------------- Алгоритмы ------------------*//
 //алгоритм флойда
 vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix);
@@ -378,9 +379,17 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver);
 int Jonson(Graph GRAPH, vector<vector<int>>& answ);
 //алгоритм A*
 int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2));
+//восстановление пути из матрицы пути для клеток карты
 vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell begin);
+//возращает номер ребра (из списка ребер), куда должен пойти муравей
 int Choose_Edge(vector<float> probalities);
+//муравьиный алгоритм
 int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver);
+//алгоритм форда-флакерсона
+int Ford_Fulkerson(Graph GRAPH, vector<vector<int>>* bandwidth, int& source, int& sink);
+//поиск в ширину для поиска максимального потока
+bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<int>& parent);
+bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color);
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2);
 int Chebyshev(Cell Ver1, Cell Ver2);
