@@ -2850,16 +2850,48 @@ int secondMin(vector<vector<int>>* matr_adj, int i)
 	}
 	return second;
 }
-// Эта функция устанавливает final_path[]
-void TSP(vector<vector<int>>* matr_adj, vector<int>& final_path, int& final_res, vector<bool>& visited)
+// Функция для решения задачи коммивояжера методом ветвей и границ
+int TSP(vector<vector<int>> costMatrix, ostream& stream_out)
 {
-	int length = matr_adj->size();
-	vector<int> curr_path(length + 1);
-	visited.resize(length+1);
-	for (size_t i = 0; i < length+1; i++)
+	int length = costMatrix.size();
+	// Приоритетная очередь для хранения активных узлов дерева поиска
+	priority_queue<Node*, vector<Node*>, comp> pq;
+
+	vector<pair<int, int>> v;
+
+	// создаем корневой узел и рассчитываем его стоимость.
+	// TSP начинается с первой вершины, то есть с узла 0
+	Node* root = newNode(costMatrix, v, 0, -1, 0);
+
+	// получаем нижнюю границу пути, начинающегося с узла 0
+	root->cost = calculateCost(root->reducedMatrix);
+
+	// Добавляем корень в список активных узлов
+	pq.push(root);
+
+	// Находит активный узел с наименьшими затратами, добавляет его дочерние узлы в список
+	// активных узлов и, наконец, удаляет его из списка
+	while (!pq.empty())
 	{
-		curr_path[i] = -1;
-	}
+		// Находим активный узел с наименьшей предполагаемой стоимостью
+		Node* min = pq.top();
+		pq.pop();
+
+		// `i` сохраняет текущий номер вершины
+		int i = min->vertex;
+
+		// если посещены все вершины
+		if (min->level == length - 1)
+		{
+			// возврат в стартовую вершину
+			min->path.push_back(make_pair(i, 0));
+
+			// печать списка посещенных городов
+			printPath(min->path, stream_out);
+
+			// возврат оптимальной стоимости
+			return min->cost;
+		}
 
 	// Вычисляем начальную нижнюю границу для корневого узла
 	// используя формулу 1/2 * (сумма первого минимума + второго минимума) для всех ребер.
