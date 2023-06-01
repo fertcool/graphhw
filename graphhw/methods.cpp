@@ -2882,7 +2882,10 @@ vector<int*>* zeros_rating(vector<vector<int>>& reducedMatrix)
 	}
 	return max_zeros;
 }
+int BaB_TSP(Graph GRAPH)
+{
 
+}
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2)
 {

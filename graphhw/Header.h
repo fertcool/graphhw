@@ -302,7 +302,8 @@ struct Node
 {
 	Node* incude_edge;
 	Node* not_inlude_edge;
-	
+	//флаг того что нижняя граница меньше других
+	bool skip = false;
 	// вектор пути до текущего узла
 	vector<pair<int, int>> path;
 
