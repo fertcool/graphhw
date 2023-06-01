@@ -782,7 +782,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			}
 		}
 		(*exc)[i] = max;
-		if (inf)	
+		if (INF)	
 			break;
 
 	}
@@ -2416,7 +2416,7 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
 	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
 	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
-	const float infinum_pheromone = 0.001;//нижняя граница феромона
+	const float INFinum_pheromone = 0.001;//нижняя граница феромона
 	//матрица феромонов
 	vector<vector<float>> pheromone(length);
 	for (size_t i = 0; i < length; i++)
@@ -2560,7 +2560,7 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 		{
 			for (size_t j = 0; j < length; j++)
 			{
-				if (pheromone[i][j] > infinum_pheromone)
+				if (pheromone[i][j] > INFinum_pheromone)
 					pheromone[i][j] *= 1 - p;
 			}
 		}
@@ -2742,143 +2742,331 @@ int Max_Matching_Bipatrid(Graph GRAPH, vector<vector<int>>*& web, vector<vector<
 	
 	return answ;
 }
-// функция, которая принимает в качестве аргументов:
-// curr_bound -> нижняя граница корневого узла
-// curr_weight-> сохраняет вес пути на данный момент
-// level-> текущий уровень при перемещении в поиске дерева
-// curr_path[] -> где хранится решение, которое позже будет скопирован в final_path[]
-void TSPRec(vector<vector<int>>* matr_adj, int curr_bound, int curr_weight, int level, 
-		    vector<int>& curr_path, vector<int>& final_path, int& final_res, vector<bool>& visited)
-{
-	int length = matr_adj->size();
-	// базовый случай - это когда мы достигли уровня N, который означает, что мы охватили все узлы один раз
-	if (level == length)
-	{
-		// проверяем, есть ли ребро от последней вершины в обратном пути к первой вершине
-		if ((*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1] != 0)
-		{
-			// curr_res имеет текущий вес решения, которое мы получили
-			int curr_res = curr_weight +
-				(*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1];
 
-			// Обновляем конечный результат и конечный путь, если текущий результат лучше.
-			if (curr_res < final_res)
+// Сохраняет два минимальных элемента при добавлении нового
+void two_lows(unsigned int* a, unsigned int* b, unsigned int c)
+{
+	if (c <= *a)
+	{
+		*b = *a;
+		*a = c;
+	}
+	else
+		if (c < *b)
+			*b = c;
+}
+void matrix_reduction(unsigned int* pm, unsigned int n, unsigned int* max_sum, unsigned int* max_i, unsigned int* max_j)
+{
+	unsigned int sum = 0;
+
+	// Организуем кеш для подсчёта веса строки
+	unsigned int* line_cache = new unsigned int[n+1];
+
+	// Для каждой строки находим минимум
+	for (unsigned int i = 1; i < n; i++)
+	{
+		unsigned int min1 = pm[i * n + 1];
+		unsigned int min2 = INF;
+		two_lows(&min1, &min2, pm[i * n + 2]);
+
+		for (unsigned int j = 3; j < n; j++)
+			two_lows(&min1, &min2, pm[i * n + j]);
+
+		// Если хоть одна точка источник не имеет выходов то обрываем расчёт
+		if (min1 == INF)
+		{
+			pm[0] = INF;
+			return;
+		}
+
+		// Вычитаем минимум из каждой строки (Редукция строк)
+		if (min1 > 0)
+		{
+			if (min2 < INF)
+				min2 -= min1;
+
+			for (unsigned int j = 1; j < n; j++)
+				if (pm[i * n + j] < INF)
+					pm[i * n + j] -= min1;
+			// Прибавляем минимальный элемент к нижней границе
+			sum += min1;
+		}
+		line_cache[i] = min2;
+	}
+
+	*max_sum = 0;
+	*max_i = INF;
+
+	// Для каждого столбца находим минимум
+	for (unsigned int i = 1; i < n; i++)
+	{
+		unsigned int min1 = pm[1 * n + i];
+		unsigned int min2 = INF;
+		two_lows(&min1, &min2, pm[2 * n + i]);
+
+		for (unsigned int j = 3; j < n; j++)
+			two_lows(&min1, &min2, pm[j * n + i]);
+
+		// Если хоть одна точка назначения не имеет входов то обрываем расчёт
+		if (min1 == INF)
+		{
+			pm[0] = INF;
+			return;
+		}
+
+		if (min1 > 0)
+		{
+			if (min2 < INF)
+				min2 -= min1;
+
+			// Вычитаем минимум из каждого столбца (Редукция столбцов)
+			// Находим элемент для разбиения, и верхнюю оценку
+			unsigned int temp_val;
+			for (unsigned int j = 1; j < n; j++)
 			{
-				copyToFinal(curr_path,final_path);
-				final_res = curr_res;
+				temp_val = pm[j * n + i];
+				if (temp_val < INF)
+				{
+					temp_val -= min1;
+					pm[j * n + i] = temp_val;
+					if (temp_val == 0)
+					{
+						temp_val = line_cache[j] + min2;
+						if (temp_val >= *max_sum)
+						{
+							*max_sum = temp_val;
+							*max_i = j;
+							*max_j = i;
+						}
+					}
+				}
 			}
+
+			// Прибавляем минимальный элемент к нижней границе
+			sum += min1;
+
+		}
+		else
+		{
+			// Находим элемент для разбиения, и верхнюю оценку
+			unsigned int temp_val;
+			for (unsigned int j = 1; j < n; j++)
+				if (pm[j * n + i] == 0)
+				{
+					temp_val = line_cache[j] + min2;
+					// выбираем значение с максимальной суммой минимумов по строке и столбцу
+					if (temp_val >= *max_sum)
+					{
+						*max_sum = temp_val;
+						*max_i = j;
+						*max_j = i;
+					}
+				}
+		}
+	}
+
+	// Нижняя граница - стоимость меньше которой невозможно построить маршрут
+	// Если нет элемента для разбиения, то блочим ветку
+	if (*max_i == INF)
+		pm[0] = INF;
+	else
+		pm[0] += sum;
+}
+
+int head_search(unsigned int* pm, struct TVector* v, unsigned int n, unsigned int index, unsigned int dj)
+{
+	unsigned int l = 0;
+	do
+	{
+		if (v[l].src == dj)
+		{
+			dj = v[l].dest;
+			l = 0;
+			continue;
+		}
+		l++;
+	} while (l < index);
+
+	for (l = 1; l < n; l++)
+		if (pm[l * n + 0] == dj)
+			break;
+	return l;
+}
+
+int tail_search(unsigned int* pm, struct TVector* v, unsigned int n, unsigned int index, unsigned int di)
+{
+	unsigned int l = 0;
+	do
+	{
+		if (v[l].dest == di)
+		{
+			di = v[l].src;
+			l = 0;
+			continue;
+		}
+		l++;
+	} while (l < index);
+
+	for (l = 1; l < n; l++)
+		if (pm[0 * n + l] == di)
+			break;
+	return l;
+}
+void martix_in_depth(struct TMatrixObj* m, unsigned int* pm, unsigned int n, unsigned int index, unsigned int di, unsigned int dj)
+{
+	unsigned int* new_matrix = new unsigned int[n*n];
+	
+	// Копируем матрицу в массив меньшего размера
+	{
+		unsigned int* src = pm;
+		unsigned int* dest = new_matrix;
+		for (unsigned int i = 0; i <= n; i++)
+		{
+			if (i == di)
+			{
+				src += n + 1;
+				continue;
+			}
+			for (unsigned int j = 0; j <= n; j++)
+			{
+				if (j == dj)
+				{
+					src++;
+					continue;
+				}
+				*dest++ = *src++;
+			}
+		}
+	}
+
+	if (n > 3)
+	{
+		// Запрещаем переходы в уже пройденные узлы графа.
+		// Чтобы избежать подциклы в векторе найденых рёбер ищем голову и хвост цепочек,
+		// вместе с которыми добавленное ребро образует единую ветвь.
+		// Для найденый индексов в матрице меньшего размера ищем обратные индексы
+		unsigned int i = head_search(new_matrix, m->v, n, index, m->v[index].dest);
+		unsigned int j = tail_search(new_matrix, m->v, n, index, m->v[index].src);
+		// Зануляем обратный элемент в матрице меньшего размера.
+		// Должен находиться всегда!!!
+		new_matrix[i * n + j] = INF;
+	}
+	else if (n == 2)
+	{
+		// Если в матрице остался только один элемент
+		new_matrix[0] += new_matrix[3];
+
+		// Если текущее решение лучшее из найденных, запоминаем его
+		if (new_matrix[0] < m->global_min)
+		{
+			m->global_min = new_matrix[0];
+			for (unsigned int i = 0; i <= index; i++)
+			{
+				m->v_best[i].src = m->v[i].src;
+				m->v_best[i].dest = m->v[i].dest;
+			}
+			//memcpy(m->v_best, m->v, (m->n-1) * sizeof(TVector));
+			m->v_best[index + 1].src = new_matrix[1 * n + 0];
+			m->v_best[index + 1].dest = new_matrix[0 * n + 1];
 		}
 		return;
 	}
-
-	// для любого другого уровня выполняем итерацию для всех вершин, чтобы рекурсивно построить дерево пространства поиска
-	for (int i = 0; i < length; i++)
+	// Производим раcчёт для слоя ниже
+	matrix_evaluation(m, new_matrix, index + 1, n);
+}
+//=======================================================================
+void matrix_evaluation(struct TMatrixObj* m, unsigned int* pm, unsigned int index, unsigned int n)
+{
+	unsigned int max_sum, max_i, max_j;
+	do
 	{
-		// Рассмотрим следующую вершину, если она не такая же 
-		// (диагональная запись в матрице смежности, не посещенная)
-		if ((*matr_adj)[curr_path[level - 1]-1][i] != 0 && visited[i] == false)
+		m->step++;
+		// Производим приведение матрицы, находим элемент для разбиения, и верхнюю оценку
+		matrix_reduction(pm, n, &max_sum, &max_i, &max_j);
+		// Если нет возможного пути, то блочим ветку
+		if (pm[0] >= INF)
+			return;
+
+		// Расчитываем множество М1
+		// Если лучший из найденых пока маршрутов больше нижней границы,
+		// то вычёркиваем текущую строку и столбец и переходим к уменьшиной матрице
+		if (m->global_min > pm[0])
 		{
-			int temp = curr_bound;
-			curr_weight += (*matr_adj)[curr_path[level - 1]-1][i];
-
-			// другое вычисление curr_bound для второго уровня отличающегося от других уровней
-			if (level == 1)
-				curr_bound -= ((firstMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
-			else
-				curr_bound -= ((secondMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
-
-			// curr_bound + curr_weight - фактическая нижняя граница для узла, на который мы прибыли
-			// Если текущая нижняя граница < final_res, нам нужно исследоватьузел далее
-			if (curr_bound + curr_weight < final_res)
-			{
-				curr_path[level] = i+1;
-				visited[i] = true;
-
-				// вызываем TSPRec на слудующий уровень
-				TSPRec(matr_adj, curr_bound, curr_weight, level + 1, curr_path, final_path, final_res, visited);
-			}
-
-			// В противном случае нам придется обрезать узел путем сброса настроек к curr_weight и curr_bound
-			curr_weight -= (*matr_adj)[curr_path[level - 1]-1][i];
-			curr_bound = temp;
-
-			// Также сбросить посещенный массив
-			visited.clear();
-			visited.resize(length);
-			for (int j = 0; j <= level - 1; j++)
-				visited[curr_path[j]-1] = true;
+			// Сохраняем индексы элемента разбиения в вектор локального результата
+			m->v[index].src = pm[max_i * n + 0];
+			m->v[index].dest = pm[0 * n + max_j];
+			// Погружаемся на слой ниже
+			martix_in_depth(m, pm, n - 1, index, max_i, max_j);
 		}
-	}
+		// Расчитываем множество М2
+		// Исключаем пункт из множества
+		pm[max_i * n + max_j] = INF;
+		// Производим повторную оценку после вычерка вершины (множество М2)
+		// Так как хвостовая рекурсия дороже итерации, оформляем цикл
+	} while (m->global_min >= pm[0] + max_sum);
 }
-// Функция для копирования текущего решения в окончательное решение
-void copyToFinal(vector<int>& curr_path, vector<int>& final_path)
+int tsp_branch(unsigned int n, int* p)
 {
-	int length = curr_path.size()-1;
-	for (int i = 0; i < length; i++)
-		final_path[i] = curr_path[i];
-	final_path[length] = curr_path[0];
-}
-// Функция для определения минимальной стоимости ребра имеющего конец в вершине i
-int firstMin(vector<vector<int>>* matr_adj, int i)
-{
-	int length = matr_adj->size();
-	int min = INF;
-	for (int k = 0; k < length; k++)
-		if ((*matr_adj)[i][k] < min && i != k)
-			min = (*matr_adj)[i][k];
-	return min;
-}
-// функция для нахождения второй минимального веса ребра имеющего конец в вершине i
-int secondMin(vector<vector<int>>* matr_adj, int i)
-{
-	int length = matr_adj->size();
-	int first = INF;
-	int second = INF;
-	for (int j = 0; j < length; j++)
-	{
-		if (i == j)
-			continue;
+	if ((n < 2) || (n > 64))
+		return 0;
 
-		if ((*matr_adj)[i][j] <= first)
+	struct TMatrixObj m;
+	m.n = n;
+	struct TVector* v_best = new TVector[n];
+	struct TVector* v = new TVector[n - 1];
+	m.v = v;
+	m.v_best = v_best;
+	unsigned int* work_matrix = new unsigned int[(n + 1) * (n + 1)];
+
+	//-----------------------------------------------------------------------
+	// Производим первичную инициализацию рабочей матрицы
+	m.global_min = INF;
+	m.step = 0;
+	work_matrix[0] = 0;
+	for (unsigned int i = 1; i < m.n + 1; i++)
+	{
+		work_matrix[i * (m.n + 1) + 0] = i;
+		work_matrix[0 * (m.n + 1) + i] = i;
+	}
+	{
+		int* src = p;
+		for (unsigned int i = 1; i < m.n + 1; i++)
+			for (unsigned int j = 1; j < m.n + 1; j++, src++)
+				if ((i != j) && (*src >= 0))
+					work_matrix[i * (m.n + 1) + j] = *src;
+				else
+					work_matrix[i * (m.n + 1) + j] = INF;
+	}
+	//-----------------------------------------------------------------------
+	// Начинаем расчёт
+	matrix_evaluation(&m, work_matrix, 0, m.n + 1);
+	//-----------------------------------------------------------------------
+	// Вывод результата
+	if (m.global_min < INF)
+	{
+		p[0] = m.global_min;
+		p[1] = m.step;
+		unsigned int* v_result = new unsigned int[n];
+
+
+		for (unsigned int i = 0; i < n; i++)
 		{
-			second = first;
-			first = (*matr_adj)[i][j];
+			v_result[v_best[i].src - 1] = v_best[i].dest;
 		}
-		else if ((*matr_adj)[i][j] <= second &&
-			(*matr_adj)[i][j] != first)
-			second = (*matr_adj)[i][j];
+
+		unsigned int j = 0;
+		for (unsigned int i = 2; i < m.n + 1; i++)
+		{
+			p[i] = v_result[j] - 1;
+			j = v_result[j] - 1;
+		}
+		p[n + 1] = 0;
+		return n + 2;
 	}
-	return second;
-}
-// Эта функция устанавливает final_path[]
-void TSP(vector<vector<int>>* matr_adj, vector<int>& final_path, int& final_res, vector<bool>& visited)
-{
-	int length = matr_adj->size();
-	vector<int> curr_path(length + 1);
-	visited.resize(length+1);
-	for (size_t i = 0; i < length+1; i++)
+	else
 	{
-		curr_path[i] = -1;
+		return 0;
 	}
-
-	// Вычисляем начальную нижнюю границу для корневого узла
-	// используя формулу 1/2 * (сумма первого минимума + второго минимума) для всех ребер.
-	// Также инициализируем curr_path и посещенный массив
-	int curr_bound = 0;
-	
-	// Вычисляем начальную границу
-	for (int i = 0; i < length; i++)
-		curr_bound += (firstMin(matr_adj, i) + secondMin(matr_adj, i));
-
-	// Округление нижней границы до целого числа
-	curr_bound = (curr_bound & 1) ? curr_bound / 2 + 1 : curr_bound / 2;
-
-	// Мы начинаем с вершины 1, так что первая вершина в curr_path[] равна 1
-	visited[0] = true;
-	curr_path[0] = 1;
-
-	// Вызов TSPRec для curb_weight, равного 0 и уровню 1
-	TSPRec(matr_adj, curr_bound, 0, 1, curr_path, final_path, final_res, visited);
 }
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2)
