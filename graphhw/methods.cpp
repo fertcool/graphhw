@@ -11,7 +11,7 @@
 #include <time.h>
 //*-------------- ф-ии класса графа ------------------*//
 //возвращает вес ребра по его вершинам
-int Graph::weight(int Ver1, int Ver2) 
+int Graph::weight(int Ver1, int Ver2)
 {
 	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
 	{
@@ -30,7 +30,7 @@ bool Graph::is_edge(int Ver1, int Ver2)
 };
 
 //граф ориентированный или нет
-bool Graph::is_directed() 
+bool Graph::is_directed()
 {
 	vector<vector<int>>* matrix = adjacency_matrix();
 	int msize = matrix->size();
@@ -127,7 +127,7 @@ list<int>* Graph::adjacency_list(int Ver)
 		current = current->next;
 	}
 	list<int>* current_sub = current->Ver;//текущая вершина j смежная с Ver
-	for (current_sub;current_sub;current_sub = current_sub->next)//цикл копирования
+	for (current_sub; current_sub; current_sub = current_sub->next)//цикл копирования
 	{
 		current_c->Ver = current_sub->Ver;//копирование
 		if (current_sub->next)//выделение памяти для следующего элемента
@@ -149,9 +149,9 @@ list<int>* Graph::adjacency_list_in(int Ver)
 	list<int>* adjlistin_c = new list<int>;//копия списка смежных вершин
 	int init = adjlistin_c->Ver;//изначальный мусор в списке
 	list<int>* current_c = adjlistin_c; // текущая вершина в копии списка
-	
+
 	int length = matrix->size();//длина списка (количество вершин)
-	for (int i = 0; i<length; i++) //цикл по всем вершинам основного списка
+	for (int i = 0; i < length; i++) //цикл по всем вершинам основного списка
 	{
 		if ((*matrix)[i][Ver - 1])
 		{
@@ -163,7 +163,7 @@ list<int>* Graph::adjacency_list_in(int Ver)
 			}
 		}
 	}
-	if(current_c->Ver!=length)
+	if (current_c->Ver != length)
 		adjlistin_c->del();
 	if (adjlistin_c->Ver == init)//если список вершин пуст
 		return NULL;
@@ -179,25 +179,25 @@ list<int[3]>* Graph::list_of_edges()
 	list<int[3]>* current = edgelist;//текущее ребро в основном списке
 	int length = edgelist->length();//длина списка ребер
 	for (int i = 0; i < length; i++)//цикл копирования
+	{
+		current_c->Ver[0] = current->Ver[0];
+		current_c->Ver[1] = current->Ver[1];//копирование
+		current_c->Ver[2] = current->Ver[2];
+		if (i != length - 1)//выделение памяти для следующего элемента
 		{
-			current_c->Ver[0] = current->Ver[0];
-			current_c->Ver[1] = current->Ver[1];//копирование
-			current_c->Ver[2] = current->Ver[2];
-			if (i != length - 1)//выделение памяти для следующего элемента
-			{
-				current_c->next = new list<int[3]>;
-				current_c = current_c->next;
-				current = current->next;
-			}
+			current_c->next = new list<int[3]>;
+			current_c = current_c->next;
+			current = current->next;
 		}
-	
+	}
+
 	return edgelist_c;
-	
+
 
 };
 list<int[3]>* Graph::list_of_edges(vector<vector<int>>* matrix)
 {
-	
+
 	int lsize = matrix->size();//размер списка (матрицы)
 	edgelist = new list<int[3]>;//выделенеи памяти для ребра
 	list<int[3]>* current = edgelist; //текущее ребро
@@ -255,15 +255,15 @@ list<int[3]>* Graph::list_of_edges(list<list<int>*>* adjlist)
 //возвращает список всех ребер иcходящих из Ver
 list<int[3]>* Graph::list_of_edges(int Ver)
 {
-	
+
 	list<int[3]>* list_out = new list<int[3]>;//выделение памяти для списка исходящих ребер
 	int init = list_out->Ver[0];//изначальный мусор в списке
 	list<int[3]>* current_out = list_out;//текущее ребро, исходящее из Ver
-	
-	
-	for (list<int[3]>* cur = edgelist; cur;cur = cur->next)//цикл просмотра смежных с Ver вершин и добавления исходящего ребра в список ребер
+
+
+	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)//цикл просмотра смежных с Ver вершин и добавления исходящего ребра в список ребер
 	{
-		if (cur->Ver[0]==Ver)
+		if (cur->Ver[0] == Ver)
 		{
 			current_out->Ver[0] = Ver;//добавление 1 вершины
 			current_out->Ver[1] = cur->Ver[1];//добавление исходящей вершины
@@ -286,7 +286,7 @@ Graph& Graph::operator=(const Graph& graph)
 	return *this;
 }
 //*-------------- Функции Класса Map ------------------*//
-Map::Map(string FPath) 
+Map::Map(string FPath)
 {
 	//нахождение высоты матрицы
 	ifstream in_ch(FPath); //поток по файлу
@@ -324,22 +324,22 @@ Map::Map(string FPath)
 		}
 	}
 }
-int Map::GetHeight(Cell c) 
+int Map::GetHeight(Cell c)
 {
 	if (c.x >= 0 && c.x < map->size() && c.y >= 0 && c.y < map->size())
 		return (*map)[c.x][c.y];
 	else
 		return -1;
 }
-list<pair<int,Cell>>* Map::neighbors(Cell c)
+list<pair<int, Cell>>* Map::neighbors(Cell c)
 {
-	list<pair<int,Cell>>* nbrs = new list<pair<int,Cell>>;
+	list<pair<int, Cell>>* nbrs = new list<pair<int, Cell>>;
 	nbrs->Ver.second.x = -1;
 	for (int dx = -1; dx <= 1; dx++)
 	{
 		for (int dy = -1; dy <= 1; dy++)
 		{
-			if (!(dy || dx)||(dx == 1 && dy == 1)||(dx==-1&&dy==-1)|| (dx == 1 && dy == -1)|| (dx == -1 && dy == 1))
+			if (!(dy || dx) || (dx == 1 && dy == 1) || (dx == -1 && dy == -1) || (dx == 1 && dy == -1) || (dx == -1 && dy == 1))
 				continue;
 			if (c.x + dx < 0 || c.x + dx >= map->size() || c.y + dy < 0 || c.y + dy >= map->size())
 				continue;
@@ -349,11 +349,11 @@ list<pair<int,Cell>>* Map::neighbors(Cell c)
 				{
 					nbrs->Ver.second.x = c.x + dx;
 					nbrs->Ver.second.y = c.y + dy;
-					nbrs->Ver.first = (*map)[c.x+dx][c.y+dy];
+					nbrs->Ver.first = (*map)[c.x + dx][c.y + dy];
 				}
 				else
 				{
-					nbrs->add(pair<int, Cell>((*map)[c.x+dx][c.y+dy], Cell(c.x + dx, c.y + dy)));
+					nbrs->add(pair<int, Cell>((*map)[c.x + dx][c.y + dy], Cell(c.x + dx, c.y + dy)));
 				}
 
 			}
@@ -406,12 +406,12 @@ Graph::Graph(string FPath, string FType)
 
 			istringstream strstream(str); //поток по строке
 			list<int>* current_sub = current->Ver; //указатель на текущую считываемую вершину
-			
+
 			//перед циклом делаем ввод первого числа 
 			//(так сделано, чтобы дальше реализовать цикл с выделением памяти после чтения числа)
 			int check_space;//проверка на пробел в конце строки
 			strstream >> current_sub->Ver;//считывание числа из строчной вершины
-	
+
 			while (!strstream.eof()) //цикл считывания 
 			{
 				strstream >> check_space;//считывание числа из строчной вершины
@@ -426,7 +426,7 @@ Graph::Graph(string FPath, string FType)
 			current->next = new list<list<int>*>;//выделение памяти 
 			current->next->Ver = new list<int>;
 			current = current->next;//итерация
-			
+
 		}
 		edgelist = list_of_edges(adjlist);
 
@@ -443,7 +443,7 @@ Graph::Graph(string FPath, string FType)
 		edgelist = new list<int[3]>; //выделение памяти под список ребер
 
 		list<int[3]>* current = edgelist;//указатель на текущий ребро
-		
+
 		while (!fin.eof())
 		{
 			string str; //строчка текущего ребра
@@ -461,7 +461,7 @@ Graph::Graph(string FPath, string FType)
 			for (int i = 0; i < 2; i++) //цикл считывания двух вершин
 			{
 				strstream >> current->Ver[i]; //считывание вершины или веса ребра
-				
+
 			}
 			strstream >> check_space;//проверка и считывание веса (если пусто, то 1)
 			if (check_space == "")
@@ -473,7 +473,7 @@ Graph::Graph(string FPath, string FType)
 				break;
 			current->next = new list<int[3]>; //выделение памяти
 			current = current->next;//итерация
-			
+
 		}
 	}
 	if (FType == "-m")//ввод матрицы смежности
@@ -516,7 +516,7 @@ Graph::Graph(string FPath, string FType)
 
 		edgelist = list_of_edges(matrix);
 	}
-	
+
 }
 
 
@@ -548,7 +548,7 @@ bool once_keyfile(int argc, char* argv[])
 //справка
 void help(int argc, char* argv[])
 {
-	
+
 	cout << "Автор работы: Иващенко А.В.\n" << endl;
 	cout << "Группа: M30-211б-21\n" << endl;
 	cout << "Список ключей с параметрами: \n" << endl;
@@ -558,12 +558,12 @@ void help(int argc, char* argv[])
 	cout << "-m \"adjacency_matrix_file_path\"\n" << endl;
 	cout << "Одновременно может указываться только один из этих ключей!\n" << endl;
 	cout << "Результаты работы выводятся на экран, либо в файл при указании следующего ключа: " << endl;
-	cout << "-o \"output_file_path\"\n" << endl;	
-	
+	cout << "-o \"output_file_path\"\n" << endl;
+
 	cout << "Дополнительные ключи для программы: \n" << endl;
 	cout << "№4:" << endl;
 	cout << "Алгоритм для расчёта задаётся следующими ключами: " << endl;
-	cout << "-k – алгоритм Крускала" << endl;	
+	cout << "-k – алгоритм Крускала" << endl;
 	cout << "-p – алгоритм Прима" << endl;
 	cout << "-b – алгоритм Борувки" << endl;
 	cout << "-s – расчёт производится тремя алгоритмами поочерёдно\n" << endl;
@@ -633,16 +633,16 @@ void print_vector(vector<T>* vec, ostream& stream_out)
 {
 	int length = vec->size();
 	stream_out << "[";
-	for (int i = 0; i < length-1; i++)
+	for (int i = 0; i < length - 1; i++)
 	{
-		stream_out << (*vec)[i]<<", ";
+		stream_out << (*vec)[i] << ", ";
 	}
-	stream_out << (*vec)[length-1] << "]"<<endl;
+	stream_out << (*vec)[length - 1] << "]" << endl;
 }
 //печать компонент связности
-void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out,bool is_directed, bool strong_comp)
+void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out, bool is_directed, bool strong_comp)
 {
-	
+
 	bool connected = true;//флаг связности
 	for (int i = 0; i < length - 1; i++)//цикл проверки на связность
 	{
@@ -659,16 +659,16 @@ void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out
 	{
 		if (connected && !strong_comp)
 			stream_out << "Орграф связен ";
-		else if(!strong_comp)
+		else if (!strong_comp)
 			stream_out << "Орграф не связен ";
-		else if(connected)
+		else if (connected)
 			stream_out << "Орграф сильносвязен ";
-		else 
+		else
 			stream_out << "Орграф слабосвязен ";
 	}
-	if(!strong_comp)
+	if (!strong_comp)
 		stream_out << "и имеет " << num_comp << " компонент связности:" << endl;
-	else 
+	else
 		stream_out << "и имеет " << num_comp << " компонент сильной связности:" << endl;
 	stream_out << "[";
 	for (int i = 0; i < num_comp; i++)//вывод компонент
@@ -688,7 +688,7 @@ void print_comp(int length, vector<int>& used, int num_comp, ostream& stream_out
 		print_vector(&comp, stream_out);
 	}
 	stream_out << "]" << endl;
-	
+
 }
 //печать остовного дерева
 void print_spanningtree(list<int*>* spanning_tree, ostream& stream_out, int cost)
@@ -702,13 +702,13 @@ void print_spanningtree(list<int*>* spanning_tree, ostream& stream_out, int cost
 			stream_out << ", ";
 	}
 	stream_out << "]" << endl << "Вес миимального остова: " << cost << endl;
-	
+
 }
 //*-------------- Ф-ии Программ ------------------*//
 
 void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
-	
+
 	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрица смежности
 	int length = matrix->size();//размир матрицы
 	int count;//счетчик
@@ -718,7 +718,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	//вывод степеней вершин
 	if (is_directed)//если граф ориентированный
 	{
-		
+
 		stream_out << "deg+ = ";
 		for (int j = 0; j < length; j++)//цикл нахождения степеней входа (кроме последней вершины)
 		{
@@ -753,13 +753,13 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		(*deg_out)[i] = count;
 	}
 	print_vector(deg_out, stream_out);
-	
+
 	//создаем матрицу расстояний
 	Floyd_Warshall(matrix);
 
 	stream_out << endl;
 	print_matrix(matrix, stream_out);
-	
+
 	//поиск эксцентриситетов
 	int max;
 	bool inf = false;
@@ -782,7 +782,7 @@ void first_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			}
 		}
 		(*exc)[i] = max;
-		if (inf)	
+		if (inf)
 			break;
 
 	}
@@ -836,7 +836,7 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	int length = adjlist->length();//длина списка(количество вершин)
 	int num_comp = 1;//номер компоненты (или их количество)
 	vector<int> used(length);//вектор с маркированными вершинами(марка - номер компоненты вершины)
-	
+
 	if (!GRAPH.is_directed())//если граф неориентированный
 	{
 		for (int i = 1; i <= length; i++)//цикл поиска в ширину для каждой непосещенной вершины
@@ -877,7 +877,7 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		}
 		//печать компонент слабой связности
 		print_comp(length, used, num_comp - 1, stream_out, true, false);
-		
+
 		//инвертируем граф
 		list<int[3]>* edgelist = GRAPH.list_of_edges();
 		list<int[3]>* current = edgelist;
@@ -888,13 +888,13 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		//обнуляем список маркеров
 		for (int i = 0; i < length; i++)
 			used[i] = 0;
-		
+
 		Graph Graph_Inv(edgelist);//инвертированный граф
 		vector<int>* order = TopologicalSort(Graph_Inv);//вектор топологической сортировки инвертированного графа
 		num_comp = 1;
 		for (int i = 0; i < order->size(); i++)//цикл DFS по вершинам обычного графа в порядке топологической сортировки инвертированного
 		{
-			if (!used[(*order)[i]-1]) 
+			if (!used[(*order)[i] - 1])
 			{
 				DFS(GRAPH, &used, (*order)[i], num_comp, 0);
 				num_comp++;
@@ -902,9 +902,9 @@ void second_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		}
 		print_comp(length, used, num_comp - 1, stream_out, true, true);
 	}
-	
+
 }
-void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out) 
+void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 {
 	if (GRAPH.is_directed())//если граф ориентированный создаем соотнесенный граф
 	{
@@ -928,7 +928,7 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<bool> used(length);//вектор маркеров
 	vector<int> tin(length);//векторов маркеров времени входа в врешину
 	vector<int> tup(length);//вектор маркеров выхода из вершины с учетом обратных ребер
-	list<int*> * bridges = new list<int*>;//список мостов
+	list<int*>* bridges = new list<int*>;//список мостов
 	bridges->Ver = NULL;
 	int timer = 0;//таймер уровня обхода дерева DFS
 	//поиск мостов с помощью поиска в глубину
@@ -938,7 +938,7 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			DFS_BRIDGES(GRAPH, &used, i + 1, timer, &tin, &tup, bridges);
 	}
 	//вывод мостов
-	stream_out << "Мосты в графе:" << endl<<"[";
+	stream_out << "Мосты в графе:" << endl << "[";
 	list<int*>* current = bridges;
 	if (current->Ver) {
 		for (current; current; current = current->next)
@@ -948,12 +948,12 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				stream_out << ", ";
 		}
 	}
-	stream_out << "]"<<endl;
+	stream_out << "]" << endl;
 	//поиск шарниров с помощью поиска в глубину
 	timer = 0;
 	vector<bool> is_cut(length);//вектор маркеров на то является ли i вершина шарниром
 	//обнуляем списки маркеров
-	for (int i = 0; i < length; i++) 
+	for (int i = 0; i < length; i++)
 	{
 		tin[i] = 0;
 		tup[i] = 0;
@@ -962,14 +962,14 @@ void third_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	for (int i = 0; i < length; i++)//поиск шарниров с помощью поиска в глубину
 	{
 		if (!used[i])
-			DFS_CUTVERTEXES(GRAPH, &used, &is_cut, i+1, timer, &tin, &tup);
+			DFS_CUTVERTEXES(GRAPH, &used, &is_cut, i + 1, timer, &tin, &tup);
 	}
 	//вывод шарниров в графе
 	stream_out << "Шарниры в графе:" << endl;
 	vector<int> cut_vertexes;
 	for (int i = 0; i < length; i++)
 	{
-		if (is_cut[i]) 
+		if (is_cut[i])
 		{
 			cut_vertexes.push_back(i + 1);
 		}
@@ -1020,7 +1020,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		int cost = Kruscal(GRAPH, spanning_tree);
 		//печать остова и его веса
 		print_spanningtree(spanning_tree, stream_out, cost);
-		break; 
+		break;
 	}
 	case 2://алгоритм прима
 	{
@@ -1037,7 +1037,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		//печать остова и его веса
 		print_spanningtree(spanning_tree, stream_out, cost);
 		break;
-		
+
 	}
 	case 4:
 	{
@@ -1069,7 +1069,7 @@ void fourth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		stream_out << "Время Работы (мкс): " << elapsed_micros.count() << endl;
 	}
 	}
-	
+
 
 
 }
@@ -1088,11 +1088,11 @@ void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	int dst = Dijkstra(GRAPH, answ, prev, begin_Ver, end_Ver);
 	if (dst == INF)//если пути нет
 	{
-		stream_out << "Нет пути между " << begin_Ver<<" и " << end_Ver << "." << endl;
+		stream_out << "Нет пути между " << begin_Ver << " и " << end_Ver << "." << endl;
 		return;
 	}
 	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();//матрицы смежности для данного графа
-	
+
 	int curPrev = end_Ver - 1;//текущая вершина в массиве пути
 	vector<int*>* way = new vector<int*>;//вектор пути
 	while (curPrev != begin_Ver - 1)//заполняем вектор пути
@@ -1104,7 +1104,7 @@ void fifth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	reverse(way->begin(), way->end());//переворачиваем путь
 
 	//вывод кратчайшего пути и его расстояния
-	stream_out << "Путь между " << begin_Ver << " и " << end_Ver << ": " <<dst<< endl<<"[";
+	stream_out << "Путь между " << begin_Ver << " и " << end_Ver << ": " << dst << endl << "[";
 	int length = way->size();
 	for (int i = 0; i < length; i++)
 	{
@@ -1148,7 +1148,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			return;
 		}
 		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
-				//проверка на ребра отрицательного веса
+						//проверка на ребра отрицательного веса
 		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
 		{
 			if (cur->Ver[2] < 0)
@@ -1171,7 +1171,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 					stream_out << begin_Ver << " - " << i + 1 << ": INF " << endl;
 			}
 		}
-		break; 
+		break;
 	}
 	case 2://алгоритм беллмана форда
 	{
@@ -1182,7 +1182,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 			return;
 		}
 		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
-						//проверка на ребра отрицательного веса
+								//проверка на ребра отрицательного веса
 		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
 		{
 			if (cur->Ver[2] < 0)
@@ -1220,7 +1220,7 @@ void sixth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		//если нет отриц цикла запускаем левита
 		Levit(GRAPH, answ, begin_Ver);
 		bool negedge_exist = false;//флаг существования ребер отрицательного веса\
-								//проверка на ребра отрицательного веса
+										//проверка на ребра отрицательного веса
 		for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
 		{
 			if (cur->Ver[2] < 0)
@@ -1257,7 +1257,7 @@ void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		return;
 	}
 	bool negedge_exist = false;//флаг существования ребер отрицательного веса\
-							//проверка на ребра отрицательного веса
+								//проверка на ребра отрицательного веса
 	for (list<int[3]>* cur = GRAPH.list_of_edges(); cur; cur = cur->next)
 	{
 		if (cur->Ver[2] < 0)
@@ -1277,7 +1277,7 @@ void seventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				continue;
 			else
 				stream_out << i + 1 << " - " << j + 1 << ": " << answ[i][j] << endl;
-			
+
 		}
 	}
 
@@ -1301,11 +1301,11 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 	stream_out << "Эвристика Евклида: " << endl;
 	int length = AStar(MAP, way, used, begin, end, &Euclid);
 	//вывод длины пути и маршрута
-	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl<<"[";
+	stream_out << length << " - Длина пути между (" << begin.x << ", " << begin.y << ") и (" << end.x << ", " << end.y << ") точками" << endl << "[";
 	for (size_t i = 0; i < way->size(); i++)
 	{
 		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
-		if (i != way->size()-1)
+		if (i != way->size() - 1)
 			stream_out << ", ";
 
 	}
@@ -1319,7 +1319,7 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 				count_used++;
 		}
 	}
-	stream_out << "Процент посещенных вершин: " <<double(count_used)/double(used.size() * used.size()) * 100.0 << endl;
+	stream_out << "Процент посещенных вершин: " << double(count_used) / double(used.size() * used.size()) * 100.0 << endl;
 
 	way->clear();
 	used.clear();
@@ -1330,7 +1330,7 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 	for (size_t i = 0; i < way->size(); i++)
 	{
 		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
-		if (i != way->size()-1)
+		if (i != way->size() - 1)
 			stream_out << ", ";
 
 	}
@@ -1355,7 +1355,7 @@ void eighth_task(int argc, char* argv[], Map MAP, ostream& stream_out)
 	for (size_t i = 0; i < way->size(); i++)
 	{
 		stream_out << "(" << (*way)[i].x << ", " << (*way)[i].y << ")";
-		if (i != way->size()-1)
+		if (i != way->size() - 1)
 			stream_out << ", ";
 
 	}
@@ -1378,7 +1378,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		num_alg = 1;
 	if (exist_key(argc, argv, "-b"))
 		num_alg = 2;
-	
+
 	if (!num_alg)
 	{
 		cout << "Не введен ключ алгоритма!!!" << endl;
@@ -1391,7 +1391,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	}
 	int begin_VER = stoi(argv[exist_key(argc, argv, "-n")]);
 	//муравьиный алгоритм
-	if (num_alg == 1) 
+	if (num_alg == 1)
 	{
 		const int K = 10;//количество запусков муравьиного алгоритма
 		const int KA = 200;//количество итераций в муравьином алгоритме
@@ -1440,7 +1440,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
 		int length = matrix->size();//количество вершин
 		// final_path[] хранит окончательное решение, т.е. путь коммивояжера.
-		vector<int> final_path(length+1);
+		vector<int> final_path(length + 1);
 
 		// visited[] отслеживает уже посещенные узлы по определенному пути
 		vector<bool> visited(length);
@@ -1448,14 +1448,14 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 		// Сохраняет конечный минимальный вес самого короткого пути.
 		int final_res = INF;
 
-		TSP(matrix,final_path, final_res, visited);
+		TSP(matrix, final_path, final_res, visited);
 		if (final_path[0] != 0)
 		{
 			stream_out << "Вес найденного гамильтонова пути: " << final_res << endl;
 			print_vector(&final_path, stream_out);
 		}
 		else
-			stream_out << "Гамильтонова цикла нет в графе!!!"<<endl;
+			stream_out << "Гамильтонова цикла нет в графе!!!" << endl;
 	}
 
 
@@ -1496,7 +1496,7 @@ void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
 	int length = matrix->size();
 	//делаем соотнесенный граф
-	if (GRAPH.is_directed()) 
+	if (GRAPH.is_directed())
 	{
 		for (size_t i = 0; i < length; i++)
 		{
@@ -1514,24 +1514,24 @@ void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	vector<int> color(length);//вектор принадлежности вершины доле
 	bool bipartide = true;//флаг является ли граф двудольным
 	//проверка графа на двудольность через поиск в глубину
-	for (int i = 0; i < length; i++) 
+	for (int i = 0; i < length; i++)
 	{
-		if (color[i] == 0) 
+		if (color[i] == 0)
 		{
-			if (!DFS_BIPARTITE_CHECK(GRAPH, i+1, 1, color))
+			if (!DFS_BIPARTITE_CHECK(GRAPH, i + 1, 1, color))
 				bipartide = false;
 		}
 	}
 	if (!bipartide)
 		stream_out << "Граф не является двудольным!!!" << endl;
-	else 
+	else
 		stream_out << "Граф является двудольным" << endl;
 
 	if (bipartide)
 	{
 		vector<vector<int>>* web_matrix = new vector<vector<int>>;//изначальная сеть с доп вершинами для форда фалкерсона
 		vector<vector<int>>* web_matrix_new = new vector<vector<int>>;//сеть после форда фалкерсона
-		
+
 		//поиск максимального паросочетания фордом фалкерсоном
 		int answ = Max_Matching_Bipatrid(GRAPH, web_matrix, web_matrix_new, color);
 		stream_out << answ << " - Количество ребер в максимальном паросочетании." << endl << "Рёбра: " << endl;
@@ -1547,7 +1547,7 @@ void eleventh_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 				}
 
 			}
-			
+
 		}
 
 	}
@@ -1561,7 +1561,7 @@ vector<vector<int>>* Floyd_Warshall(vector<vector<int>>* matrix)
 	{
 		for (int j = 0; j < length; j++)
 		{
-			if ((*matrix)[i][j] == 0 && i!=j)
+			if ((*matrix)[i][j] == 0 && i != j)
 				(*matrix)[i][j] = INF;
 		}
 	}
@@ -1610,9 +1610,9 @@ vector<int>* TopologicalSort(Graph GRAPH)
 	{
 		if (!used[i])
 		{
-			DFS(GRAPH, &used, i+1, 1, sortedgraph);
+			DFS(GRAPH, &used, i + 1, 1, sortedgraph);
 		}
-			
+
 	}
 	reverse(sortedgraph->begin(), sortedgraph->end());
 	return sortedgraph;
@@ -1623,7 +1623,7 @@ void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 {
 	stack<int> s;
 	s.push(Ver);
-	(*used)[Ver-1] = mark;
+	(*used)[Ver - 1] = mark;
 	while (!s.empty())
 	{
 		int v = s.top();
@@ -1635,17 +1635,17 @@ void DFS(Graph GRAPH, vector<int>* used, int Ver, int mark, vector<int>* order)
 			{
 				s.push(v);
 				(*used)[current->Ver - 1] = mark;
-				s.push(current->Ver);	
+				s.push(current->Ver);
 				break;
 			}
 		}
-		if(!current && order)
+		if (!current && order)
 			order->push_back(v);
 	}
 }
 //для поиска мостов
 void DFS_BRIDGES(Graph GRAPH, vector<bool>* used, int Ver, int timer, vector<int>* tin, vector<int>* tup, list<int*>* bridges, int back)
-{   
+{
 	int length = used->size();
 	(*used)[Ver - 1] = true;
 	(*tin)[Ver - 1] = timer;
@@ -1779,7 +1779,7 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 		int v = c.second.second;//вершина 
 
 		if (used[v]) //вершина уже добавлена в остов
-		{      
+		{
 			continue;
 		}
 
@@ -1788,7 +1788,7 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 
 		if (spanning_tree->Ver)//добавление ребра в остов
 		{
-			int* edge = new int[3] { c.second.first+1, v+1, dst };
+			int* edge = new int[3] { c.second.first + 1, v + 1, dst };
 			spanning_tree->add(edge);
 		}
 		else//добавление первого ребра в остов
@@ -1809,7 +1809,7 @@ int Prim(Graph GRAPH, list<int*>*& spanning_tree)
 				q.push({ len_vu, {v,u} });//добавление в очередь нового ребра
 			}
 		}
-		
+
 	}
 	//удаление лишней 1 вершины из списка ребер остова
 	list<int*>* next = spanning_tree->next;
@@ -1836,7 +1836,7 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 	int MSTweight = 0;//вес минимального остова
 
 	// Создать V подмножеств с отдельными элементамиts
-	for (int node = 0; node < length; node++) 
+	for (int node = 0; node < length; node++)
 	{
 		parent[node] = node;
 		rank[node] = 0;
@@ -1849,13 +1849,13 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 		// Пройдитесь по всем ребрам и обновите
 		// самый дешевый из всех компонентов
 
-		for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
+		for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
 		{
 
 			// Найти компоненты (или наборы) двух вершин
 			// текущего ребра
-			int u = cur->Ver[0]-1; 
-			int v = cur->Ver[1]-1;
+			int u = cur->Ver[0] - 1;
+			int v = cur->Ver[1] - 1;
 			int	w = cur->Ver[2];
 			int set1 = find(parent, u),
 				set2 = find(parent, v);
@@ -1865,11 +1865,11 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 			// если текущее ребро ближе к предыдущим
 			// самые дешевым ребрам set1 и set2
 			if (set1 != set2) {
-				if (cheapest[set1][2] == -1 || cheapest[set1][2] > w) 
+				if (cheapest[set1][2] == -1 || cheapest[set1][2] > w)
 				{
 					cheapest[set1] = { u, v, w };
 				}
-				if (cheapest[set2][2] == -1 || cheapest[set2][2] > w) 
+				if (cheapest[set2][2] == -1 || cheapest[set2][2] > w)
 				{
 					cheapest[set2] = { u, v, w };
 				}
@@ -1887,18 +1887,18 @@ int Boruvka(Graph GRAPH, list<int*>*& spanning_tree)
 					w = cheapest[node][2];
 				int set1 = find(parent, u),
 					set2 = find(parent, v);
-				if (set1 != set2) 
+				if (set1 != set2)
 				{
 					MSTweight += w;
 					unionSet(parent, rank, set1, set2);
 					if (spanning_tree->Ver)//добавление ребра в остов
 					{
-						int* edge = new int[3] { u+1, v+1, w };
+						int* edge = new int[3] { u + 1, v + 1, w };
 						spanning_tree->add(edge);
 					}
 					else//добавление первого ребра в остов
 					{
-						int* edge = new int[3] { u+1, v+1, w};
+						int* edge = new int[3] { u + 1, v + 1, w};
 						spanning_tree->Ver = edge;
 					}
 					numTrees--;
@@ -1961,14 +1961,14 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 	answ[begin_Ver - 1] = 0;//начальная вершина 0
 	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q; //приоритетная очередь с парой: вершина и расстояние до нее
 
-	q.push({ 0, begin_Ver-1 });
+	q.push({ 0, begin_Ver - 1 });
 	while (!q.empty())
 	{
 		pair<int, int> c = q.top();
 		q.pop();
 		int dst = c.first;//расстояние до рассматриваемой минимальной вершины
 		int v = c.second;//рассматриваемая минимальная вершина
-		count_mark[v] = count_mark[v]+1;//итерируем маркер обработки
+		count_mark[v] = count_mark[v] + 1;//итерируем маркер обработки
 		if (count_mark[v] >= length) //если существует отр. цикл возвращаем -1
 		{
 			return -1;
@@ -1979,7 +1979,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 
 		}
 		//цикл по всем смежным с v вершинами
-		for (list<int[3]>* cur = GRAPH.list_of_edges(v+1); cur; cur = cur->next)
+		for (list<int[3]>* cur = GRAPH.list_of_edges(v + 1); cur; cur = cur->next)
 		{
 			int u = cur->Ver[1] - 1;//смежная с v вершина
 			int len_vu = cur->Ver[2];//вес ребра (v,u)
@@ -1991,7 +1991,7 @@ int Dijkstra(Graph GRAPH, vector<int>& answ, vector<int>& prev, int begin_Ver, i
 				prev[u] = v;//изменяем путь
 				q.push({ n_dst, u });//добавляем ребро с измененным растоянием в очередь
 			}
-			
+
 		}
 	}
 	return answ[end_Ver - 1];
@@ -2077,21 +2077,21 @@ int Bellman_Ford(Graph GRAPH, vector<int>& answ, int begin_Ver)
 	answ[begin_Ver - 1] = 0;
 
 	//цикл |V|-1 раз
-	for (int i = 0; i < length-1; i++)
+	for (int i = 0; i < length - 1; i++)
 	{
 		//цикл по всем ребрам
-		for (list<int[3]>* cur = edgelist;cur;cur = cur->next)
+		for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
 		{
 			//релаксация
-			if (answ[cur->Ver[1]-1] > answ[cur->Ver[0]-1] + cur->Ver[2])
-				answ[cur->Ver[1]-1] = answ[cur->Ver[0]-1] + cur->Ver[2];
+			if (answ[cur->Ver[1] - 1] > answ[cur->Ver[0] - 1] + cur->Ver[2])
+				answ[cur->Ver[1] - 1] = answ[cur->Ver[0] - 1] + cur->Ver[2];
 		}
 	}
 	//проверка на отриц. цикл
 	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
 	{
 		//релаксация
-		if (answ[cur->Ver[1]-1] > answ[cur->Ver[0]-1] + cur->Ver[2])
+		if (answ[cur->Ver[1] - 1] > answ[cur->Ver[0] - 1] + cur->Ver[2])
 			return -1;
 
 	}
@@ -2118,7 +2118,7 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 	M1_1.push(begin_Ver);//добавляем начальную вершину в очередь
 	M1.insert(begin_Ver);
 	//заполянем множество необработанных вершин
-	for (int i = 0;i < length; i++)
+	for (int i = 0; i < length; i++)
 	{
 		M2.insert(i + 1);
 	}
@@ -2152,7 +2152,7 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 				M1_1.push(cur->Ver[1]);
 				M1.insert(cur->Ver[1]);
 				M2.erase(cur->Ver[1]);
-				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u-1] + cur->Ver[2]);
+				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u - 1] + cur->Ver[2]);
 
 			}
 			//2 случай
@@ -2160,7 +2160,7 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 			else if (M1.find(cur->Ver[1]) != M1.end())
 			{
 				//производим релаксацию ребра uv
-				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u-1] + cur->Ver[2]);
+				answ[cur->Ver[1] - 1] = min(answ[cur->Ver[1] - 1], answ[u - 1] + cur->Ver[2]);
 			}
 			//3 случай
 			//v принадлежит M0 и answ[v]>answ[u]+w(uv)
@@ -2181,13 +2181,13 @@ int Levit(Graph GRAPH, vector<int>& answ, int begin_Ver)
 //алгоритм джонсона
 int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 {
-	
+
 	list<int[3]>* edgelist = GRAPH.list_of_edges();
 	int length = edgelist->length(edgelist);
 	answ.resize(length);
 	for (size_t i = 0; i < length; i++)//выделение памяти
 		answ[i].resize(length);
-	
+
 	//создание нового списка ребер с доп. вершиной
 	list<int[3]>* last = 0;
 	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
@@ -2199,41 +2199,41 @@ int Jonson(Graph GRAPH, vector<vector<int>>& answ)
 		last->Ver[0] = length + 1;
 		last->Ver[1] = i + 1;
 		last->Ver[2] = 0;
-		
+
 	}
-	
+
 	//создание новного графа с доп. вершиной
 	Graph GRAPH_PLUS1(edgelist);
 
-	vector<int> h(length+1);//вектор весовых меток
+	vector<int> h(length + 1);//вектор весовых меток
 	//запускаем беллмана форда для поиска расстояний от новой вершины до остальных
 	if (Bellman_Ford(GRAPH_PLUS1, h, length + 1) == -1)
 		return -1;
 	//удаляем новые ребра
 	for (size_t i = 0; i < length; i++)
 		edgelist->del();
-	
+
 	//пересчитываем веса ребер
 	for (list<int[3]>* cur = edgelist; cur; cur = cur->next)
 		cur->Ver[2] = cur->Ver[2] + h[cur->Ver[0] - 1] - h[cur->Ver[1] - 1];
-	
+
 	//GRAPH_PLUS1 - теперь без доп. ребер
 	//запускаем дейкстру для каждой вершины
 	for (size_t i = 0; i < length; i++)
 	{
 		vector<int> prev;
-		Dijkstra(GRAPH_PLUS1, answ[i], prev,i+1);
+		Dijkstra(GRAPH_PLUS1, answ[i], prev, i + 1);
 		//изменяем расстояния согласно массиву меток
 		for (size_t j = 0; j < length; j++)
 		{
-			if(answ[i][j]!=INF)
+			if (answ[i][j] != INF)
 				answ[i][j] = answ[i][j] + h[j] - h[i];
 		}
 	}
 	return 1;
 }
 //алгоритм А*
-int AStar(Map MAP, vector<Cell>*& way,vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
+int AStar(Map MAP, vector<Cell>*& way, vector<vector<bool>>& used, Cell begin_Ver, Cell end_Ver, int (*h)(Cell Ver1, Cell Ver2))
 {
 	int length = MAP.length();//размер стороны карты
 	way = new vector<Cell>;//вектор пути
@@ -2377,7 +2377,7 @@ vector<Cell>* reconstruct_path(vector<vector<Cell>>& cameFrom, Cell end, Cell be
 		(*path).push_back(cameFrom[cur.x][cur.y]);
 		cur = cameFrom[cur.x][cur.y];
 	}
-	
+
 	reverse((*path).begin(), (*path).end());
 	return path;
 }
@@ -2578,8 +2578,8 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 			}
 		}
 	}
-	
-	
+
+
 	return mincycle_length;
 }
 //алгоритм форда-флакерсона
@@ -2614,27 +2614,27 @@ int Ford_Fulkerson(Graph GRAPH, vector<vector<int>>* bandwidth, int& source, int
 	int max_flow = 0;//максимальный поток
 
 	//поиск дополняющей цепи
-	while (BFS_FlowSearch(bandwidth, source, sink, parent)) 
+	while (BFS_FlowSearch(bandwidth, source, sink, parent))
 	{
 		//находим минимальный остаточный поток в цепи
 		int path_flow = INF;
-		for (v = sink; v != source; v = parent[v-1]) 
+		for (v = sink; v != source; v = parent[v - 1])
 		{
-			u = parent[v-1];
-			path_flow = min(path_flow, (*bandwidth)[u-1][v-1]);
+			u = parent[v - 1];
+			path_flow = min(path_flow, (*bandwidth)[u - 1][v - 1]);
 		}
 
 		//обновляем остаточные потоки ребер в цепи
-		for (v = sink; v != source; v = parent[v-1]) 
+		for (v = sink; v != source; v = parent[v - 1])
 		{
-			u = parent[v-1];
-			(*bandwidth)[u-1][v-1] -= path_flow;
-			(*bandwidth)[v-1][u-1] += path_flow;
+			u = parent[v - 1];
+			(*bandwidth)[u - 1][v - 1] -= path_flow;
+			(*bandwidth)[v - 1][u - 1] += path_flow;
 		}
 
 		//дополняем максимальный поток
 		max_flow += path_flow;
-		
+
 	}
 
 	return max_flow;
@@ -2658,10 +2658,10 @@ bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<in
 		int u = q.front();
 		q.pop();
 
-		for (int v = 0; v < length; v++) 
+		for (int v = 0; v < length; v++)
 		{
 			//если соседняя вершина не посещена и ее остаточный поток положительный, то добавляем вершину в очередь
-			if (visited[v] == false && (*matrix)[u-1][v] > 0)
+			if (visited[v] == false && (*matrix)[u - 1][v] > 0)
 			{
 				//если попали в сток, то выходим из поиска
 				if (v == sink - 1)
@@ -2669,7 +2669,7 @@ bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<in
 					parent[v] = u;
 					return true;
 				}
-				q.push(v+1);
+				q.push(v + 1);
 				parent[v] = u;
 				visited[v] = true;
 			}
@@ -2680,18 +2680,18 @@ bool BFS_FlowSearch(vector<vector<int>>* matrix, int source, int sink, vector<in
 //поиск в глубину для определения двудольности графа
 bool DFS_BIPARTITE_CHECK(Graph GRAPH, int v, int c, vector<int>& color)
 {
-	color[v-1] = c;
+	color[v - 1] = c;
 
 	for (list<int[3]>* cur = GRAPH.list_of_edges(v); cur; cur = cur->next)
 	{
-		if (color[cur->Ver[1]-1] == 0) 
-		{    
+		if (color[cur->Ver[1] - 1] == 0)
+		{
 			//непосещённая вершина
 			int new_col = c == 1 ? 2 : 1;
 			if (!DFS_BIPARTITE_CHECK(GRAPH, cur->Ver[1], new_col, color))
 				return false;
 		}
-		else if (color[cur->Ver[1] - 1] == c) 
+		else if (color[cur->Ver[1] - 1] == c)
 		{
 			return false;
 		}
@@ -2739,179 +2739,150 @@ int Max_Matching_Bipatrid(Graph GRAPH, vector<vector<int>>*& web, vector<vector<
 	new_web = WEB.adjacency_matrix();//сеть после форда фалекрсона
 	//запускаем форда фалкерсона
 	int answ = Ford_Fulkerson(WEB, new_web, source, sink);
-	
+
 	return answ;
 }
-// функция, которая принимает в качестве аргументов:
-// curr_bound -> нижняя граница корневого узла
-// curr_weight-> сохраняет вес пути на данный момент
-// level-> текущий уровень при перемещении в поиске дерева
-// curr_path[] -> где хранится решение, которое позже будет скопирован в final_path[]
-void TSPRec(vector<vector<int>>* matr_adj, int curr_bound, int curr_weight, int level, 
-		    vector<int>& curr_path, vector<int>& final_path, int& final_res, vector<bool>& visited)
-{
-	int length = matr_adj->size();
-	// базовый случай - это когда мы достигли уровня N, который означает, что мы охватили все узлы один раз
-	if (level == length)
-	{
-		// проверяем, есть ли ребро от последней вершины в обратном пути к первой вершине
-		if ((*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1] != 0)
-		{
-			// curr_res имеет текущий вес решения, которое мы получили
-			int curr_res = curr_weight +
-				(*matr_adj)[curr_path[level - 1]-1][curr_path[0]-1];
 
-			// Обновляем конечный результат и конечный путь, если текущий результат лучше.
-			if (curr_res < final_res)
+// Function to reduce each row so that there must be at least one zero in each row
+int rowReduction(vector<vector<int>>& reducedMatrix, vector<int>& row)
+{
+	int length = reducedMatrix.size();
+	// initialize row array to `INFINITY`
+	for (size_t i = 0; i < length; i++)
+	{
+		row[i] = INF;
+	}
+
+	// `row[i]` contains minimum in row `i`
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < length; j++)
+		{
+			if (reducedMatrix[i][j] < row[i]) 
 			{
-				copyToFinal(curr_path,final_path);
-				final_res = curr_res;
+				row[i] = reducedMatrix[i][j];
 			}
 		}
-		return;
 	}
 
-	// для любого другого уровня выполняем итерацию для всех вершин, чтобы рекурсивно построить дерево пространства поиска
+	// reduce the minimum value from each element in each row
 	for (int i = 0; i < length; i++)
 	{
-		// Рассмотрим следующую вершину, если она не такая же 
-		// (диагональная запись в матрице смежности, не посещенная)
-		if ((*matr_adj)[curr_path[level - 1]-1][i] != 0 && visited[i] == false)
+		for (int j = 0; j < length; j++)
 		{
-			int temp = curr_bound;
-			curr_weight += (*matr_adj)[curr_path[level - 1]-1][i];
-
-			// другое вычисление curr_bound для второго уровня отличающегося от других уровней
-			if (level == 1)
-				curr_bound -= ((firstMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
-			else
-				curr_bound -= ((secondMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
-
-			// curr_bound + curr_weight - фактическая нижняя граница для узла, на который мы прибыли
-			// Если текущая нижняя граница < final_res, нам нужно исследоватьузел далее
-			if (curr_bound + curr_weight < final_res)
+			if (reducedMatrix[i][j] != INF && row[i] != INF) 
 			{
-				curr_path[level] = i+1;
-				visited[i] = true;
-
-				// вызываем TSPRec на слудующий уровень
-				TSPRec(matr_adj, curr_bound, curr_weight, level + 1, curr_path, final_path, final_res, visited);
+				reducedMatrix[i][j] -= row[i];
 			}
-
-			// В противном случае нам придется обрезать узел путем сброса настроек к curr_weight и curr_bound
-			curr_weight -= (*matr_adj)[curr_path[level - 1]-1][i];
-			curr_bound = temp;
-
-			// Также сбросить посещенный массив
-			visited.clear();
-			visited.resize(length);
-			for (int j = 0; j <= level - 1; j++)
-				visited[curr_path[j]-1] = true;
 		}
 	}
 }
-// Функция для копирования текущего решения в окончательное решение
-void copyToFinal(vector<int>& curr_path, vector<int>& final_path)
+// Function to reduce each column so that there must be at least one zero
+// in each column
+int columnReduction(vector<vector<int>>& reducedMatrix, vector<int>& col)
 {
-	int length = curr_path.size()-1;
-	for (int i = 0; i < length; i++)
-		final_path[i] = curr_path[i];
-	final_path[length] = curr_path[0];
-}
-// Функция для определения минимальной стоимости ребра имеющего конец в вершине i
-int firstMin(vector<vector<int>>* matr_adj, int i)
-{
-	int length = matr_adj->size();
-	int min = INF;
-	for (int k = 0; k < length; k++)
-		if ((*matr_adj)[i][k] < min && i != k)
-			min = (*matr_adj)[i][k];
-	return min;
-}
-// функция для нахождения второй минимального веса ребра имеющего конец в вершине i
-int secondMin(vector<vector<int>>* matr_adj, int i)
-{
-	int length = matr_adj->size();
-	int first = INF;
-	int second = INF;
-	for (int j = 0; j < length; j++)
+	int length = reducedMatrix.size();
+	// initialize col array to `INFINITY`
+	for (size_t i = 0; i < length; i++)
 	{
-		if (i == j)
-			continue;
-
-		if ((*matr_adj)[i][j] <= first)
-		{
-			second = first;
-			first = (*matr_adj)[i][j];
-		}
-		else if ((*matr_adj)[i][j] <= second &&
-			(*matr_adj)[i][j] != first)
-			second = (*matr_adj)[i][j];
+		col[i] = INF;
 	}
-	return second;
-}
-// Функция для решения задачи коммивояжера методом ветвей и границ
-int TSP(vector<vector<int>> costMatrix, ostream& stream_out)
-{
-	int length = costMatrix.size();
-	// Приоритетная очередь для хранения активных узлов дерева поиска
-	priority_queue<Node*, vector<Node*>, comp> pq;
 
-	vector<pair<int, int>> v;
-
-	// создаем корневой узел и рассчитываем его стоимость.
-	// TSP начинается с первой вершины, то есть с узла 0
-	Node* root = newNode(costMatrix, v, 0, -1, 0);
-
-	// получаем нижнюю границу пути, начинающегося с узла 0
-	root->cost = calculateCost(root->reducedMatrix);
-
-	// Добавляем корень в список активных узлов
-	pq.push(root);
-
-	// Находит активный узел с наименьшими затратами, добавляет его дочерние узлы в список
-	// активных узлов и, наконец, удаляет его из списка
-	while (!pq.empty())
-	{
-		// Находим активный узел с наименьшей предполагаемой стоимостью
-		Node* min = pq.top();
-		pq.pop();
-
-		// `i` сохраняет текущий номер вершины
-		int i = min->vertex;
-
-		// если посещены все вершины
-		if (min->level == length - 1)
-		{
-			// возврат в стартовую вершину
-			min->path.push_back(make_pair(i, 0));
-
-			// печать списка посещенных городов
-			printPath(min->path, stream_out);
-
-			// возврат оптимальной стоимости
-			return min->cost;
-		}
-
-	// Вычисляем начальную нижнюю границу для корневого узла
-	// используя формулу 1/2 * (сумма первого минимума + второго минимума) для всех ребер.
-	// Также инициализируем curr_path и посещенный массив
-	int curr_bound = 0;
-	
-	// Вычисляем начальную границу
+	// `col[j]` contains minimum in col `j`
 	for (int i = 0; i < length; i++)
-		curr_bound += (firstMin(matr_adj, i) + secondMin(matr_adj, i));
+	{
+		for (int j = 0; j < length; j++)
+		{
+			if (reducedMatrix[i][j] < col[j]) 
+			{
+				col[j] = reducedMatrix[i][j];
+			}
+		}
+	}
 
-	// Округление нижней границы до целого числа
-	curr_bound = (curr_bound & 1) ? curr_bound / 2 + 1 : curr_bound / 2;
-
-	// Мы начинаем с вершины 1, так что первая вершина в curr_path[] равна 1
-	visited[0] = true;
-	curr_path[0] = 1;
-
-	// Вызов TSPRec для curb_weight, равного 0 и уровню 1
-	TSPRec(matr_adj, curr_bound, 0, 1, curr_path, final_path, final_res, visited);
+	// reduce the minimum value from each element in each column
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < length; j++)
+		{
+			if (reducedMatrix[i][j] != INF && col[j] != INF) 
+			{
+				reducedMatrix[i][j] -= col[j];
+			}
+		}
+	}
 }
+
+// Function to get the lower bound on the path starting at the current minimum node
+int calculateCost(vector<vector<int>>& reducedMatrix)
+{
+	int length = reducedMatrix.size();
+	// initialize cost to 0
+	int cost = 0;
+
+	// Row Reduction
+	vector<int> row(length);
+	rowReduction(reducedMatrix, row);
+
+	// Column Reduction
+	vector<int> col(length);
+	columnReduction(reducedMatrix, col);
+
+	// the total expected cost is the sum of all reductions
+	for (int i = 0; i < length; i++)
+	{
+		cost += (row[i] != INT_MAX) ? row[i] : 0,
+			cost += (col[i] != INT_MAX) ? col[i] : 0;
+	}
+
+	return cost;
+}
+vector<int*>* zeros_rating(vector<vector<int>>& reducedMatrix)
+{
+	int length = reducedMatrix.size();
+	vector<int*>* zeros = new vector<int*>;
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < length; j++)
+		{
+			if (reducedMatrix[i][j] == 0) 
+			{
+				int minstr = INF;
+				int mincol = INF;
+				for (int p = 0; p < length; p++)
+				{
+					if (minstr > reducedMatrix[i][p])
+						minstr = reducedMatrix[i][p];
+				}
+				for (int p = 0; p < length; p++)
+				{
+					if (mincol > reducedMatrix[p][j])
+						mincol = reducedMatrix[p][j];
+				}
+				int* zero = new int[3] {i, j, max(minstr, mincol)};
+				(*zeros).push_back(zero);
+			}
+		}
+	}
+	int max = 0;
+	for (size_t i = 0; i < (*zeros).size(); i++)
+	{
+		if ((*zeros)[i][2] > max)
+		{
+			max = (*zeros)[i][2];
+		}
+	}
+	vector<int*>* max_zeros = new vector<int*>;
+	for (size_t i = 0; i < (*zeros).size(); i++)
+	{
+		if ((*zeros)[i][2] == max)
+		{
+			max_zeros->push_back(new int[3] {(*zeros)[i][0], (*zeros)[i][1], (*zeros)[i][2]});
+		}
+	}
+	return max_zeros;
+}
+
 //*-------------- Эвристические функции ---------------*//
 int Euclid(Cell Ver1, Cell Ver2)
 {
