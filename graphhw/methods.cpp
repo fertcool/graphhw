@@ -1394,7 +1394,7 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	if (num_alg == 1) 
 	{
 		const int K = 10;//количество запусков муравьиного алгоритма
-		const int KA = 200;//количество итераций в муравьином алгоритме
+		const int KA = 20;//количество итераций в муравьином алгоритме
 		vector<int> mincycle;
 		int mincycle_length = INF;
 		for (size_t i = 0; i < K; i++)
@@ -1439,8 +1439,14 @@ void ninth_task(int argc, char* argv[], Graph GRAPH, ostream& stream_out)
 	{
 		vector<vector<int>>* matrix = GRAPH.adjacency_matrix();
 		int length = matrix->size();//количество вершин
+
+		for (size_t i = 0; i < length; i++)
+		{
+			(*matrix)[i][i] = INF;
+		}
 		// final_path[] хранит окончательное решение, т.е. путь коммивояжера.
 		vector<int> final_path(length+1);
+
 
 		// visited[] отслеживает уже посещенные узлы по определенному пути
 		vector<bool> visited(length);
@@ -2414,7 +2420,7 @@ int Ant_Agorithm(Graph GRAPH, vector<int>& mincycle, int Num_iter, int begin_Ver
 	const float Qp = max_edge / 2.0;//коэффициент, которым делим вес ребра для нахождения желания прохождения муравья по нему
 	const float Qd = max_edge * 2;//коэффициент, который делим на найденный путь муравья для нахождения добавки феромона
 	const float alpha = 2;//коэффициент влияния феромона на нахождение распределения вероятности выбора следующего ребра в пути
-	const float beta = 1;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
+	const float beta = 2;//коэффициент влияния веса ребра на нахождение распределения вероятности выбора следующего ребра в пути
 	const float percent_max_length = 0.8;//процент от максимального количества ребер(нужно для добавки феромнов для неполных путей)
 	const float infinum_pheromone = 0.001;//нижняя граница феромона
 	//матрица феромонов
@@ -2736,7 +2742,23 @@ int Max_Matching_Bipatrid(Graph GRAPH, vector<vector<int>>*& web, vector<vector<
 	//новый граф - сеть
 	Graph WEB = Graph(edgelist);
 	web = WEB.adjacency_matrix();//изначальная сеть
+
 	new_web = WEB.adjacency_matrix();//сеть после форда фалекрсона
+
+	//удвляем ребра из второй части двудольного графа в первую
+	for (size_t i = 0; i < length; i++)
+	{
+		for (size_t j = 0; j < length; j++)
+		{
+			if (color[i] == 2 && color[j] == 1)
+			{
+				(*web)[i][j] = 0;
+				(*new_web)[i][j] = 0;
+			}
+		}
+	}
+	//обновляем граф сети
+	WEB = Graph(web);
 	//запускаем форда фалкерсона
 	int answ = Ford_Fulkerson(WEB, new_web, source, sink);
 	
@@ -2783,12 +2805,12 @@ void TSPRec(vector<vector<int>>* matr_adj, int curr_bound, int curr_weight, int 
 
 			// другое вычисление curr_bound для второго уровня отличающегося от других уровней
 			if (level == 1)
-				curr_bound -= ((firstMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
+				curr_bound -= (((firstMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i))) / 2);
 			else
-				curr_bound -= ((secondMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i)) / 2);
+				curr_bound -= (((secondMin(matr_adj, curr_path[level - 1]-1) + firstMin(matr_adj, i))) / 2);
 
 			// curr_bound + curr_weight - фактическая нижняя граница для узла, на который мы прибыли
-			// Если текущая нижняя граница < final_res, нам нужно исследоватьузел далее
+			// Если текущая нижняя граница < final_res, нам нужно исследовать узел далее
 			if (curr_bound + curr_weight < final_res)
 			{
 				curr_path[level] = i+1;
@@ -2818,7 +2840,7 @@ void copyToFinal(vector<int>& curr_path, vector<int>& final_path)
 		final_path[i] = curr_path[i];
 	final_path[length] = curr_path[0];
 }
-// Функция для определения минимальной стоимости ребра имеющего конец в вершине i
+// Функция для минимального ребра исходящего из i
 int firstMin(vector<vector<int>>* matr_adj, int i)
 {
 	int length = matr_adj->size();
@@ -2828,7 +2850,7 @@ int firstMin(vector<vector<int>>* matr_adj, int i)
 			min = (*matr_adj)[i][k];
 	return min;
 }
-// функция для нахождения второй минимального веса ребра имеющего конец в вершине i
+// функция для нахождения второго минимального ребра исходящего из i
 int secondMin(vector<vector<int>>* matr_adj, int i)
 {
 	int length = matr_adj->size();
@@ -2844,8 +2866,7 @@ int secondMin(vector<vector<int>>* matr_adj, int i)
 			second = first;
 			first = (*matr_adj)[i][j];
 		}
-		else if ((*matr_adj)[i][j] <= second &&
-			(*matr_adj)[i][j] != first)
+		else if ((*matr_adj)[i][j] <= second && (*matr_adj)[i][j] != first)
 			second = (*matr_adj)[i][j];
 	}
 	return second;
